@@ -1,24 +1,16 @@
-# Expo Router Example
+# 🛒 Magnolia Modas (Frontend)
 
-Use [`expo-router`](https://docs.expo.dev/router/introduction/) to build native navigation using files in the `app/` directory.
+Este é o aplicativo mobile do nosso projeto, desenvolvido com **React Native** e **Expo**.
 
-## Launch your own
+## 🚀 Como rodar o app
 
-[![Launch with Expo](https://github.com/expo/examples/blob/master/.gh-assets/launch.svg?raw=true)](https://launch.expo.dev/?github=https://github.com/expo/examples/tree/master/with-router)
+Abra o terminal na pasta do projeto e siga os passos:
 
-## 🚀 How to use
-
-```sh
-npx create-expo-app -e with-router
+### 1. Instalar as dependências
+```bash
+npm install
 ```
-
-## Deploy
-
-Deploy on all platforms with Expo Application Services (EAS).
-
-- Deploy the website: `npx eas-cli deploy` — [Learn more](https://docs.expo.dev/eas/hosting/get-started/)
-- Deploy on iOS and Android using: `npx eas-cli build` — [Learn more](https://expo.dev/eas)
-
-## 📝 Notes
-
-- [Expo Router: Docs](https://docs.expo.dev/router/introduction/)
+### 2. Rodar o projeto
+```bash
+npx expo start
+```

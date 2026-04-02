@@ -1,43 +1,41 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
+import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Platform } from 'react-native';
 import api from '../src/services/api'; 
 import { router } from 'expo-router';
 
-export default function login() {
+export default function cadastro() {
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
 
-  const handleLogin = async () => {
+  const handleCadastro = async () => {
+
     if (!nome || !email || !senha) {
       Alert.alert("Erro", "Preencha todos os campos");
       return;
     }
     try {
-        const response = await api.post('/auth/login', null, {
-            params: { email, senha }
-        });
-
-        const token = response.data.token;
-
-        if (token) {
-            if (Platform.OS === 'web') {
-                localStorage.setItem('userToken', token);
-            } else {
-                await SecureStore.setItemAsync('userToken', token);
-            }
-            
-            alert("Sucesso!", "Login realizado!");
-        }
+      const response = await api.post('/auth/cadastro', { nome_usuario: nome, email: email, senha: senha, role: "admin" });
+      if (response.status === 200 || response.status === 201) {        
+        if (Platform.OS === 'web') alert("Conta criada com sucesso!");
+        Alert.alert("Sucesso!", "Conta criada! Agora você pode fazer login.");
+        router.push('/');
+      }
     } catch (error) {
-        alert(error);
-    }
-};
+      const erroMsg = error.response?.data?.detail || "Erro ao conectar com o servidor";
+      Alert.alert("Erro no Cadastro", erroMsg);
+    } 
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={{fontSize: 20, fontWeight: 'bold'}}>Login</Text>
-      
+      <Text>Criar Conta - Magnólia</Text>
+      <TextInput 
+        style={styles.input}
+        placeholder="Nome Completo" 
+        onChangeText={setNome}
+      />
+
       <TextInput 
         style={styles.input}
         placeholder="E-mail" 
@@ -55,13 +53,13 @@ export default function login() {
 
       <TouchableOpacity 
         style={styles.button} 
-        onPress={handleLogin}
+        onPress={handleCadastro} 
       >
-        <Text style={{color: '#fff'}}>Entrar</Text>
+        <Text>Cadastrar</Text>
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => router.push('/cadastro')}
-      >Não tem conta? Cadastre-se</TouchableOpacity>
+      <TouchableOpacity 
+        onPress={() => router.push('/')}
+      >Já tem conta? Faça Login</TouchableOpacity>
     </View>
   );
 }
