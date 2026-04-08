@@ -1,38 +1,41 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
+import { useNavigation } from '@react-navigation/native';
 import api from '../src/services/api'; 
 import { router } from 'expo-router';
 
 export default function login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const navigation = useNavigation();
 
   const handleLogin = async () => {
-    if (!nome || !email || !senha) {
-      Alert.alert("Erro", "Preencha todos os campos");
+    if (!email || !senha) {
+      alert("Erro: Preencha todos os campos");
       return;
     }
     try {
-        const response = await api.post('/auth/login', null, {
-            params: { email, senha }
-        });
+      const response = await api.post('/auth/login', null, {
+        params: { email, senha }
+      });
 
-        const token = response.data.token;
+      const token = response.data.token;
 
-        if (token) {
-            if (Platform.OS === 'web') {
-                localStorage.setItem('userToken', token);
-            } else {
-                await SecureStore.setItemAsync('userToken', token);
-            }
-            
-            alert("Sucesso!", "Login realizado!");
+      if (token) {
+        if (Platform.OS === 'web') {
+          localStorage.setItem('userToken', token);
+        } else {
+          await SecureStore.setItemAsync('userToken', token);
         }
+
+        alert("Login realizado com sucesso!");
+        router.push("/produtos");  // Navega direto aqui
+      }
     } catch (error) {
-        alert(error);
+      alert("Erro: " + String(error));
     }
-};
+  };
 
   return (
     <View style={styles.container}>
