@@ -1,14 +1,16 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
-import * as SecureStore from 'expo-secure-store';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import { authStyles } from '../styles/authStyles';
+import AuthLayout from './AuthLayout';
 import api from '../src/services/api'; 
 import { router } from 'expo-router';
+import * as SecureStore from 'expo-secure-store';
+import { Platform } from 'react-native';
 
 export default function login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const navigation = useNavigation();
+  // const navigation = useNavigation();
 
   const handleLogin = async () => {
     if (!email || !senha) {
@@ -38,58 +40,35 @@ export default function login() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={{fontSize: 20, fontWeight: 'bold'}}>Login</Text>
-      
-      <TextInput 
-        style={styles.input}
-        placeholder="E-mail" 
-        keyboardType="email-address"
-        autoCapitalize="none"
-        onChangeText={setEmail}
-      />
+    <AuthLayout>
+      <View style={authStyles.card}>
+        <Image source={require('../assets/images/magnoliaModas_logo.svg')} style={authStyles.logo} />
+        <Text style={authStyles.title}>Login</Text>
 
-      <TextInput 
-        style={styles.input}
-        placeholder="Senha" 
-        secureTextEntry 
-        onChangeText={setSenha}
-      />
+        <TextInput 
+          style={authStyles.input}
+          placeholder="E-mail"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          onChangeText={setEmail}
+        />
 
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={handleLogin}
-      >
-        <Text style={{color: '#fff'}}>Entrar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => router.push('/cadastro')}
-      >Não tem conta? Cadastre-se</TouchableOpacity>
-    </View>
+        <TextInput 
+          style={authStyles.input}
+          placeholder="Senha"
+          secureTextEntry
+          onChangeText={setSenha}
+        />
+
+        <TouchableOpacity style={authStyles.button} onPress={handleLogin}>
+          <Text style={authStyles.buttonText}>Entrar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('/cadastro')}>
+          <Text style={authStyles.link}>Não tem conta? Cadastre-se</Text>
+        </TouchableOpacity>
+      </View>
+    </AuthLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
-    padding: 20
-  },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 10,
-    borderRadius: 8
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
-    width: '100%',
-    alignItems: 'center'
-  }
-});

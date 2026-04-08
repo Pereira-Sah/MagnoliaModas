@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, StyleSheet, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, Image, Platform } from 'react-native';
+import { authStyles } from '../styles/authStyles';
+import AuthLayout from './AuthLayout';
 import api from '../src/services/api'; 
 import { router } from 'expo-router';
 
@@ -28,63 +30,24 @@ export default function cadastro() {
   };
 
   return (
-    <View style={styles.container}>
-      <Text>Criar Conta - Magnólia</Text>
-      <TextInput 
-        style={styles.input}
-        placeholder="Nome Completo" 
-        onChangeText={setNome}
-      />
+    <AuthLayout>
+      <View style={authStyles.card}>
+        <Image source={require('../assets/images/magnoliaModas_logo.svg')} style={authStyles.logo} />
+        <Text style={authStyles.title}>Criar Conta</Text>
 
-      <TextInput 
-        style={styles.input}
-        placeholder="E-mail" 
-        keyboardType="email-address"
-        autoCapitalize="none"
-        onChangeText={setEmail}
-      />
+        <TextInput style={authStyles.input} placeholder="Nome Completo" onChangeText={setNome} />
+        <TextInput style={authStyles.input} placeholder="E-mail" keyboardType="email-address" onChangeText={setEmail} />
+        <TextInput style={authStyles.input} placeholder="Senha" secureTextEntry onChangeText={setSenha} />
 
-      <TextInput 
-        style={styles.input}
-        placeholder="Senha" 
-        secureTextEntry 
-        onChangeText={setSenha}
-      />
+        <TouchableOpacity style={authStyles.button} onPress={handleCadastro}>
+          <Text style={authStyles.buttonText}>Cadastrar</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={handleCadastro} 
-      >
-        <Text>Cadastrar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity 
-        onPress={() => router.push('/')}
-      >Já tem conta? Faça Login</TouchableOpacity>
-    </View>
+        <TouchableOpacity onPress={() => router.push('/')}>
+          <Text style={authStyles.link}>Já tem conta? Faça Login</Text>
+        </TouchableOpacity>
+      </View>
+    </AuthLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
-    padding: 20
-  },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 10,
-    borderRadius: 8
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
-    width: '100%',
-    alignItems: 'center'
-  }
-});
