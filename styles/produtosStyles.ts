@@ -331,5 +331,20 @@ modalOverlay: {
     color: '#999',
   },
 
-
+fab: {
+  position: 'absolute',
+  right: 20,
+  bottom: 100, 
+  backgroundColor: colors.green,
+  width: 60,
+  height: 60,
+  borderRadius: 30,
+  justifyContent: 'center',
+  alignItems: 'center',
+  elevation: 8,
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.3,
+  shadowRadius: 5,
+},
 });

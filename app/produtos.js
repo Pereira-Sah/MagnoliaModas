@@ -2,16 +2,17 @@ import { useEffect, useState } from 'react';
 import { View, Text, FlatList, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import api from '../src/services/api';
-import { styles } from '../styles/produtosStyles';
+import { styles, colors } from '../styles/produtosStyles';
 import ProductCard from '../components/ProductCard';
 import ProductModal from '../components/ProductModal';
+import CreateProductModal from '../components/CreateProductModal';
 import TabBar from '../components/TabBar';
 
 export default function Produtos() {
   const [listaProdutos, setListaProdutos] = useState([]);
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-
+  const [createModalVisible, setCreateModalVisible] = useState(false); 
   useEffect(() => {
     const carregarProdutos = async () => {
       try {
@@ -83,12 +84,24 @@ export default function Produtos() {
           renderItem={({ item }) => <ProductCard item={item} onPress={abrirModal} />}
         />
 
+        <TouchableOpacity 
+        style={styles.fab} 
+        onPress={() => setCreateModalVisible(true)}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="add" size={30} color={colors.white} />
+      </TouchableOpacity>
+
       <ProductModal
         visible={modalVisible}
         produto={produtoSelecionado}
         onClose={() => setModalVisible(false)}
       />
 
+  <CreateProductModal 
+          visible={createModalVisible} 
+          onClose={() => setCreateModalVisible(false)} 
+        />
       <TabBar />
     </View>
   );
