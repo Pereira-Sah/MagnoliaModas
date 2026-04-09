@@ -1,28 +1,35 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { styles } from '../styles/produtosStyles';
+import { Ionicons } from '@expo/vector-icons';
 
-export default function ProductCard({ item, onPress }) {
+interface ProductCardProps {
+  item: {
+    imagem: string;
+    nome: string;
+    preco_base: number | string;
+    descricao: string;
+  };
+  onPress: (item: any) => void;
+}
+
+export default function ProductCard({ item, onPress }: ProductCardProps) {
   return (
-    <TouchableOpacity style={styles.cardHorizontal} onPress={() => onPress(item)}>
-      <Image source={{ uri: item.imagem }} style={styles.imageHorizontal} />
+<TouchableOpacity 
+      activeOpacity={0.8} 
+      style={styles.gridCard} 
+      onPress={() => onPress(item)}
+    >
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: item.imagem }} style={styles.gridImage} />
+                <Text style={styles.gridPrice}>R$ {item.preco_base}</Text>
 
-      <View style={styles.cardContentHorizontal}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.nomeHorizontal} numberOfLines={1} ellipsizeMode="tail">
-            {item.nome}
-          </Text>
-          <View style={styles.priceBadge}>
-            <Text style={styles.priceBadgeText}>R$ {item.preco_base}</Text>
-          </View>
-        </View>
+      </View>
 
-        <Text style={styles.descricaoHorizontal} numberOfLines={2} ellipsizeMode="tail">
-          {item.descricao}
-        </Text>
+      <View style={styles.gridInfo}>
 
-        <TouchableOpacity style={styles.buttonHorizontal} onPress={() => onPress(item)}>
-          <Text style={styles.buttonTextHorizontal}>Ver mais</Text>
-        </TouchableOpacity>
+        <Text style={styles.gridTitle} numberOfLines={1}>{item.nome}</Text>
+        <Text style={styles.gridDescription} numberOfLines={2}>{item.descricao}</Text>
+
       </View>
     </TouchableOpacity>
   );

@@ -1,260 +1,335 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Dimensions } from 'react-native';
+
+export const colors = {
+  green: '#60875b',
+  pink: '#e5aeab',
+  white: '#fff',
+};
+
+export const fonts = {
+  regular: 'Poppins_400Regular',
+  semiBold: 'Poppins_600SemiBold',
+};
+
+const { width } = Dimensions.get('window');
+const gap = 12; 
+const padding = 16; 
+const cardWidth = (width - (padding * 2 + gap)) / 2;
 
 export const styles = StyleSheet.create({
+
   container: {
     flex: 1,
-    backgroundColor: '#fdfdfd',
-    paddingTop: 50,
-    paddingHorizontal: 16,
+    backgroundColor: '#FBFBFB',
+    // paddingTop: 50,
+    // paddingHorizontal: 16,
   },
+  headerContainer: {
+      backgroundColor: '#FBFBFB',
+      paddingBottom: 10,
+    },
 
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  logoWrapper: {
+    backgroundColor: colors.green, 
+    width: width,
+    height: 90, 
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 20, 
+    // paddingTop: 30, 
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 5,
+
   },
 
   logo: {
-    width: 120,
-    height: 40,
-    resizeMode: 'contain',
+    width: '40%',
+    height: 100,
+    resizeMode: 'cover',
   },
 
-  filtros: {
+  searchSection: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    marginBottom: 20,
+    alignItems: 'center',
+    backgroundColor: '#F0F0F0',
+    borderRadius: 15,
+    marginHorizontal: 16,
+    paddingHorizontal: 15,
+    height: 45,
+    marginBottom: 16,
   },
-
-  filtroButton: {
-    backgroundColor: '#e6aeac',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 20,
+  searchIcon: {
+    marginRight: 10,
   },
-
-  filtroText: {
-    color: '#fff',
-    fontWeight: '500',
-  },
-
-cardHorizontal: {
-  flexDirection: 'row',
-  backgroundColor: '#fff',
-  borderRadius: 12,
-  marginBottom: 16,
-  shadowColor: '#000',
-  shadowOpacity: 0.1,
-  shadowRadius: 6,
-  elevation: 3,
-  overflow: 'hidden',
-},
-
-imageHorizontal: {
-  width: 100,
-  height: 100,
-  borderTopLeftRadius: 12,
-  borderBottomLeftRadius: 12,
-  resizeMode: 'cover',
-},
-
-cardContentHorizontal: {
-  flex: 1,
-  padding: 10,
-  justifyContent: 'space-between',
-},
-
-cardHeader: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-  marginBottom: 6,
-},
-
-nomeHorizontal: {
-  fontSize: 16,
-  fontWeight: '600',
-  color: '#333',
-  flex: 1,
-  marginRight: 8,
-},
-
-priceBadge: {
-  backgroundColor: '#e6aeac',
-  paddingVertical: 4,
-  paddingHorizontal: 8,
-  borderRadius: 6,
-   
-},
-
-priceBadgeText: {
-  color: '#fff',
-  fontWeight: '600',
-  fontSize: 12,
-},
-
-descricaoHorizontal: {
-  fontSize: 13,
-  color: '#555',
-  marginBottom: 8,
-},
-
-buttonHorizontal: {
-  backgroundColor: '#89c489',
-  paddingVertical: 6,
-  paddingHorizontal: 12,
-  borderRadius: 6,
-  alignSelf: 'flex-start',
-},
-
-buttonTextHorizontal: {
-  color: '#fff',
-  fontWeight: '600',
-  fontSize: 12,
-},
-
-  modalOverlay: {
+  searchInput: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    fontFamily: fonts.regular,
+    fontSize: 14,
+    color: '#333',
   },
 
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
-    padding: 20,
-    width: '90%',
-    maxHeight: '80%',
-    alignItems: 'center',
+  filterScroll: {
+    paddingLeft: 16,
+    paddingBottom: 10,
+  },
+  filterPill: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 25,
+    backgroundColor: '#FFF',
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#EEE',
     shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 2,
+  },
+  filterPillActive: {
+    backgroundColor: colors.pink,
+    borderColor: colors.pink,
+  },
+  filterPillText: {
+    fontFamily: fonts.semiBold,
+    fontSize: 13,
+    color: '#666',
+  },
+  filterPillTextActive: {
+    color: '#FFF',
   },
 
-  modalImage: {
-    width: 200,
-    height: 200,
-    borderRadius: 12,
-    marginBottom: 12,
+
+ listContent: {
+    paddingBottom: 100,
+    paddingHorizontal: 16,
   },
 
-  modalNome: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginBottom: 6,
-    textAlign: 'center',
-    color: '#333',
+  row: {
+    justifyContent: 'space-between',
   },
 
-  modalPreco: {
-    fontSize: 18,
-    color: '#89c489',
-    marginBottom: 8,
-    fontWeight: '500',
-  },
 
-  modalDescricao: {
-    fontSize: 14,
-    textAlign: 'center',
+  gridCard: {
+    width: cardWidth,
+    backgroundColor: '#FFF',
+    borderRadius: 16,
     marginBottom: 16,
-    color: '#555',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.09,
+    shadowRadius: 8,
+    elevation: 3,
   },
 
-  modalInfoBox: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 16,
+  imageContainer: {
     width: '100%',
+    height: cardWidth * 1.3, 
+    position: 'relative',
+    backgroundColor: '#F5F5F5',
+    borderWidth: 2,
+    borderColor: colors.green,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    overflow: 'hidden',
+  },
+  
+  gridImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
 
-  modalInfoText: {
-    fontSize: 14,
-    color: '#333',
+gridDescription:{
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    color: '#777',
+
+},
+  gridInfo: {
+    padding: 12,
+  },
+  gridTitle: {
+    fontFamily: fonts.regular,
+    fontSize: 16,
+    color: '#444',
     marginBottom: 4,
   },
-
-  modalInfoHighlight: {
-    fontWeight: '600',
-    color: '#e6aeac',
+  gridPrice: {
+    fontFamily: fonts.semiBold,
+    fontSize: 15,
+    color: colors.green,
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.97)',
+    padding: 6,
+    borderRadius: 15,
   },
 
-  modalSectionTitle: {
+// buttonHorizontal: {
+//   backgroundColor: '#89c489',
+//   paddingVertical: 6,
+//   paddingHorizontal: 12,
+//   borderRadius: 6,
+//   alignSelf: 'flex-start',
+// },
+
+// buttonTextHorizontal: {
+//   color: '#fff',
+//   fontWeight: '600',
+//   fontSize: 12,
+// },
+
+modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'flex-end', 
+  },
+
+  
+  modalContent: {
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 40,
+    maxHeight: '85%',
+    width: '100%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 20,
+  },
+  modalHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    marginBottom: 20,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent:'space-between',
+     
+  },
+  iconBtn: {
+    padding: 8,
+    backgroundColor: '#F5F5F5',
+    borderRadius: 10,
+  },
+  modalTopSection: {
+    flexDirection: 'row',
+    marginBottom: 20,
+  },
+  modalImageLarge: {
+    width: 120,
+    height: 150,
+    borderRadius: 16,
+    borderWidth: 4,
+    borderColor: colors.green,
+    backgroundColor: '#EEE',
+  },
+  modalMainInfo: {
+    flex: 1,
+    marginLeft: 20,
+    justifyContent: 'center',
+  },
+  modalNome: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#333',
+    marginBottom: 4,
+    fontFamily: fonts.semiBold,
+    textTransform: 'capitalize',
+  },
+  modalPriceText: {
+    fontSize: 18,
+    color: colors.green,
+    fontWeight: '600',
+    marginBottom: 10,
+    fontFamily: fonts.semiBold,
+    letterSpacing: 0.5,
+  },
+
+  categoryBadge: {
+    backgroundColor: '#fdecec96',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginRight: 8,
+
+  },
+  categoryBadgeText: {
+    color: '#e6aeac',
+    fontSize: 12,
+    fontWeight: '600',
+    fontFamily: fonts.semiBold,
+    letterSpacing: 0.5,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#e8e5e5',
+    marginVertical: 15,
+  },
+  
+  sectionLabel: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#333',
+    textTransform: 'capitalize',
+    letterSpacing: 1,
     marginBottom: 8,
-    color: '#333',
-    alignSelf: 'flex-start',
+    fontFamily: fonts.regular,
+
   },
 
-  estoqueTable: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    marginBottom: 16,
+  modalDetailsSection:{
+    marginBottom: 20,
+    padding: 16,
   },
 
-  estoqueHeader: {
+  modalDescricaoText: {
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#555',
+    marginBottom: 24,
+    fontFamily: fonts.regular,
+
+    
+  },
+  modernTable: {
+    backgroundColor: '#fbd3d238',
+    borderRadius: 12,
+    padding: 10,
+  },
+  modernTableRow: {
     flexDirection: 'row',
-    backgroundColor: '#e6aeac',
-    paddingVertical: 6,
-    borderTopLeftRadius: 8,
-    borderTopRightRadius: 8,
-  },
-
-  estoqueHeaderText: {
-    flex: 1,
-    textAlign: 'center',
-    fontWeight: '600',
-    color: '#fff',
-  },
-
-  estoqueRow: {
-    flexDirection: 'row',
-    paddingVertical: 6,
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     borderBottomWidth: 1,
-    borderColor: '#eee',
+    borderBottomColor: '#e6aeac66',
   },
-
-  estoqueCell: {
-    flex: 1,
-    textAlign: 'center',
-    color: '#333',
-  },
-
-  semEstoque: {
-    color: 'red',
+  tableCellMain: {
     fontWeight: '500',
-    marginBottom: 16,
+    color: '#333',
+    fontFamily: fonts.regular,
+  },
+  tableCellSide: {
+    color: '#666',
+    fontFamily: fonts.regular,
+
+  },
+  semEstoque: {
+    fontStyle: 'italic',
+    color: '#999',
   },
 
-  closeButton: {
-    backgroundColor: '#89c489',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
 
-  closeButtonText: {
-    color: '#fff',
-    fontWeight: '600',
-  },
-
-  tabBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: '#fff',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderColor: '#eee',
-  },
 });

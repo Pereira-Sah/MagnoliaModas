@@ -41,8 +41,9 @@ export default function login() {
 
   return (
     <AuthLayout>
+              <Image source={require('../assets/images/magnoliaModas_logo.svg')} style={authStyles.logo} />
+
       <View style={authStyles.card}>
-        <Image source={require('../assets/images/magnoliaModas_logo.svg')} style={authStyles.logo} />
         <Text style={authStyles.title}>Login</Text>
 
         <TextInput 

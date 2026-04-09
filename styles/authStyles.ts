@@ -1,9 +1,14 @@
 import { StyleSheet } from 'react-native';
 
 export const colors = {
-  green: '#89c489',
-  pink: '#e6aeac',
+  green: '#60875b',
+  pink: '#e5aeab',
   white: '#fff',
+};
+
+export const fonts = {
+  regular: 'Poppins_400Regular',
+  semiBold: 'Poppins_600SemiBold',
 };
 
 export const authStyles = StyleSheet.create({
@@ -20,10 +25,10 @@ export const authStyles = StyleSheet.create({
     gap: 20,
   },
   logo: {
-    width: '50%',
+    width: '40%',
     height: 80,
     marginBottom: 16,
-    borderRadius:100,
+    borderRadius:10,
     // resizeMode: 'contain',
   },
   title: {
@@ -31,6 +36,7 @@ export const authStyles = StyleSheet.create({
     fontWeight: '600',
     color: colors.green,
     marginBottom: 12,
+    fontFamily: fonts.semiBold,
   },
   input: {
     width: '100%',
@@ -39,6 +45,7 @@ export const authStyles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     backgroundColor: 'rgba(255,255,255,0.9)',
+    fontFamily: fonts.regular,
   },
   button: {
     backgroundColor: colors.green,
@@ -50,9 +57,14 @@ export const authStyles = StyleSheet.create({
   buttonText: {
     color: colors.white,
     fontWeight: '600',
+      fontFamily: fonts.semiBold,
+
   },
   link: {
     color: colors.pink,
     marginTop: 8,
+    fontFamily: fonts.regular,
+    fontWeight: '500',
+
   }
 });

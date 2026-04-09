@@ -1,56 +1,107 @@
-import { View, Text, Image, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import React from 'react';
+import { View, Text, Image, TouchableOpacity, Modal, ScrollView, Pressable } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { styles } from '../styles/produtosStyles';
 
-export default function ProductModal({ visible, produto, onClose }) {
-  return (
-    <Modal visible={visible} animationType="slide" transparent={true}>
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          {produto && (
-            <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
-              <Image source={{ uri: produto.imagem }} style={styles.modalImage} />
-              <Text style={styles.modalNome}>{produto.nome}</Text>
-              <Text style={styles.modalPreco}>R$ {produto.preco_base}</Text>
-              <Text style={styles.modalDescricao}>{produto.descricao}</Text>
+interface Estoque {
+  cor: string;
+  tamanho: string;
+  quantidade: number;
+}
 
-              <View style={styles.modalInfoBox}>
-                <Text style={styles.modalInfoText}>
-                  Categoria: <Text style={styles.modalInfoHighlight}>{produto.categoria}</Text>
-                </Text>
-                <Text style={styles.modalInfoText}>
-                  Estação: <Text style={styles.modalInfoHighlight}>{produto.estacao}</Text>
-                </Text>
+interface Produto {
+  id: string;
+  imagem: string;
+  nome: string;
+  preco_base: number;
+  categoria: string;
+  estacao: string;
+  descricao: string;
+  estoque: Estoque[];
+}
+
+interface ProductModalProps {
+  visible: boolean;
+  produto: Produto | null;
+  onClose: () => void;
+  onEdit: (produto: Produto) => void;
+  onDelete: (id: string) => void;
+}
+
+export default function ProductModal({ visible, produto, onClose }: ProductModalProps) {
+  if (!produto) return null;
+
+  return (
+    <Modal visible={visible} animationType="fade" transparent={true} onRequestClose={onClose}>
+      <Pressable style={styles.modalOverlay} onPress={onClose}>
+
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeaderRow}>
+
+            <TouchableOpacity onPress={onClose} >
+              <Ionicons name="close" size={24} color="#e6aeac" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={styles.modalTopSection}>
+              <Image source={{ uri: produto.imagem }} style={styles.modalImageLarge} />
+              <View style={styles.modalMainInfo}>
+                <Text style={styles.modalNome}>{produto.nome}</Text>
+                <Text style={styles.modalPriceText}>R$ {produto.preco_base}</Text>
+
+                <View style={{ flexDirection: 'row', marginTop: 8}}>
+                <View style={styles.categoryBadge}>
+                  <Text style={styles.categoryBadgeText}>{produto.categoria}</Text>
+                </View>
+                <View style={styles.categoryBadge}>
+                 <Text style={styles.categoryBadgeText}>{produto.estacao}</Text>
+                </View>
               </View>
 
-              <Text style={styles.modalSectionTitle}>Variações em estoque:</Text>
+
+
+
+              </View>
+            </View>
+
+            <View style={styles.divider} />
+            <View style={styles.modalDetailsSection}>
+              <Text style={styles.sectionLabel}>Descrição</Text>
+              <Text style={styles.modalDescricaoText}>{produto.descricao}</Text>
+              
+              <Text style={styles.sectionLabel}>Estoque por Variação</Text>
               {produto.estoque && produto.estoque.length > 0 ? (
-                <View style={styles.estoqueTable}>
-                  <View style={styles.estoqueHeader}>
-                    <Text style={styles.estoqueHeaderText}>Tamanho</Text>
-                    <Text style={styles.estoqueHeaderText}>Cor</Text>
-                    <Text style={styles.estoqueHeaderText}>Qtd</Text>
-                    {/* <Text style={styles.estoqueHeaderText}>CB</Text> */}
-                  </View>
+                <View style={styles.modernTable}>
+
                   {produto.estoque.map((variacao, index) => (
-                    <View key={index} style={styles.estoqueRow}>
-                      <Text style={styles.estoqueCell}>{variacao.tamanho}</Text>
-                      <Text style={styles.estoqueCell}>{variacao.cor}</Text>
-                      <Text style={styles.estoqueCell}>{variacao.quantidade}</Text>
-                      {/* <Text style={styles.estoqueCell}>{variacao.codigo_barras}</Text> */}
+                    <View key={index} style={styles.modernTableRow}>
+                      <Text style={styles.tableCellMain}>{variacao.cor} • {variacao.tamanho}</Text>
+                      <Text style={styles.tableCellSide}>{variacao.quantidade} unid.</Text>
+
+
                     </View>
                   ))}
                 </View>
               ) : (
-                <Text style={styles.semEstoque}>Sem estoque cadastrado</Text>
+                <Text style={styles.semEstoque}>Nenhum item em estoque</Text>
               )}
+            </View>
 
-              <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-                <Text style={styles.closeButtonText}>Fechar</Text>
+              <View>
+            <View style={styles.actionButtons}>
+              <TouchableOpacity style={styles.iconBtn} >
+                <Ionicons name="pencil-outline" size={20} color="#666" />
               </TouchableOpacity>
-            </ScrollView>
-          )}
+              <TouchableOpacity style={[styles.iconBtn, { marginLeft: 12 }]}>
+                <Ionicons name="archive" size={20} color="#E57373" />
+              </TouchableOpacity>
+            </View>
+              </View>
+
+          </ScrollView>
         </View>
-      </View>
+      </Pressable>
     </Modal>
   );
 }

@@ -31,8 +31,9 @@ export default function cadastro() {
 
   return (
     <AuthLayout>
+    <Image source={require('../assets/images/magnoliaModas_logo.svg')} style={authStyles.logo} />
+
       <View style={authStyles.card}>
-        <Image source={require('../assets/images/magnoliaModas_logo.svg')} style={authStyles.logo} />
         <Text style={authStyles.title}>Criar Conta</Text>
 
         <TextInput style={authStyles.input} placeholder="Nome Completo" onChangeText={setNome} />
