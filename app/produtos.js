@@ -56,7 +56,7 @@ export default function Produtos() {
           showsHorizontalScrollIndicator={false} 
           contentContainerStyle={styles.filterScroll}
         >
-          {["All", "Camisetas", "Vestidos", "Calças", "Acessórios"].map((tipo, index) => (
+          {["Tudo", "Camisetas", "Vestidos", "Calças", "Acessórios"].map((tipo, index) => (
             <TouchableOpacity 
               key={tipo} 
               style={[
