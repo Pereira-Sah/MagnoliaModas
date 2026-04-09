@@ -27,7 +27,7 @@ export const dashboardStyles = StyleSheet.create({
   logoWrapper: {
     backgroundColor: colors.green, 
     width: width,
-    height: 90, 
+      height: 120, 
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20, 
