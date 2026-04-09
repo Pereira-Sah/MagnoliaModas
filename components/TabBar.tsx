@@ -1,18 +1,34 @@
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 
 export default function TabBar() {
+  const pathname = usePathname();
+
   return (
     <View style={styles.tabBar}>
       <TouchableOpacity onPress={() => router.push('/produtos')}>
-        <Ionicons name="home" size={28} color="#60875b" />
+        <Ionicons
+          name="home"
+          size={28}
+          color={pathname === '/produtos' ? '#60875b' : '#e5aeab'}
+        />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/dasboard')}>
-        <Ionicons name="stats-chart" size={28} color="#e5aeab" />
+
+      <TouchableOpacity onPress={() => router.push('/dashboard')}>
+        <Ionicons
+          name="stats-chart"
+          size={28}
+          color={pathname === '/dashboard' ? '#60875b' : '#e5aeab'}
+        />
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => router.push('/')}>
-        <Ionicons name="person" size={28} color="#e5aeab" />
+
+      <TouchableOpacity onPress={() => router.push('/perfil')}>
+        <Ionicons
+          name="person"
+          size={28}
+          color={pathname === '/perfil' ? '#60875b' : '#e5aeab'}
+        />
       </TouchableOpacity>
     </View>
   );
