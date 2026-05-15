@@ -2,15 +2,14 @@ import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 
-const API_URL = 'http://127.0.0.1:8000'; 
-
 const api = axios.create({
-  baseURL: API_URL,
+  baseURL: process.env.EXPO_PUBLIC_API_URL,
+  timeout: 10000,
 });
 
 api.interceptors.request.use(async (config) => {
   let token;
-  
+
   if (Platform.OS === 'web') {
     token = localStorage.getItem('userToken');
   } else {
@@ -20,6 +19,9 @@ api.interceptors.request.use(async (config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
+  console.log('Enviando requisição para:', config.baseURL + config.url);
+
   return config;
 });
 

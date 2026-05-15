@@ -1,25 +1,53 @@
-import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
+import { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from 'react-native';
+import * as SecureStore from 'expo-secure-store';
+import { router } from 'expo-router';
 import { authStyles } from '../styles/authStyles';
 import AuthLayout from './AuthLayout';
-import api from '../src/services/api'; 
-import { router } from 'expo-router';
-import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
+import api from '../src/services/api';
 
-export default function login() {
+export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  // const navigation = useNavigation();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const verificarToken = async () => {
+      let token;
+
+      if (Platform.OS === 'web') {
+        token = localStorage.getItem('userToken');
+      } else {
+        token = await SecureStore.getItemAsync('userToken');
+      }
+
+      if (token) {
+        router.replace('/produtos');
+      } else {
+        setLoading(false);
+      }
+    };
+
+    verificarToken();
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !senha) {
-      alert("Erro: Preencha todos os campos");
+      alert('Erro: Preencha todos os campos');
       return;
     }
+
     try {
-      const response = await api.post('/auth/login', null, {
-        params: { email, senha }
+      const response = await api.post('auth/login', {
+        email,
+        senha,
       });
 
       const token = response.data.token;
@@ -31,22 +59,29 @@ export default function login() {
           await SecureStore.setItemAsync('userToken', token);
         }
 
-        alert("Login realizado com sucesso!");
-        router.push("/produtos");  // Navega direto aqui
+        router.replace('/produtos');
       }
     } catch (error) {
-      alert("Erro: " + String(error));
+      alert('Erro ao fazer login');
+      console.log(error);
     }
   };
 
+  if (loading) {
+    return null;
+  }
+
   return (
     <AuthLayout>
-              <Image source={require('../assets/images/magnoliaModas_logo.svg')} style={authStyles.logo} />
+      <Image
+        source={require('../assets/images/magnoliaModas_logo.png')}
+        style={authStyles.logo}
+      />
 
       <View style={authStyles.card}>
         <Text style={authStyles.title}>Login</Text>
 
-        <TextInput 
+        <TextInput
           style={authStyles.input}
           placeholder="E-mail"
           keyboardType="email-address"
@@ -54,22 +89,26 @@ export default function login() {
           onChangeText={setEmail}
         />
 
-        <TextInput 
+        <TextInput
           style={authStyles.input}
           placeholder="Senha"
           secureTextEntry
           onChangeText={setSenha}
         />
 
-        <TouchableOpacity style={authStyles.button} onPress={handleLogin}>
+        <TouchableOpacity
+          style={authStyles.button}
+          onPress={handleLogin}
+        >
           <Text style={authStyles.buttonText}>Entrar</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push('/cadastro')}>
-          <Text style={authStyles.link}>Não tem conta? Cadastre-se</Text>
+          <Text style={authStyles.link}>
+            Não tem conta? Cadastre-se
+          </Text>
         </TouchableOpacity>
       </View>
     </AuthLayout>
   );
 }
-
