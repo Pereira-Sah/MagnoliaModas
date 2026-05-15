@@ -37,15 +37,14 @@ export default function ScannerModal({ visible, onClose, onCodeScanned }: Scanne
           <CameraView
             style={styles.camera}
             onBarcodeScanned={({ data }) => {
-              onCodeScanned(data); // Envia o código para o formulário
-              onClose(); // Fecha o scanner
+              onCodeScanned(data);
+              onClose();
             }}
             barcodeScannerSettings={{
               barcodeTypes: ["ean13", "code128", "qr"], 
             }}
           />
           
-          {/* Mira do Scanner */}
           <View style={styles.scannerFrame}>
             <View style={styles.laser} />
           </View>
@@ -70,7 +69,7 @@ const styles = StyleSheet.create({
     width: '80%',
     height: '40%',
     borderWidth: 2,
-    borderColor: '#FF1493', // Cor rosa do seu tema
+    borderColor: '#FF1493',
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center'

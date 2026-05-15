@@ -8,12 +8,31 @@ import ProductModal from '../components/ProductModal';
 import CreateProductModal from '../components/CreateProductModal';
 import TabBar from '../components/TabBar';
 import { router } from 'expo-router';
+import ScannerModal from '../components/ScannerModal';
 
 export default function Produtos() {
   const [listaProdutos, setListaProdutos] = useState([]);
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false); 
+
+  const [isSearching, setIsSearching] = useState(false);
+  const [scannerBuscaVisible, setScannerBuscaVisible] = useState(false);
+
+const handleScanSearch = async (codigo) => {
+  try {
+    setIsSearching(true);
+    const response = await api.get(`/produtos/buscar-por-codigo/${codigo}`);
+    
+    setProdutoSelecionado(response.data);
+    setModalVisible(true);
+  } catch (error) {
+    alert("Produto não encontrado no estoque.");
+  } finally {
+    setIsSearching(false);
+  }
+};
+
   useEffect(() => {
     const carregarProdutos = async () => {
       try {
@@ -52,15 +71,17 @@ export default function Produtos() {
     />
   </View>
 
-
-  <View style={styles.searchSection}>
-    <Ionicons name="search-outline" size={20} color="#999" style={styles.searchIcon} />
-    <TextInput 
-      style={styles.searchInput}
-      placeholder="Pesquisar..."
-      placeholderTextColor="#999"
-    />
-  </View>
+<View style={styles.searchSection}>
+  <Ionicons name="search-outline" size={20} color="#999" style={styles.searchIcon} />
+  <TextInput 
+    style={styles.searchInput}
+    placeholder="Pesquisar..."
+    placeholderTextColor="#999"
+  />
+  <TouchableOpacity onPress={() => setScannerBuscaVisible(true)}>
+    <Ionicons name="barcode-outline" size={24} color={colors.pink} style={{ marginRight: 10 }} />
+  </TouchableOpacity>
+</View>
 
         <ScrollView 
           horizontal 
@@ -114,6 +135,14 @@ export default function Produtos() {
           onClose={() => setCreateModalVisible(false)} 
         />
       <TabBar />
+      <ScannerModal 
+  visible={scannerBuscaVisible}
+  onClose={() => setScannerBuscaVisible(false)}
+  onCodeScanned={(data) => {
+    setScannerBuscaVisible(false);
+    handleScanSearch(data);
+  }}
+/>
     </View>
   );
 }

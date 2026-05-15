@@ -45,13 +45,9 @@ async function selecionarArquivo() {
   });
 
   if (resultado.canceled) return;
-
   const uri = resultado.assets[0].uri;
-
-  // Mostra a imagem imediatamente no formulário
   setImageUrl(uri);
 
-  // Se quiser apenas selecionar manualmente, abre o formulário
   setStep(2);
 }
 
@@ -59,14 +55,12 @@ async function IAProductModal(uri: string) {
   try {
     const formData = new FormData();
 
-    // Adiciona a imagem no formato multipart/form-data
     formData.append('imagem', {
       uri,
       name: 'produto.jpg',
       type: 'image/jpeg',
     } as any);
 
-    // Chama o endpoint da IA
     const response = await api.post(
       '/ml/sugerir-dados-produto',
       formData,
@@ -74,13 +68,12 @@ async function IAProductModal(uri: string) {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
-        timeout: 60000, // IA pode levar alguns segundos para pensar na roupa
+        timeout: 60000,
       }
     );
 
     const sugestao = response.data.sugestao;
 
-    // Preenche os estados do formulário
     setNome(sugestao.nome ?? '');
     setDescricao(sugestao.descricao ?? '');
     setPreco(
@@ -92,7 +85,6 @@ async function IAProductModal(uri: string) {
     setCategoria(sugestao.categoria ?? '');
     setImageUrl(sugestao.imagem ?? '');
 
-    // Abre a etapa do formulário com os dados preenchidos
     setStep(2);
   } catch (error: any) {
     console.log(
@@ -106,10 +98,8 @@ async function IAProductModal(uri: string) {
 async function handlePhotoCaptured(uri: string) {
   setCameraVisible(false);
 
-  // Exibe imediatamente a foto tirada
   setImageUrl(uri);
 
-  // Envia para IA
   await IAProductModal(uri);
 }
   const handleTagPress = (tag: string) => {
@@ -136,15 +126,11 @@ async function handleCadastrar() {
   formData.append('categoria', categoria);
   formData.append('estacao', estacao);
   
-  // Garante que o preço seja um número válido para o Python não dar 422
   const precoFormatado = preco.replace(',', '.').trim();
-  formData.append('preco_base', precoFormatado === "" ? "0" : precoFormatado);
-  
-  // Tags (você está esquecendo de enviar as tags selecionadas!)
+  formData.append('preco_base', precoFormatado === "" ? "0" : precoFormatado);  
   formData.append('tags', JSON.stringify(selectedTags));
-  // Criando o objeto de estoque que o backend salvar_estoque_inicial espera
   const estoque = [{
-    tamanho: "U", // Ou pegue de um estado de tamanho
+    tamanho: "U",
     cor: "N/A",
     quantidade: 1,
     codigo_barras: codigoBarras
