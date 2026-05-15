@@ -5,12 +5,14 @@ Este é o aplicativo mobile do nosso projeto, desenvolvido com **React Native** 
 ## 🚀 Como rodar o app
 
 Abra o terminal na pasta do projeto e siga os passos:
+### 1. Mudar as variáveis de desenvolvimento no arquivo `.env`
+use o arquivo `.env.example` como base pra estabelecer as suas variáveis. Lembre-se de renomear o arquivo para apenas .env
 
-### 1. Instalar as dependências
+### 2. Instalar as dependências
 ```bash
 npm install
 ```
-### 2. Rodar o projeto
+### 3. Rodar o projeto
 ```bash
 npx expo start
 ```
