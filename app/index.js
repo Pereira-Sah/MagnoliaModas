@@ -45,9 +45,11 @@ export default function Login() {
     }
 
     try {
-      const response = await api.post('auth/login', {
-        email,
-        senha,
+      const response = await api.post('/auth/login', null, {
+        params: {
+          email,
+          senha,
+        },
       });
 
       const token = response.data.token;
