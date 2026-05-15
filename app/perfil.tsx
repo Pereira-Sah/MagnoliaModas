@@ -1,6 +1,16 @@
 import React from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import * as SecureStore from 'expo-secure-store';
+import { router } from 'expo-router';
+
 import { perfilStyles, colors } from '../styles/perfilStyles';
 import TabBar from '../components/TabBar';
 
@@ -17,54 +27,126 @@ const InfoItem = ({ icon, label, value, isLast = false }: any) => (
 );
 
 export default function Perfil() {
+  async function logout() {
+    try {
+      if (Platform.OS === 'web') {
+        localStorage.removeItem('userToken');
+      } else {
+        await SecureStore.deleteItemAsync('userToken');
+      }
+
+      // Redireciona para a tela de login e impede voltar com o botão "voltar"
+      router.replace('/');
+    } catch (error) {
+      console.log('Erro ao fazer logout:', error);
+      alert('Não foi possível sair da conta.');
+    }
+  }
+
   return (
     <View style={perfilStyles.container}>
       <View style={perfilStyles.logoWrapper}>
-        <Image 
-          source={require('../assets/images/magnoliaModas_logo.png')} 
-          style={perfilStyles.logo} 
+        <Image
+          source={require('../assets/images/magnoliaModas_logo.png')}
+          style={perfilStyles.logo}
         />
       </View>
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={perfilStyles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        
         <View style={perfilStyles.avatarWrapper}>
-          <Image 
-            source={{ uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200' }} 
-            style={perfilStyles.avatar} 
+          <Image
+            source={{
+              uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200',
+            }}
+            style={perfilStyles.avatar}
           />
-          <TouchableOpacity style={perfilStyles.editIconButton} activeOpacity={0.7}>
-            <Ionicons name="pencil" size={16} color={colors.white} />
+          <TouchableOpacity
+            style={perfilStyles.editIconButton}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="pencil"
+              size={16}
+              color={colors.white}
+            />
           </TouchableOpacity>
         </View>
 
-        <Text style={perfilStyles.userName}>Fernanda Magnolia</Text>
+        <Text style={perfilStyles.userName}>
+          Fernanda Magnolia
+        </Text>
+
         <View style={perfilStyles.roleBadge}>
-          <Text style={perfilStyles.roleText}>Administradora</Text>
+          <Text style={perfilStyles.roleText}>
+            Administradora
+          </Text>
         </View>
 
         <View style={perfilStyles.sectionCard}>
-          <InfoItem icon="mail-outline" label="E-mail Cadastrado" value="fernanda@magnoliamodas.com" />
-          <InfoItem icon="call-outline" label="Telefone" value="(11) 98888-7777" />
-          <InfoItem icon="business-outline" label="Loja" value="Magnolia Modas" isLast/>
+          <InfoItem
+            icon="mail-outline"
+            label="E-mail Cadastrado"
+            value="fernanda@magnoliamodas.com"
+          />
+          <InfoItem
+            icon="call-outline"
+            label="Telefone"
+            value="(11) 98888-7777"
+          />
+          <InfoItem
+            icon="business-outline"
+            label="Loja"
+            value="Magnolia Modas"
+            isLast
+          />
         </View>
 
         <View style={perfilStyles.sectionCard}>
-          <InfoItem icon="calendar-outline" label="Membro desde" value="Janeiro de 2024"  />
-          <InfoItem icon="cube-outline" label="Produtos cadastrados pelo usuário" value="128" />
-          <InfoItem icon="checkmark-circle-outline" label="Status" value="Ativo"  isLast />
+          <InfoItem
+            icon="calendar-outline"
+            label="Membro desde"
+            value="Janeiro de 2024"
+          />
+          <InfoItem
+            icon="cube-outline"
+            label="Produtos cadastrados pelo usuário"
+            value="128"
+          />
+          <InfoItem
+            icon="checkmark-circle-outline"
+            label="Status"
+            value="Ativo"
+            isLast
+          />
         </View>
 
-        <TouchableOpacity style={perfilStyles.logoutButton} activeOpacity={0.6}>
-          <Ionicons name="log-out-outline" size={20} color={colors.danger} />
-          <Text style={perfilStyles.logoutText}>Sair da Conta</Text>
+        <TouchableOpacity
+          style={perfilStyles.logoutButton}
+          activeOpacity={0.6}
+          onPress={logout}
+        >
+          <Ionicons
+            name="log-out-outline"
+            size={20}
+            color={colors.danger}
+          />
+          <Text style={perfilStyles.logoutText}>
+            Sair da Conta
+          </Text>
         </TouchableOpacity>
 
-        <Text style={{ marginTop: 20, color: '#CCC', fontSize: 10 }}>Magnolia Systems - Todos os direitos reservados</Text>
-
+        <Text
+          style={{
+            marginTop: 20,
+            color: '#CCC',
+            fontSize: 10,
+          }}
+        >
+          Magnolia Systems - Todos os direitos reservados
+        </Text>
       </ScrollView>
 
       <TabBar />

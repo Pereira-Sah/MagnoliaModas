@@ -50,16 +50,6 @@ const handleScanSearch = async (codigo) => {
     setModalVisible(true);
   };
 
-  async function logout(){
-  if (Platform.OS === 'web') {
-      localStorage.removeItem('userToken');
-    } else {
-      await SecureStore.deleteItemAsync('userToken');
-    }
-    router.replace('/');
-  }
-
-
   return (
     <View style={styles.container}>
 <View style={styles.headerContainer}>
