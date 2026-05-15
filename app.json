@@ -3,9 +3,19 @@
     "scheme": "acme",
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font"
     ],
     "name": "MagnoliaModas",
-    "slug": "MagnoliaModas"
+    "slug": "MagnoliaModas",
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "c2304796-ec74-4f24-9be3-4eaa4e1a0a3f"
+      }
+    },
+    "android": {
+      "package": "com.almile.MagnoliaModas"
+    }
   }
 }

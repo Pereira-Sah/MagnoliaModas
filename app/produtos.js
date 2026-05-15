@@ -1,81 +1,138 @@
 import { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, FlatList, Image } from 'react-native';
-import api from '../src/services/api'; 
+import { View, Text, FlatList, Image, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import api from '../src/services/api';
+import { styles, colors } from '../styles/produtosStyles';
+import ProductCard from '../components/ProductCard';
+import ProductModal from '../components/ProductModal';
+import CreateProductModal from '../components/CreateProductModal';
+import TabBar from '../components/TabBar';
 import { router } from 'expo-router';
+import ScannerModal from '../components/ScannerModal';
 
-export default function produtos() {
+export default function Produtos() {
   const [listaProdutos, setListaProdutos] = useState([]);
+  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [createModalVisible, setCreateModalVisible] = useState(false); 
 
-  const carregarProdutos = async () => {
-    try {
-      const response = await api.get('/produtos/');
-      setListaProdutos(response.data);
-    } catch (error) {
-      console.error("Erro ao carregar produtos:", error);
-    } 
-  };
+  const [isSearching, setIsSearching] = useState(false);
+  const [scannerBuscaVisible, setScannerBuscaVisible] = useState(false);
+
+const handleScanSearch = async (codigo) => {
+  try {
+    setIsSearching(true);
+    const response = await api.get(`/produtos/buscar-por-codigo/${codigo}`);
+    
+    setProdutoSelecionado(response.data);
+    setModalVisible(true);
+  } catch (error) {
+    alert("Produto não encontrado no estoque.");
+  } finally {
+    setIsSearching(false);
+  }
+};
 
   useEffect(() => {
+    const carregarProdutos = async () => {
+      try {
+        const response = await api.get('produtos/');
+        setListaProdutos(response.data);
+      } catch (error) {
+        console.error("Erro ao carregar produtos:", error);
+      }
+    };
     carregarProdutos();
   }, []);
 
+  const abrirModal = (item) => {
+    setProdutoSelecionado(item);
+    setModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
-      <Text style={{fontSize: 24, fontWeight: 'bold'}}>Lista de Produtos</Text>
+<View style={styles.headerContainer}>
 
-      <TouchableOpacity 
-        style={styles.button}
-        onPress={() => router.push('/cadastroProduto')}
+  <View style={styles.logoWrapper}>
+    <Image 
+      source={require('../assets/images/magnoliaModas_logo.svg')} 
+      style={styles.logo} 
+    />
+  </View>
+
+<View style={styles.searchSection}>
+  <Ionicons name="search-outline" size={20} color="#999" style={styles.searchIcon} />
+  <TextInput 
+    style={styles.searchInput}
+    placeholder="Pesquisar..."
+    placeholderTextColor="#999"
+  />
+  <TouchableOpacity onPress={() => setScannerBuscaVisible(true)}>
+    <Ionicons name="barcode-outline" size={24} color={colors.pink} style={{ marginRight: 10 }} />
+  </TouchableOpacity>
+</View>
+
+        <ScrollView 
+          horizontal 
+          showsHorizontalScrollIndicator={false} 
+          contentContainerStyle={styles.filterScroll}
+        >
+          {["Tudo", "Camisetas", "Vestidos", "Calças", "Acessórios"].map((tipo, index) => (
+            <TouchableOpacity 
+              key={tipo} 
+              style={[
+                styles.filterPill, 
+                index === 0 && styles.filterPillActive 
+              ]}
+            >
+              <Text style={[
+                styles.filterPillText, 
+                index === 0 && styles.filterPillTextActive
+              ]}>
+                {tipo}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </View>
+
+        <FlatList
+          data={listaProdutos}
+          keyExtractor={(item) => item.id.toString()}
+          numColumns={2}
+          columnWrapperStyle={styles.row} 
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => <ProductCard item={item} onPress={abrirModal} />}
+        />
+
+        <TouchableOpacity 
+        style={styles.fab} 
+        onPress={() => setCreateModalVisible(true)}
+        activeOpacity={0.8}
       >
-        <Text style={{color: '#fff'}}>+ Cadastrar novo produto</Text>
+        <Ionicons name="add" size={30} color={colors.white} />
       </TouchableOpacity>
 
-      <FlatList
-        data={listaProdutos}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View>
-            <Text style={{fontWeight: 'bold'}}>Nome: {item.nome}</Text>
-            <Text>imagem_link: {item.imagem}</Text>
-
-            <Image style={{width : 120, height : 80}} source={{uri: item.imagem}} />
-            <Text>Descrição: {item.descricao}</Text>
-            <Text>Categoria: {item.categoria} | Estação: {item.estacao}</Text>
-            <Text>Preço: R$ {item.preco_base}</Text>
-
-            <Text style={{ fontWeight: 'bold'}}>VARIAÇÕES EM ESTOQUE:</Text>
-
-            {item.estoque && item.estoque.length > 0 ? (
-                item.estoque.map((variacao, index) => (
-                <Text key={index}>
-                    • {variacao.tamanho} | {variacao.cor} | Qtd: {variacao.quantidade} | CB: {variacao.codigo_barras}
-                </Text>
-                ))
-            ) : (
-                <Text style={{ color: 'red' }}>Sem estoque cadastrado</Text>
-            )}
-            
-            <br/>
-            
-          </View>
-        )}
+      <ProductModal
+        visible={modalVisible}
+        produto={produtoSelecionado}
+        onClose={() => setModalVisible(false)}
       />
+
+  <CreateProductModal 
+          visible={createModalVisible} 
+          onClose={() => setCreateModalVisible(false)} 
+        />
+      <TabBar />
+      <ScannerModal 
+  visible={scannerBuscaVisible}
+  onClose={() => setScannerBuscaVisible(false)}
+  onCodeScanned={(data) => {
+    setScannerBuscaVisible(false);
+    handleScanSearch(data);
+  }}
+/>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    padding: 20,
-    paddingTop: 50
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginBottom: 20
-  }
-});

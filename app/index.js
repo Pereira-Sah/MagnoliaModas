@@ -1,93 +1,114 @@
-import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Platform } from 'react-native';
+import { useState, useEffect } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  Platform,
+} from 'react-native';
 import * as SecureStore from 'expo-secure-store';
-import api from '../src/services/api'; 
 import { router } from 'expo-router';
+import { authStyles } from '../styles/authStyles';
+import AuthLayout from './AuthLayout';
+import api from '../src/services/api';
 
-export default function login() {
-  
+export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const verificarToken = async () => {
+      let token;
+
+      if (Platform.OS === 'web') {
+        token = localStorage.getItem('userToken');
+      } else {
+        token = await SecureStore.getItemAsync('userToken');
+      }
+
+      if (token) {
+        router.replace('/produtos');
+      } else {
+        setLoading(false);
+      }
+    };
+
+    verificarToken();
+  }, []);
 
   const handleLogin = async () => {
-    if (!nome || !email || !senha) {
-      Alert.alert("Erro", "Preencha todos os campos");
+    if (!email || !senha) {
+      alert('Erro: Preencha todos os campos');
       return;
     }
+
     try {
-        const response = await api.post('/auth/login', null, {
-            params: { email, senha }
-        });
+      const response = await api.post('auth/login', {
+        email,
+        senha,
+      });
 
-        const token = response.data.token;
+      const token = response.data.token;
 
-        if (token) {
-            if (Platform.OS === 'web') {
-                localStorage.setItem('userToken', token);
-            } else {
-                await SecureStore.setItemAsync('userToken', token);
-            }
-            
-            alert("Sucesso!", "Login realizado!");
+      if (token) {
+        if (Platform.OS === 'web') {
+          localStorage.setItem('userToken', token);
+        } else {
+          await SecureStore.setItemAsync('userToken', token);
         }
+
+        router.replace('/produtos');
+      }
     } catch (error) {
-        alert(error);
+      alert('Erro ao fazer login');
+      console.log(error);
     }
-};
+  };
+
+  if (loading) {
+    return null;
+  }
 
   return (
-    <View style={styles.container}>
-      <Text style={{fontSize: 20, fontWeight: 'bold'}}>Login</Text>
-      
-      <TextInput 
-        style={styles.input}
-        placeholder="E-mail" 
-        keyboardType="email-address"
-        autoCapitalize="none"
-        onChangeText={setEmail}
+    <AuthLayout>
+      <Image
+        source={require('../assets/images/magnoliaModas_logo.png')}
+        style={authStyles.logo}
       />
 
-      <TextInput 
-        style={styles.input}
-        placeholder="Senha" 
-        secureTextEntry 
-        onChangeText={setSenha}
-      />
+      <View style={authStyles.card}>
+        <Text style={authStyles.title}>Login</Text>
 
-      <TouchableOpacity 
-        style={styles.button} 
-        onPress={handleLogin}
-      >
-        <Text style={{color: '#fff'}}>Entrar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => router.push('/cadastro')}
-      >Não tem conta? Cadastre-se</TouchableOpacity>
-    </View>
+        <TextInput
+          style={authStyles.input}
+          placeholder="E-mail"
+          keyboardType="email-address"
+          autoCapitalize="none"
+          onChangeText={setEmail}
+        />
+
+        <TextInput
+          style={authStyles.input}
+          placeholder="Senha"
+          secureTextEntry
+          onChangeText={setSenha}
+        />
+
+        <TouchableOpacity
+          style={authStyles.button}
+          onPress={handleLogin}
+        >
+          <Text style={authStyles.buttonText}>Entrar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => router.push('/cadastro')}>
+          <Text style={authStyles.link}>
+            Não tem conta? Cadastre-se
+          </Text>
+        </TouchableOpacity>
+      </View>
+    </AuthLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
-    padding: 20
-  },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: '#ddd',
-    padding: 10,
-    borderRadius: 8
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 15,
-    borderRadius: 8,
-    width: '100%',
-    alignItems: 'center'
-  }
-});
