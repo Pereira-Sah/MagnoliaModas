@@ -15,6 +15,8 @@ import { createProductStyles as s, colors, fonts } from '../styles/createProduct
 import CameraModal from './CameraModal';
 import api from '../src/services/api';
 import * as ImagePicker from 'expo-image-picker';
+import QRCode from 'react-native-qrcode-svg';
+import ScannerModal from './ScannerModal';
 
 interface Props {
   visible: boolean;
@@ -26,6 +28,8 @@ export default function CreateProductModal({ visible, onClose }: Props) {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [imageUrl, setImageUrl] = useState(''); 
 
+const [codigoBarras, setCodigoBarras] = useState('');
+  const [scannerVisible, setScannerVisible] = useState(false);
   const tags = ['floral', 'festa', 'casual', 'alfaiataria', 'linho'];
 const [nome, setNome] = useState('');
 const [descricao, setDescricao] = useState('');
@@ -124,6 +128,48 @@ async function handlePhotoCaptured(uri: string) {
     setImageUrl('');
     onClose();
   };
+
+async function handleCadastrar() {
+  const formData = new FormData();
+  formData.append('nome', nome);
+  formData.append('descricao', descricao);
+  formData.append('categoria', categoria);
+  formData.append('estacao', estacao);
+  
+  // Garante que o preço seja um número válido para o Python não dar 422
+  const precoFormatado = preco.replace(',', '.').trim();
+  formData.append('preco_base', precoFormatado === "" ? "0" : precoFormatado);
+  
+  // Tags (você está esquecendo de enviar as tags selecionadas!)
+  formData.append('tags', JSON.stringify(selectedTags));
+  // Criando o objeto de estoque que o backend salvar_estoque_inicial espera
+  const estoque = [{
+    tamanho: "U", // Ou pegue de um estado de tamanho
+    cor: "N/A",
+    quantidade: 1,
+    codigo_barras: codigoBarras
+  }];
+  
+  formData.append('estoque_inicial', JSON.stringify(estoque));
+
+  if (imageUrl.startsWith('file://')) {
+    formData.append('imagem', {
+      uri: imageUrl,
+      name: 'foto.jpg',
+      type: 'image/jpeg',
+    } as any);
+  }
+
+  try {
+    await api.post('/produtos/adicionar-produto', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    alert('Produto salvo!');
+    handleClose();
+  } catch (err) {
+    alert('Erro ao salvar');
+  }
+}
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -262,13 +308,40 @@ async function handlePhotoCaptured(uri: string) {
                   </TouchableOpacity>
                 ))}
               </View>
-
-              <TouchableOpacity style={s.submitButton} onPress={handleClose}>
+<View style={s.inputGroup}>
+        <Text style={s.label}>Código de Barras da Etiqueta</Text>
+        <View style={{ flexDirection: 'row' }}>
+          <TextInput 
+            style={[s.input, { flex: 1, marginRight: 10 }]} 
+            value={codigoBarras}
+            onChangeText={setCodigoBarras}
+            placeholder="Aguardando bip..."
+          />
+          <TouchableOpacity 
+            onPress={() => setScannerVisible(true)}
+            style={{ backgroundColor: colors.pink, padding: 12, borderRadius: 10, justifyContent: 'center' }}
+          >
+            <Ionicons name="barcode-outline" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+      </View>
+{codigoBarras ? (
+  <View style={{ alignItems: 'center', marginVertical: 20 }}>
+    <QRCode value={codigoBarras} size={150} />
+    <Text style={{ marginTop: 10}}>QR Code para etiqueta</Text>
+  </View>
+) : null}
+              <TouchableOpacity style={s.submitButton} onPress={handleCadastrar}>
                 <Text style={s.submitButtonText}>Cadastrar Produto</Text>
               </TouchableOpacity>
 
             </ScrollView>
           )}
+          <ScannerModal 
+        visible={scannerVisible}
+        onClose={() => setScannerVisible(false)}
+        onCodeScanned={(data) => setCodigoBarras(data)}
+      />
 <CameraModal
   visible={cameraVisible}
   onClose={() => setCameraVisible(false)}
