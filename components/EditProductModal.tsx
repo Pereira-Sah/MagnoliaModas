@@ -68,27 +68,27 @@ export default function EditProductModal({
   const [scannerVisible, setScannerVisible] = useState(false);
   const [salvando, setSalvando] = useState(false);
   const [estoque, setEstoque] = useState<Estoque[]>([]);
-  
-useEffect(() => {
-  if (!produto) return;
 
-  setNome(produto.nome ?? "");
-  setDescricao(produto.descricao ?? "");
-  setPreco(
-    produto.preco_base != null
-      ? String(produto.preco_base).replace(".", ",")
-      : ""
-  );
-  setEstacao(produto.estacao ?? "");
-  setCategoria(produto.categoria ?? "");
-  setImageUrl(produto.imagem ?? "");
-  setSelectedTags(produto.tags ?? []);
+  useEffect(() => {
+    if (!produto) return;
 
-  setEstoque(produto.estoque ?? []);
+    setNome(produto.nome ?? "");
+    setDescricao(produto.descricao ?? "");
+    setPreco(
+      produto.preco_base != null
+        ? String(produto.preco_base).replace(".", ",")
+        : "",
+    );
+    setEstacao(produto.estacao ?? "");
+    setCategoria(produto.categoria ?? "");
+    setImageUrl(produto.imagem ?? "");
+    setSelectedTags(produto.tags ?? []);
 
-  const primeiroCodigo = produto.estoque?.[0]?.codigo_barras ?? "";
-  setCodigoBarras(primeiroCodigo);
-}, [produto, visible]);
+    setEstoque(produto.estoque ?? []);
+
+    const primeiroCodigo = produto.estoque?.[0]?.codigo_barras ?? "";
+    setCodigoBarras(primeiroCodigo);
+  }, [produto, visible]);
 
   function handleTagPress(tag: string) {
     setSelectedTags((prev) =>
@@ -96,40 +96,39 @@ useEffect(() => {
     );
   }
 
-function atualizarVariacao(
-  index: number,
-  campo: keyof Estoque,
-  valor: string
-) {
-  setEstoque((prev) => {
-    const novoEstoque = [...prev];
+  function atualizarVariacao(
+    index: number,
+    campo: keyof Estoque,
+    valor: string,
+  ) {
+    setEstoque((prev) => {
+      const novoEstoque = [...prev];
 
-    if (campo === "quantidade") {
-      novoEstoque[index][campo] = Number(valor) as any;
-    } else {
-      novoEstoque[index][campo] = valor as any;
-    }
+      if (campo === "quantidade") {
+        novoEstoque[index][campo] = Number(valor) as any;
+      } else {
+        novoEstoque[index][campo] = valor as any;
+      }
 
-    return novoEstoque;
-  });
-}
+      return novoEstoque;
+    });
+  }
 
-function adicionarVariacao() {
-  setEstoque((prev) => [
-    ...prev,
-    {
-      cor: "",
-      tamanho: "",
-      quantidade: 0,
-      codigo_barras: "",
-    },
-  ]);
-}
+  function adicionarVariacao() {
+    setEstoque((prev) => [
+      ...prev,
+      {
+        cor: "",
+        tamanho: "",
+        quantidade: 0,
+        codigo_barras: "",
+      },
+    ]);
+  }
 
-
-function removerVariacao(index: number) {
-  setEstoque((prev) => prev.filter((_, i) => i !== index));
-}
+  function removerVariacao(index: number) {
+    setEstoque((prev) => prev.filter((_, i) => i !== index));
+  }
 
   async function selecionarArquivo() {
     const resultado = await ImagePicker.launchImageLibraryAsync({
@@ -144,58 +143,52 @@ function removerVariacao(index: number) {
     setImageUrl(uri);
   }
 
-async function handleSalvar() {
-  if (!produto) return;
+  async function handleSalvar() {
+    if (!produto) return;
 
-  try {
-    setSalvando(true);
+    try {
+      setSalvando(true);
 
-    const payload = {
-      nome,
-      descricao,
-      categoria,
-      estacao,
-      preco_base: parseFloat(preco.replace(",", ".")) || 0,
-      tags: selectedTags,
-      imagem: imageUrl,
-    };
-
-    await api.put(`/produtos/${produto.id}`, payload);
-
-    for (const variacao of estoque) {
-      const payloadEstoque = {
-        tamanho: variacao.tamanho,
-        cor: variacao.cor,
-        quantidade: Number(variacao.quantidade) || 0,
-        codigo_barras: variacao.codigo_barras || "",
+      const payload = {
+        nome,
+        descricao,
+        categoria,
+        estacao,
+        preco_base: parseFloat(preco.replace(",", ".")) || 0,
+        tags: selectedTags,
+        imagem: imageUrl,
       };
 
-      if (variacao.id_variacao) {
-        await api.put(
-          `/estoque/${variacao.id_variacao}`,
-          payloadEstoque
-        );
-      } else {
-        await api.post(
-          `/estoque/adicionar-variacao?id_produto=${produto.id}`,
-          payloadEstoque
-        );
-      }
-    }
+      await api.put(`/produtos/${produto.id}`, payload);
 
-    alert("Produto e estoque atualizados com sucesso!");
-    onUpdated?.();
-    onClose();
-  } catch (error: any) {
-    console.log(
-      "Erro ao atualizar produto:",
-      error.response?.data || error
-    );
-    alert("Não foi possível atualizar o produto.");
-  } finally {
-    setSalvando(false);
+      for (const variacao of estoque) {
+        const payloadEstoque = {
+          tamanho: variacao.tamanho,
+          cor: variacao.cor,
+          quantidade: Number(variacao.quantidade) || 0,
+          codigo_barras: variacao.codigo_barras || "",
+        };
+
+        if (variacao.id_variacao) {
+          await api.put(`/estoque/${variacao.id_variacao}`, payloadEstoque);
+        } else {
+          await api.post(
+            `/estoque/adicionar-variacao?id_produto=${produto.id}`,
+            payloadEstoque,
+          );
+        }
+      }
+
+      alert("Produto e estoque atualizados com sucesso!");
+      onUpdated?.();
+      onClose();
+    } catch (error: any) {
+      console.log("Erro ao atualizar produto:", error.response?.data || error);
+      alert("Não foi possível atualizar o produto.");
+    } finally {
+      setSalvando(false);
+    }
   }
-}
 
   if (!produto) return null;
 
@@ -329,103 +322,95 @@ async function handleSalvar() {
                 </TouchableOpacity>
               ))}
             </View>
-{/* 8. Adicione esta seção antes do QR Code. */}
+            <Text style={s.label}>Variações de Estoque</Text>
 
-<Text style={s.label}>Variações de Estoque</Text>
+            {estoque.map((variacao, index) => (
+              <View
+                key={index}
+                style={{
+                  marginBottom: 16,
+                  padding: 12,
+                  borderWidth: 1,
+                  borderColor: "#E8E8E8",
+                  borderRadius: 12,
+                  backgroundColor: "#FFF",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  <Text style={{ fontWeight: "600" }}>
+                    Variação {index + 1}
+                  </Text>
 
-{estoque.map((variacao, index) => (
-  <View
-    key={index}
-    style={{
-      marginBottom: 16,
-      padding: 12,
-      borderWidth: 1,
-      borderColor: "#E8E8E8",
-      borderRadius: 12,
-      backgroundColor: "#FFF",
-    }}
-  >
-    <View
-      style={{
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 10,
-      }}
-    >
-      <Text style={{ fontWeight: "600" }}>
-        Variação {index + 1}
-      </Text>
+                  <TouchableOpacity onPress={() => removerVariacao(index)}>
+                    <Ionicons name="trash-outline" size={20} color="#E57373" />
+                  </TouchableOpacity>
+                </View>
 
-      <TouchableOpacity onPress={() => removerVariacao(index)}>
-        <Ionicons
-          name="trash-outline"
-          size={20}
-          color="#E57373"
-        />
-      </TouchableOpacity>
-    </View>
+                <TextInput
+                  style={[s.input, { marginBottom: 8 }]}
+                  placeholder="Cor"
+                  value={variacao.cor}
+                  onChangeText={(text) => atualizarVariacao(index, "cor", text)}
+                />
 
-    <TextInput
-      style={[s.input, { marginBottom: 8 }]}
-      placeholder="Cor"
-      value={variacao.cor}
-      onChangeText={(text) =>
-        atualizarVariacao(index, "cor", text)
-      }
-    />
+                <TextInput
+                  style={[s.input, { marginBottom: 8 }]}
+                  placeholder="Tamanho"
+                  value={variacao.tamanho}
+                  onChangeText={(text) =>
+                    atualizarVariacao(index, "tamanho", text)
+                  }
+                />
 
-    <TextInput
-      style={[s.input, { marginBottom: 8 }]}
-      placeholder="Tamanho"
-      value={variacao.tamanho}
-      onChangeText={(text) =>
-        atualizarVariacao(index, "tamanho", text)
-      }
-    />
+                <TextInput
+                  style={[s.input, { marginBottom: 8 }]}
+                  placeholder="Quantidade"
+                  keyboardType="numeric"
+                  value={String(variacao.quantidade)}
+                  onChangeText={(text) =>
+                    atualizarVariacao(index, "quantidade", text)
+                  }
+                />
 
-    <TextInput
-      style={[s.input, { marginBottom: 8 }]}
-      placeholder="Quantidade"
-      keyboardType="numeric"
-      value={String(variacao.quantidade)}
-      onChangeText={(text) =>
-        atualizarVariacao(index, "quantidade", text)
-      }
-    />
+                <TextInput
+                  style={s.input}
+                  placeholder="Código de barras"
+                  value={variacao.codigo_barras ?? ""}
+                  onChangeText={(text) =>
+                    atualizarVariacao(index, "codigo_barras", text)
+                  }
+                />
+              </View>
+            ))}
 
-    <TextInput
-      style={s.input}
-      placeholder="Código de barras"
-      value={variacao.codigo_barras ?? ""}
-      onChangeText={(text) =>
-        atualizarVariacao(index, "codigo_barras", text)
-      }
-    />
-  </View>
-))}
-
-<TouchableOpacity
-  onPress={adicionarVariacao}
-  style={{
-    borderWidth: 1,
-    borderColor: colors.pink,
-    borderStyle: "dashed",
-    borderRadius: 12,
-    padding: 14,
-    alignItems: "center",
-    marginBottom: 20,
-  }}
->
-  <Text
-    style={{
-      color: colors.pink,
-      fontWeight: "600",
-    }}
-  >
-    + Adicionar Variação
-  </Text>
-</TouchableOpacity>
+            <TouchableOpacity
+              onPress={adicionarVariacao}
+              style={{
+                borderWidth: 1,
+                borderColor: colors.pink,
+                borderStyle: "dashed",
+                borderRadius: 12,
+                padding: 14,
+                alignItems: "center",
+                marginBottom: 20,
+              }}
+            >
+              <Text
+                style={{
+                  color: colors.pink,
+                  fontWeight: "600",
+                }}
+              >
+                + Adicionar Variação
+              </Text>
+            </TouchableOpacity>
             <View style={s.inputGroup}>
               <Text style={s.label}>Código de Barras da Etiqueta</Text>
 
