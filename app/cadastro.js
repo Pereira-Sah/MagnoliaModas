@@ -17,7 +17,7 @@ export default function cadastro() {
       return;
     }
     try {
-      const response = await api.post('/auth/cadastro', { nome_usuario: nome, email: email, senha: senha, role: "admin" });
+      const response = await api.post('/auth/cadastro', { nome_usuario: nome, email: email, senha: senha, role: "cliente" });
       if (response.status === 200 || response.status === 201) {        
         if (Platform.OS === 'web') alert("Conta criada com sucesso!");
         Alert.alert("Sucesso!", "Conta criada! Agora você pode fazer login.");

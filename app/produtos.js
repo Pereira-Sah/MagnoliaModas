@@ -18,41 +18,63 @@ import TabBar from "../components/TabBar";
 import { router } from "expo-router";
 import ScannerModal from "../components/ScannerModal";
 import CreateSaleModal from "../components/CreateSaleModal";
+
 export default function Produtos() {
   const [listaProdutos, setListaProdutos] = useState([]);
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
-
-  const [isSearching, setIsSearching] = useState(false);
   const [scannerBuscaVisible, setScannerBuscaVisible] = useState(false);
-  // dentro do componente Produtos()
   const [saleModalVisible, setSaleModalVisible] = useState(false);
+
+  const [termoBusca, setTermoBusca] = useState("");
+  const [categoriaSelecionada, setCategoriaSelecionada] = useState("Tudo");
+
+  const categorias = ["Tudo", "Camisetas", "Vestidos", "Calças", "Acessórios"];
+
+  async function carregarProdutos() {
+    try {
+      let url = "/produtos/filtrar";
+      const params = new URLSearchParams();
+
+      if (termoBusca.trim() !== "") {
+        params.append("nome", termoBusca.trim());
+      }
+
+      if (categoriaSelecionada !== "Tudo") {
+        params.append("categoria", categoriaSelecionada);
+      }
+
+      const queryString = params.toString();
+
+      if (!queryString) {
+        url = "/produtos/";
+      } else {
+        url = `${url}?${queryString}`;
+      }
+
+      console.log("Buscando produtos em:", url);
+
+      const response = await api.get(url);
+      setListaProdutos(response.data);
+    } catch (error) {
+      console.error("Erro ao carregar produtos:", error);
+    }
+  }
+
+  useEffect(() => {
+    carregarProdutos();
+  }, [termoBusca, categoriaSelecionada]);
+
   const handleScanSearch = async (codigo) => {
     try {
-      setIsSearching(true);
       const response = await api.get(`/produtos/buscar-por-codigo/${codigo}`);
-
       setProdutoSelecionado(response.data);
       setModalVisible(true);
     } catch (error) {
       alert("Produto não encontrado no estoque.");
-    } finally {
-      setIsSearching(false);
     }
   };
-
-  useEffect(() => {
-    const carregarProdutos = async () => {
-      try {
-        const response = await api.get("produtos/");
-        setListaProdutos(response.data);
-      } catch (error) {
-        console.error("Erro ao carregar produtos:", error);
-      }
-    };
-    carregarProdutos();
-  }, []);
 
   const abrirModal = (item) => {
     setProdutoSelecionado(item);
@@ -68,11 +90,9 @@ export default function Produtos() {
             style={styles.logo}
           />
         </View>
-<TouchableOpacity
-  onPress={() => router.push("/listaVendas")}
->
-  <Text>Ver Vendas</Text>
-</TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/listaVendas")}>
+          <Text>Ver Vendas</Text>
+        </TouchableOpacity>
         <View style={styles.searchSection}>
           <Ionicons
             name="search-outline"
@@ -80,11 +100,15 @@ export default function Produtos() {
             color="#999"
             style={styles.searchIcon}
           />
+
           <TextInput
             style={styles.searchInput}
             placeholder="Pesquisar..."
             placeholderTextColor="#999"
+            value={termoBusca}
+            onChangeText={setTermoBusca}
           />
+
           <TouchableOpacity onPress={() => setScannerBuscaVisible(true)}>
             <Ionicons
               name="barcode-outline"
@@ -100,26 +124,25 @@ export default function Produtos() {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.filterScroll}
         >
-          {["Tudo", "Camisetas", "Vestidos", "Calças", "Acessórios"].map(
-            (tipo, index) => (
-              <TouchableOpacity
-                key={tipo}
+          {categorias.map((tipo) => (
+            <TouchableOpacity
+              key={tipo}
+              onPress={() => setCategoriaSelecionada(tipo)}
+              style={[
+                styles.filterPill,
+                categoriaSelecionada === tipo && styles.filterPillActive,
+              ]}
+            >
+              <Text
                 style={[
-                  styles.filterPill,
-                  index === 0 && styles.filterPillActive,
+                  styles.filterPillText,
+                  categoriaSelecionada === tipo && styles.filterPillTextActive,
                 ]}
               >
-                <Text
-                  style={[
-                    styles.filterPillText,
-                    index === 0 && styles.filterPillTextActive,
-                  ]}
-                >
-                  {tipo}
-                </Text>
-              </TouchableOpacity>
-            ),
-          )}
+                {tipo}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </ScrollView>
       </View>
 
@@ -141,7 +164,7 @@ export default function Produtos() {
       >
         <Ionicons name="add" size={30} color={colors.white} />
       </TouchableOpacity>
-      
+
       <TouchableOpacity
         style={[styles.fab, { bottom: 200, backgroundColor: colors.green }]}
         onPress={() => setSaleModalVisible(true)}
@@ -149,6 +172,7 @@ export default function Produtos() {
       >
         <Ionicons name="cart-outline" size={28} color="white" />
       </TouchableOpacity>
+
       <ProductModal
         visible={modalVisible}
         produto={produtoSelecionado}
@@ -159,7 +183,9 @@ export default function Produtos() {
         visible={createModalVisible}
         onClose={() => setCreateModalVisible(false)}
       />
+
       <TabBar />
+
       <ScannerModal
         visible={scannerBuscaVisible}
         onClose={() => setScannerBuscaVisible(false)}
@@ -174,13 +200,7 @@ export default function Produtos() {
         onClose={() => setSaleModalVisible(false)}
         onSuccess={async () => {
           setSaleModalVisible(false);
-
-          try {
-            const response = await api.get("/produtos/");
-            setListaProdutos(response.data);
-          } catch (error) {
-            console.log("Erro ao recarregar produtos:", error);
-          }
+          carregarProdutos();
         }}
       />
     </View>
