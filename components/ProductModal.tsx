@@ -1,7 +1,17 @@
-import React from 'react';
-import { View, Text, Image, TouchableOpacity, Modal, ScrollView, Pressable } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { styles } from '../styles/produtosStyles';
+// ProductModal.tsx
+import React, { useState } from "react";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+  Pressable,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { styles } from "../styles/produtosStyles";
+import EditProductModal from "./EditProductModal";
 
 interface Estoque {
   cor: string;
@@ -17,6 +27,7 @@ interface Produto {
   categoria: string;
   estacao: string;
   descricao: string;
+  tags?: string[];
   estoque: Estoque[];
 }
 
@@ -24,84 +35,135 @@ interface ProductModalProps {
   visible: boolean;
   produto: Produto | null;
   onClose: () => void;
-  onEdit: (produto: Produto) => void;
+  onEdit?: (produto: Produto) => void;
   onDelete: (id: string) => void;
 }
 
-export default function ProductModal({ visible, produto, onClose }: ProductModalProps) {
+export default function ProductModal({
+  visible,
+  produto,
+  onClose,
+  onEdit,
+  onDelete,
+}: ProductModalProps) {
+  const [editVisible, setEditVisible] = useState(false);
+
   if (!produto) return null;
 
+  function editarProduto() {
+    setEditVisible(true);
+  }
+
+  function handleEditSuccess() {
+    setEditVisible(false);
+    onClose();
+    onEdit?.(produto!);
+  }
+
   return (
-    <Modal visible={visible} animationType="fade" transparent={true} onRequestClose={onClose}>
-      <Pressable style={styles.modalOverlay} onPress={onClose}>
-
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeaderRow}>
-
-            <TouchableOpacity onPress={onClose} >
-              <Ionicons name="close" size={24} color="#e6aeac" />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View style={styles.modalTopSection}>
-              <Image source={{ uri: produto.imagem }} style={styles.modalImageLarge} />
-              <View style={styles.modalMainInfo}>
-                <Text style={styles.modalNome}>{produto.nome}</Text>
-                <Text style={styles.modalPriceText}>R$ {produto.preco_base}</Text>
-
-                <View style={{ flexDirection: 'row', marginTop: 8}}>
-                <View style={styles.categoryBadge}>
-                  <Text style={styles.categoryBadgeText}>{produto.categoria}</Text>
-                </View>
-                <View style={styles.categoryBadge}>
-                 <Text style={styles.categoryBadgeText}>{produto.estacao}</Text>
-                </View>
-              </View>
-
-
-
-
-              </View>
+    <>
+      <Modal
+        visible={visible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={onClose}
+      >
+        <Pressable style={styles.modalOverlay} onPress={onClose}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeaderRow}>
+              <TouchableOpacity onPress={onClose}>
+                <Ionicons name="close" size={24} color="#e6aeac" />
+              </TouchableOpacity>
             </View>
 
-            <View style={styles.divider} />
-            <View style={styles.modalDetailsSection}>
-              <Text style={styles.sectionLabel}>Descrição</Text>
-              <Text style={styles.modalDescricaoText}>{produto.descricao}</Text>
-              
-              <Text style={styles.sectionLabel}>Estoque por Variação</Text>
-              {produto.estoque && produto.estoque.length > 0 ? (
-                <View style={styles.modernTable}>
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={styles.modalTopSection}>
+                <Image
+                  source={{ uri: produto.imagem }}
+                  style={styles.modalImageLarge}
+                />
 
-                  {produto.estoque.map((variacao, index) => (
-                    <View key={index} style={styles.modernTableRow}>
-                      <Text style={styles.tableCellMain}>{variacao.cor} • {variacao.tamanho}</Text>
-                      <Text style={styles.tableCellSide}>{variacao.quantidade} unid.</Text>
+                <View style={styles.modalMainInfo}>
+                  <Text style={styles.modalNome}>{produto.nome}</Text>
+                  <Text style={styles.modalPriceText}>
+                    R$ {produto.preco_base}
+                  </Text>
 
-
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      marginTop: 8,
+                    }}
+                  >
+                    <View style={styles.categoryBadge}>
+                      <Text style={styles.categoryBadgeText}>
+                        {produto.categoria}
+                      </Text>
                     </View>
-                  ))}
-                </View>
-              ) : (
-                <Text style={styles.semEstoque}>Nenhum item em estoque</Text>
-              )}
-            </View>
 
-              <View>
-            <View style={styles.actionButtons}>
-              <TouchableOpacity style={styles.iconBtn} >
-                <Ionicons name="pencil-outline" size={20} color="#666" />
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.iconBtn, { marginLeft: 12 }]}>
-                <Ionicons name="archive" size={20} color="#E57373" />
-              </TouchableOpacity>
-            </View>
+                    <View style={styles.categoryBadge}>
+                      <Text style={styles.categoryBadgeText}>
+                        {produto.estacao}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
               </View>
 
-          </ScrollView>
-        </View>
-      </Pressable>
-    </Modal>
+              <View style={styles.divider} />
+
+              <View style={styles.modalDetailsSection}>
+                <Text style={styles.sectionLabel}>Descrição</Text>
+                <Text style={styles.modalDescricaoText}>
+                  {produto.descricao}
+                </Text>
+
+                <Text style={styles.sectionLabel}>Estoque por Variação</Text>
+
+                {produto.estoque && produto.estoque.length > 0 ? (
+                  <View style={styles.modernTable}>
+                    {produto.estoque.map((variacao, index) => (
+                      <View key={index} style={styles.modernTableRow}>
+                        <Text style={styles.tableCellMain}>
+                          {variacao.cor} • {variacao.tamanho}
+                        </Text>
+                        <Text style={styles.tableCellSide}>
+                          {variacao.quantidade} unid.
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                ) : (
+                  <Text style={styles.semEstoque}>Nenhum item em estoque</Text>
+                )}
+              </View>
+
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  style={styles.iconBtn}
+                  onPress={editarProduto}
+                >
+                  <Ionicons name="pencil-outline" size={20} color="#666" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.iconBtn, { marginLeft: 12 }]}
+                  onPress={() => onDelete(produto.id)}
+                >
+                  <Ionicons name="archive" size={20} color="#E57373" />
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </View>
+        </Pressable>
+      </Modal>
+
+      <EditProductModal
+        visible={editVisible}
+        onClose={() => setEditVisible(false)}
+        onUpdated={handleEditSuccess}
+        produto={produto}
+      />
+    </>
   );
 }
