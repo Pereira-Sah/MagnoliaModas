@@ -24,15 +24,16 @@ export const styles = StyleSheet.create({
     // paddingTop: 50,
     // paddingHorizontal: 16,
   },
+
   headerContainer: {
-      backgroundColor: '#FBFBFB',
-      paddingBottom: 10,
-    },
+    backgroundColor: '#FBFBFB',
+    paddingBottom: 10,
+  },
 
   logoWrapper: {
     backgroundColor: colors.green, 
     width: width,
-      height: 120, 
+    height: 120, 
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20, 
@@ -43,7 +44,6 @@ export const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
-
   },
 
   logo: {
@@ -62,9 +62,11 @@ export const styles = StyleSheet.create({
     height: 45,
     marginBottom: 16,
   },
+
   searchIcon: {
     marginRight: 10,
   },
+
   searchInput: {
     flex: 1,
     fontFamily: fonts.regular,
@@ -76,6 +78,7 @@ export const styles = StyleSheet.create({
     paddingLeft: 16,
     paddingBottom: 10,
   },
+
   filterPill: {
     paddingHorizontal: 20,
     paddingVertical: 8,
@@ -90,21 +93,23 @@ export const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 2,
   },
+
   filterPillActive: {
     backgroundColor: colors.pink,
     borderColor: colors.pink,
   },
+
   filterPillText: {
     fontFamily: fonts.semiBold,
     fontSize: 13,
     color: '#666',
   },
+
   filterPillTextActive: {
     color: '#FFF',
   },
 
-
- listContent: {
+  listContent: {
     paddingBottom: 100,
     paddingHorizontal: 16,
   },
@@ -112,7 +117,6 @@ export const styles = StyleSheet.create({
   row: {
     justifyContent: 'space-between',
   },
-
 
   gridCard: {
     width: cardWidth,
@@ -131,8 +135,6 @@ export const styles = StyleSheet.create({
     height: cardWidth * 1.3, 
     position: 'relative',
     backgroundColor: '#F5F5F5',
-    borderWidth: 2,
-    borderColor: colors.green,
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     overflow: 'hidden',
@@ -144,21 +146,23 @@ export const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
 
-gridDescription:{
+  gridDescription:{
     fontFamily: fonts.regular,
     fontSize: 12,
     color: '#777',
+  },
 
-},
   gridInfo: {
     padding: 12,
   },
+
   gridTitle: {
     fontFamily: fonts.regular,
     fontSize: 16,
     color: '#444',
     marginBottom: 4,
   },
+
   gridPrice: {
     fontFamily: fonts.semiBold,
     fontSize: 15,
@@ -185,12 +189,11 @@ gridDescription:{
 //   fontSize: 12,
 // },
 
-modalOverlay: {
+  modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.4)',
     justifyContent: 'flex-end', 
   },
-
   
   modalContent: {
     backgroundColor: '#FFF',
@@ -207,25 +210,30 @@ modalOverlay: {
     shadowRadius: 10,
     elevation: 20,
   },
+
   modalHeaderRow: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginBottom: 20,
   },
+
   actionButtons: {
     flexDirection: 'row',
     justifyContent:'space-between',
      
   },
+
   iconBtn: {
     padding: 8,
     backgroundColor: '#F5F5F5',
     borderRadius: 10,
   },
+
   modalTopSection: {
     flexDirection: 'row',
     marginBottom: 20,
   },
+
   modalImageLarge: {
     width: 120,
     height: 150,
@@ -234,11 +242,13 @@ modalOverlay: {
     borderColor: colors.green,
     backgroundColor: '#EEE',
   },
+
   modalMainInfo: {
     flex: 1,
     marginLeft: 20,
     justifyContent: 'center',
   },
+
   modalNome: {
     fontSize: 20,
     fontWeight: '700',
@@ -247,6 +257,7 @@ modalOverlay: {
     fontFamily: fonts.semiBold,
     textTransform: 'capitalize',
   },
+
   modalPriceText: {
     fontSize: 18,
     color: colors.green,
@@ -263,8 +274,8 @@ modalOverlay: {
     borderRadius: 8,
     alignSelf: 'flex-start',
     marginRight: 8,
-
   },
+
   categoryBadgeText: {
     color: '#e6aeac',
     fontSize: 12,
@@ -272,6 +283,7 @@ modalOverlay: {
     fontFamily: fonts.semiBold,
     letterSpacing: 0.5,
   },
+
   divider: {
     height: 1,
     backgroundColor: '#e8e5e5',
@@ -300,14 +312,14 @@ modalOverlay: {
     color: '#555',
     marginBottom: 24,
     fontFamily: fonts.regular,
-
-    
   },
+  
   modernTable: {
     backgroundColor: '#fbd3d238',
     borderRadius: 12,
     padding: 10,
   },
+
   modernTableRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -316,35 +328,37 @@ modalOverlay: {
     borderBottomWidth: 1,
     borderBottomColor: '#e6aeac66',
   },
+
   tableCellMain: {
     fontWeight: '500',
     color: '#333',
     fontFamily: fonts.regular,
   },
+
   tableCellSide: {
     color: '#666',
     fontFamily: fonts.regular,
-
   },
+
   semEstoque: {
     fontStyle: 'italic',
     color: '#999',
   },
 
-fab: {
-  position: 'absolute',
-  right: 20,
-  bottom: 100, 
-  backgroundColor: colors.green,
-  width: 60,
-  height: 60,
-  borderRadius: 30,
-  justifyContent: 'center',
-  alignItems: 'center',
-  elevation: 8,
-  shadowColor: '#000',
-  shadowOffset: { width: 0, height: 4 },
-  shadowOpacity: 0.3,
-  shadowRadius: 5,
-},
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 100, 
+    backgroundColor: colors.green,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+  },
 });
