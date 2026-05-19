@@ -17,7 +17,7 @@ import CreateProductModal from "../components/CreateProductModal";
 import TabBar from "../components/TabBar";
 import { router } from "expo-router";
 import ScannerModal from "../components/ScannerModal";
-
+import CreateSaleModal from "../components/CreateSaleModal";
 export default function Produtos() {
   const [listaProdutos, setListaProdutos] = useState([]);
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
@@ -26,7 +26,8 @@ export default function Produtos() {
 
   const [isSearching, setIsSearching] = useState(false);
   const [scannerBuscaVisible, setScannerBuscaVisible] = useState(false);
-
+  // dentro do componente Produtos()
+  const [saleModalVisible, setSaleModalVisible] = useState(false);
   const handleScanSearch = async (codigo) => {
     try {
       setIsSearching(true);
@@ -67,7 +68,11 @@ export default function Produtos() {
             style={styles.logo}
           />
         </View>
-
+<TouchableOpacity
+  onPress={() => router.push("/listaVendas")}
+>
+  <Text>Ver Vendas</Text>
+</TouchableOpacity>
         <View style={styles.searchSection}>
           <Ionicons
             name="search-outline"
@@ -136,7 +141,14 @@ export default function Produtos() {
       >
         <Ionicons name="add" size={30} color={colors.white} />
       </TouchableOpacity>
-
+      
+      <TouchableOpacity
+        style={[styles.fab, { bottom: 200, backgroundColor: colors.green }]}
+        onPress={() => setSaleModalVisible(true)}
+        activeOpacity={0.8}
+      >
+        <Ionicons name="cart-outline" size={28} color="white" />
+      </TouchableOpacity>
       <ProductModal
         visible={modalVisible}
         produto={produtoSelecionado}
@@ -154,6 +166,21 @@ export default function Produtos() {
         onCodeScanned={(data) => {
           setScannerBuscaVisible(false);
           handleScanSearch(data);
+        }}
+      />
+
+      <CreateSaleModal
+        visible={saleModalVisible}
+        onClose={() => setSaleModalVisible(false)}
+        onSuccess={async () => {
+          setSaleModalVisible(false);
+
+          try {
+            const response = await api.get("/produtos/");
+            setListaProdutos(response.data);
+          } catch (error) {
+            console.log("Erro ao recarregar produtos:", error);
+          }
         }}
       />
     </View>

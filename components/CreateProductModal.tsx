@@ -40,6 +40,45 @@ export default function CreateProductModal({ visible, onClose }: Props) {
   const [preco, setPreco] = useState("");
   const [estacao, setEstacao] = useState("");
   const [categoria, setCategoria] = useState("");
+const [variacoes, setVariacoes] = useState([
+  {
+    tamanho: "U",
+    cor: "N/A",
+    quantidade: "1",
+    codigo_barras: "",
+  },
+]);
+// Adicione junto com seus outros useState
+const [scannerVariacaoIndex, setScannerVariacaoIndex] =
+  useState<number | null>(null);
+
+function adicionarVariacao() {
+  setVariacoes((prev) => [
+    ...prev,
+    {
+      tamanho: "",
+      cor: "",
+      quantidade: "1",
+      codigo_barras: "",
+    },
+  ]);
+}
+
+function removerVariacao(index: number) {
+  setVariacoes((prev) => prev.filter((_, i) => i !== index));
+}
+
+function atualizarVariacao(
+  index: number,
+  campo: "tamanho" | "cor" | "quantidade" | "codigo_barras",
+  valor: string
+) {
+  setVariacoes((prev) =>
+    prev.map((item, i) =>
+      i === index ? { ...item, [campo]: valor } : item
+    )
+  );
+}
 
   async function selecionarArquivo() {
     const resultado = await ImagePicker.launchImageLibraryAsync({
@@ -116,44 +155,75 @@ export default function CreateProductModal({ visible, onClose }: Props) {
   };
 
   async function handleCadastrar() {
-    const formData = new FormData();
-    formData.append("nome", nome);
-    formData.append("descricao", descricao);
-    formData.append("categoria", categoria);
-    formData.append("estacao", estacao);
-
-    const precoFormatado = preco.replace(",", ".").trim();
-    formData.append("preco_base", precoFormatado === "" ? "0" : precoFormatado);
-    formData.append("tags", JSON.stringify(selectedTags));
-    const estoque = [
-      {
-        tamanho: "U",
-        cor: "N/A",
-        quantidade: 1,
-        codigo_barras: codigoBarras,
-      },
-    ];
-
-    formData.append("estoque_inicial", JSON.stringify(estoque));
-
-    if (imageUrl.startsWith("file://")) {
-      formData.append("imagem", {
-        uri: imageUrl,
-        name: "foto.jpg",
-        type: "image/jpeg",
-      } as any);
-    }
-
-    try {
-      await api.post("/produtos/adicionar-produto", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      alert("Produto salvo!");
-      handleClose();
-    } catch (err) {
-      alert("Erro ao salvar");
-    }
+  if (!nome.trim()) {
+    alert("Informe o nome do produto.");
+    return;
   }
+
+  const formData = new FormData();
+  formData.append("nome", nome.trim());
+  formData.append("descricao", descricao.trim());
+  formData.append("categoria", categoria.trim());
+  formData.append("estacao", estacao.trim());
+
+  const precoFormatado = preco.replace(",", ".").trim();
+  formData.append(
+    "preco_base",
+    precoFormatado !== "" ? precoFormatado : "0"
+  );
+
+  formData.append("tags", JSON.stringify(selectedTags));
+
+  const estoqueInicial = variacoes.map((item) => ({
+  tamanho: item.tamanho.trim() || "U",
+  cor: item.cor.trim() || "N/A",
+  quantidade: parseInt(item.quantidade || "0", 10),
+  codigo_barras: item.codigo_barras.trim() || null,
+}));
+  formData.append(
+    "estoque_inicial",
+    JSON.stringify(estoqueInicial)
+  );
+
+  if (imageUrl && imageUrl.startsWith("file://")) {
+    formData.append("imagem", {
+      uri: imageUrl,
+      name: "produto.jpg",
+      type: "image/jpeg",
+    } as any);
+  }
+  else if (imageUrl && imageUrl.startsWith("http")) {
+    formData.append("imagem_url", imageUrl);
+  }
+
+  try {
+    const response = await api.post(
+      "/produtos/adicionar-produto",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+
+    console.log("Produto criado com estoque:", response.data);
+
+    alert("Produto e estoque cadastrados com sucesso!");
+    handleClose();
+  } catch (error: any) {
+    console.log(
+      "Erro ao salvar produto:",
+      error.response?.data || error.message
+    );
+
+    alert(
+      error.response?.data?.detail
+        ? `Erro: ${JSON.stringify(error.response.data.detail)}`
+        : "Não foi possível salvar o produto."
+    );
+  }
+}
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
@@ -336,34 +406,142 @@ export default function CreateProductModal({ visible, onClose }: Props) {
                   </TouchableOpacity>
                 ))}
               </View>
-              <View style={s.inputGroup}>
-                <Text style={s.label}>Código de Barras da Etiqueta</Text>
-                <View style={{ flexDirection: "row" }}>
-                  <TextInput
-                    style={[s.input, { flex: 1, marginRight: 10 }]}
-                    value={codigoBarras}
-                    onChangeText={setCodigoBarras}
-                    placeholder="Aguardando bip..."
-                  />
-                  <TouchableOpacity
-                    onPress={() => setScannerVisible(true)}
-                    style={{
-                      backgroundColor: colors.pink,
-                      padding: 12,
-                      borderRadius: 10,
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Ionicons name="barcode-outline" size={24} color="white" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-              {codigoBarras ? (
-                <View style={{ alignItems: "center", marginVertical: 20 }}>
-                  <QRCode value={codigoBarras} size={150} />
-                  <Text style={{ marginTop: 10 }}>QR Code para etiqueta</Text>
-                </View>
-              ) : null}
+              <Text style={s.label}>Variações do Produto</Text>
+
+{variacoes.map((variacao, index) => (
+  <View
+    key={index}
+    style={{
+      marginBottom: 20,
+      padding: 15,
+      borderWidth: 1,
+      borderColor: "#E5E5E5",
+      borderRadius: 12,
+      backgroundColor: "#FFF",
+    }}
+  >
+    <View
+      style={{
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginBottom: 10,
+      }}
+    >
+      <Text
+        style={{
+          fontWeight: "600",
+          fontSize: 16,
+          color: colors.pink,
+        }}
+      >
+        Variação {index + 1}
+      </Text>
+
+      {variacoes.length > 1 && (
+        <TouchableOpacity onPress={() => removerVariacao(index)}>
+          <Ionicons name="trash-outline" size={22} color="red" />
+        </TouchableOpacity>
+      )}
+    </View>
+
+    <View style={s.row}>
+      <View style={[s.inputGroup, { flex: 1, marginRight: 10 }]}>
+        <Text style={s.label}>Tamanho</Text>
+        <TextInput
+          style={s.input}
+          value={variacao.tamanho}
+          onChangeText={(text) =>
+            atualizarVariacao(index, "tamanho", text)
+          }
+          placeholder="P, M, G, U"
+        />
+      </View>
+
+      <View style={[s.inputGroup, { flex: 1 }]}>
+        <Text style={s.label}>Cor</Text>
+        <TextInput
+          style={s.input}
+          value={variacao.cor}
+          onChangeText={(text) =>
+            atualizarVariacao(index, "cor", text)
+          }
+          placeholder="Rosa"
+        />
+      </View>
+    </View>
+
+    <View style={s.inputGroup}>
+      <Text style={s.label}>Quantidade</Text>
+      <TextInput
+        style={s.input}
+        keyboardType="numeric"
+        value={variacao.quantidade}
+        onChangeText={(text) =>
+          atualizarVariacao(index, "quantidade", text)
+        }
+        placeholder="1"
+      />
+    </View>
+
+    {/* Substitua o campo "Código de Barras" de cada variação por este */}
+<View style={s.inputGroup}>
+  <Text style={s.label}>Código de Barras</Text>
+
+  <View style={{ flexDirection: "row", alignItems: "center" }}>
+    <TextInput
+      style={[s.input, { flex: 1, marginRight: 10 }]}
+      value={variacao.codigo_barras}
+      onChangeText={(text) =>
+        atualizarVariacao(index, "codigo_barras", text)
+      }
+      placeholder="7891234567890"
+    />
+
+    <TouchableOpacity
+      onPress={() => {
+        setScannerVariacaoIndex(index);
+        setScannerVisible(true);
+      }}
+      style={{
+        backgroundColor: colors.pink,
+        padding: 12,
+        borderRadius: 10,
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Ionicons
+        name="barcode-outline"
+        size={24}
+        color="white"
+      />
+    </TouchableOpacity>
+  </View>
+</View>
+
+    {variacao.codigo_barras ? (
+      <View style={{ alignItems: "center", marginTop: 10 }}>
+        <QRCode value={variacao.codigo_barras} size={120} />
+      </View>
+    ) : null}
+  </View>
+))}
+
+<TouchableOpacity
+  onPress={adicionarVariacao}
+  style={{
+    backgroundColor: colors.green,
+    padding: 14,
+    borderRadius: 12,
+    alignItems: "center",
+    marginBottom: 20,
+  }}
+>
+  <Text style={{ color: "#FFF", fontWeight: "600" }}>
+    + Adicionar Variação
+  </Text>
+</TouchableOpacity>
               <TouchableOpacity
                 style={s.submitButton}
                 onPress={handleCadastrar}
@@ -372,16 +550,36 @@ export default function CreateProductModal({ visible, onClose }: Props) {
               </TouchableOpacity>
             </ScrollView>
           )}
-          <ScannerModal
-            visible={scannerVisible}
-            onClose={() => setScannerVisible(false)}
-            onCodeScanned={(data) => setCodigoBarras(data)}
-          />
+          
           <CameraModal
             visible={cameraVisible}
             onClose={() => setCameraVisible(false)}
             onPhotoCaptured={handlePhotoCaptured}
           />
+          {/* Modal do Scanner */}
+<ScannerModal
+  visible={scannerVisible}
+  onClose={() => {
+    setScannerVisible(false);
+    // Limpa o índice quando o scanner é fechado.
+    // Porque seres humanos adoram deixar estados pendurados.
+    setScannerVariacaoIndex(null);
+  }}
+  onCodeScanned={(data) => {
+    // Se estiver escaneando uma variação específica,
+    // atualiza o código de barras daquela variação.
+    if (scannerVariacaoIndex !== null) {
+      atualizarVariacao(
+        scannerVariacaoIndex,
+        "codigo_barras",
+        data
+      );
+    }
+
+    setScannerVisible(false);
+    setScannerVariacaoIndex(null);
+  }}
+/>
         </View>
       </KeyboardAvoidingView>
     </Modal>
