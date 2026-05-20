@@ -93,6 +93,9 @@ export default function Produtos() {
         <TouchableOpacity onPress={() => router.push("/listaVendas")}>
           <Text>Ver Vendas</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/botaoImprimirEtiquetas")}>
+          <Text>Imprimir Etiquetas</Text>
+        </TouchableOpacity>
         <View style={styles.searchSection}>
           <Ionicons
             name="search-outline"
