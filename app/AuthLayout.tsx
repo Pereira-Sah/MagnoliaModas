@@ -1,36 +1,154 @@
-import { View, ImageBackground, StyleSheet } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  StatusBar,
+  Image,
+  Text,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 
-export default function AuthLayout({ children }) {
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+
+import type { ReactNode } from 'react';
+
+import OrganicBackground from '../components/OrganicBackground';
+
+import {
+  colors,
+  fonts,
+} from '../styles/authStyles';
+
+type Props = {
+  children: ReactNode;
+  title: string;
+  subtitle: string;
+};
+
+export default function AuthLayout({
+  children,
+  title,
+  subtitle,
+}: Props) {
+
+  const insets = useSafeAreaInsets();
+
   return (
-    <ImageBackground 
-      source={require('../assets/images/background_loginRegister.png')} 
-      style={styles.background}
-      blurRadius={2}
+    <SafeAreaView
+      style={styles.safeArea}
+      edges={['top']}
     >
-      <View style={styles.overlay} />
-      <View style={styles.container}>
-        {children}
-      </View>
-    </ImageBackground>
+
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor={colors.Warmbeigebackground}
+      />
+
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={
+          Platform.OS === 'ios'
+            ? 'padding'
+            : undefined
+        }
+      >
+
+        <OrganicBackground />
+
+        <View style={styles.topSection}>
+
+          <Image
+            source={require('../assets/images/logo.png')}
+            style={styles.logo}
+          />
+
+          <Text style={styles.title}>
+            {title}
+          </Text>
+
+          <Text style={styles.subtitle}>
+            {subtitle}
+          </Text>
+
+        </View>
+
+        <View style={styles.curve} />
+
+        <View
+          style={[
+            styles.bottomSection,
+            {
+              paddingBottom: insets.bottom + 18,
+            },
+          ]}
+        >
+          {children}
+        </View>
+
+      </KeyboardAvoidingView>
+
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    // resizeMode: 'contain',
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#89c4893d', 
-  },
   container: {
     flex: 1,
+    backgroundColor: colors.Warmbeigebackground,
+  },
+
+  topSection: {
+    flex: 0.95,
+
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 30,
-  }
+
+    paddingHorizontal: 30,
+    paddingTop: 10,
+  },
+
+  logo: {
+    width: 180,
+    height: 180,
+    resizeMode: 'contain',
+  },
+
+  title: {
+    fontSize: 28,
+    color: '#4E5B48',
+    fontFamily: fonts.semiBold,
+    textAlign: 'center',
+  },
+
+  subtitle: {
+    marginTop: 8,
+    fontSize: 15,
+    textAlign: 'center',
+    color: '#4E5B48',
+    fontFamily: fonts.regular,
+  },
+
+  curve: {
+    height: 45,
+    backgroundColor: 'white',
+
+    borderTopLeftRadius: 40,
+    borderTopRightRadius: 40,
+  },
+
+  bottomSection: {
+    flex: 1,
+
+    backgroundColor: 'white',
+
+    paddingHorizontal: 28,
+    paddingTop: 8,
+  },
+  safeArea: {
+  flex: 1,
+  backgroundColor: 'white',
+},
 });

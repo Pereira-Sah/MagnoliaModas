@@ -35,7 +35,6 @@ export default function Perfil() {
         await SecureStore.deleteItemAsync('userToken');
       }
 
-      // Redireciona para a tela de login e impede voltar com o botão "voltar"
       router.replace('/');
     } catch (error) {
       console.log('Erro ao fazer logout:', error);
@@ -47,7 +46,6 @@ export default function Perfil() {
     <View style={perfilStyles.container}>
       <View style={perfilStyles.logoWrapper}>
         <Image
-          source={require('../assets/images/magnoliaModas_logo.png')}
           style={perfilStyles.logo}
         />
       </View>

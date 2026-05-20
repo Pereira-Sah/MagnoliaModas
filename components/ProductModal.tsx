@@ -143,7 +143,7 @@ export default function ProductModal({
                   style={styles.iconBtn}
                   onPress={editarProduto}
                 >
-                  <Ionicons name="pencil-outline" size={20} color="#666" />
+                <Ionicons name="pencil-outline" size={20} color="#666" />
                 </TouchableOpacity>
 
                 <TouchableOpacity

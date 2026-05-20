@@ -48,7 +48,6 @@ const [variacoes, setVariacoes] = useState([
     codigo_barras: "",
   },
 ]);
-// Adicione junto com seus outros useState
 const [scannerVariacaoIndex, setScannerVariacaoIndex] =
   useState<number | null>(null);
 
