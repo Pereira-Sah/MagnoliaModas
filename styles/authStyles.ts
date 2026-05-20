@@ -1,9 +1,9 @@
 import { StyleSheet } from 'react-native';
 
 export const colors = {
-  green: '#60875b',
-  pink: '#e5aeab',
-  white: '#fff',
+  dustypink: '#DFA3B2',
+  Lightolivegreen: '#B8C4A5',
+  Warmbeigebackground: '#F3E7DD',
 };
 
 export const fonts = {
@@ -12,59 +12,61 @@ export const fonts = {
 };
 
 export const authStyles = StyleSheet.create({
-  card: {
-    backgroundColor: 'rgba(255, 255, 255, 0.81)', 
-    borderRadius: 16,
-    padding: 24,
-    width: '90%',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+
+formContainer: {
+  gap: 14,
+  width: '100%',
+  marginTop: -4,
+},
+
+  inputContainer: {
+    backgroundColor: '#F8F6F4',
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(184,196,165,0.18)',
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 20,
+    paddingHorizontal: 16,
+    height: 38,
   },
-  logo: {
-    width: '40%',
-    height: 80,
-    marginBottom: 16,
-    borderRadius:10,
-    // resizeMode: 'contain',
+
+  input: {
+    flex: 1,
+    marginLeft: 12,
+    fontFamily: fonts.regular,
+    color: '#444',
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: colors.green,
-    marginBottom: 12,
+
+button: {
+  backgroundColor: colors.Lightolivegreen,
+  height: 54,
+  borderRadius: 18,
+
+  justifyContent: 'center',
+  alignItems: 'center',
+
+  marginTop: 4,
+},
+
+  buttonText: {
+    color: 'white',
+    fontSize: 16,
     fontFamily: fonts.semiBold,
   },
-  input: {
-    width: '100%',
-    borderWidth: 1,
-    borderColor: colors.pink,
-    padding: 12,
-    borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.9)',
-    fontFamily: fonts.regular,
-  },
-  button: {
-    backgroundColor: colors.green,
-    padding: 14,
-    borderRadius: 12,
-    width: '100%',
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: colors.white,
-    fontWeight: '600',
-      fontFamily: fonts.semiBold,
 
-  },
   link: {
-    color: colors.pink,
-    marginTop: 8,
+    textAlign: 'center',
+    marginTop: 14,
+    color: colors.dustypink,
     fontFamily: fonts.regular,
-    fontWeight: '500',
+  },
 
-  }
+  description:{
+    textAlign: 'center',
+    lineHeight: 24,
+    color: colors.dustypink,
+    fontSize: 14,
+    fontFamily: fonts.regular,
+
+  },
 });

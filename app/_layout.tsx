@@ -1,6 +1,10 @@
 import { Stack } from 'expo-router';
 import { useFonts } from 'expo-font';
-import { Poppins_400Regular, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
+import {
+  Poppins_400Regular,
+  Poppins_600SemiBold
+} from '@expo-google-fonts/poppins';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 export default function Layout() {
   const [fontsLoaded] = useFonts({
@@ -12,5 +16,11 @@ export default function Layout() {
     return null;
   }
 
-return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <SafeAreaProvider>
+      <Stack
+        screenOptions={{headerShown: false,}}
+      />
+    </SafeAreaProvider>
+  );
 }

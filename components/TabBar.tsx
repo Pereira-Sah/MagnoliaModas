@@ -1,12 +1,22 @@
 import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router, usePathname } from 'expo-router';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabBar() {
   const pathname = usePathname();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.tabBar}>
+    <View
+      style={[
+        styles.tabBar,
+        {
+          paddingBottom: insets.bottom,
+          height: 60 + insets.bottom,
+        }
+      ]}
+    >
       <TouchableOpacity onPress={() => router.push('/produtos')}>
         <Ionicons
           name="home"
@@ -34,13 +44,12 @@ export default function TabBar() {
   );
 }
 
-const styles = StyleSheet.create ({
+const styles = StyleSheet.create({
   tabBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    height: 60,
     backgroundColor: '#fff',
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -52,5 +61,4 @@ const styles = StyleSheet.create ({
     shadowRadius: 10,
     elevation: 10,
   },
-
- });
+});

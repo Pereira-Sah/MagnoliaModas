@@ -43,31 +43,30 @@ export default function CreateProductModal({ visible, onClose }: Props) {
   const [preco, setPreco] = useState("");
   const [estacao, setEstacao] = useState("");
   const [categoria, setCategoria] = useState("");
-  const [variacoes, setVariacoes] = useState([
+const [variacoes, setVariacoes] = useState([
+  {
+    tamanho: "U",
+    cor: "N/A",
+    quantidade: "1",
+    codigo_barras: "",
+  },
+]);
+const [scannerVariacaoIndex, setScannerVariacaoIndex] =
+  useState<number | null>(null);
+
+function adicionarVariacao() {
+  setVariacoes((prev) => [
+    ...prev,
     {
-      tamanho: "U",
-      cor: "N/A",
+      tamanho: "",
+      cor: "",
       quantidade: "1",
       codigo_barras: "",
     },
   ]);
-  const [scannerVariacaoIndex, setScannerVariacaoIndex] = useState<
-    number | null
-  >(null);
+}
 
-  function adicionarVariacao() {
-    setVariacoes((prev) => [
-      ...prev,
-      {
-        tamanho: "",
-        cor: "",
-        quantidade: "1",
-        codigo_barras: "",
-      },
-    ]);
-  }
-
-  function removerVariacao(index: number) {
+function removerVariacao(index: number) {
     setVariacoes((prev) => prev.filter((_, i) => i !== index));
   }
 

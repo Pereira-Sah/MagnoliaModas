@@ -59,7 +59,7 @@ const DashboardCard = ({
   <View style={dashboardStyles.card}>
     <View style={dashboardStyles.cardHeader}>
       <View style={dashboardStyles.titleRow}>
-        <Ionicons name={icon} size={20} color={iconColor || colors.green} />
+        <Ionicons name={icon} size={20} color={iconColor || colors.Lightolivegreen} />
         <Text style={dashboardStyles.cardTitle}>{title}</Text>
       </View>
     </View>
@@ -101,7 +101,7 @@ export default function Dashboard() {
           { justifyContent: "center", alignItems: "center" },
         ]}
       >
-        <ActivityIndicator size="large" color={colors.pink} />
+        <ActivityIndicator size="large" color={colors.dustypink} />
         <Text style={{ marginTop: 10, color: "#666" }}>
           Carregando dados do painel...
         </Text>
@@ -121,21 +121,31 @@ export default function Dashboard() {
 
   return (
     <View style={dashboardStyles.container}>
-      <View style={dashboardStyles.logoWrapper}>
-        <Image
-          source={require("../assets/images/magnoliaModas_logo.png")}
-          style={dashboardStyles.logo}
-        />
+  <View style={dashboardStyles.heroSection}>
+
+    <View style={dashboardStyles.heroBlob} />
+
+    <View style={dashboardStyles.heroTopRow}>
+
+      <View>
+
+        <Text style={dashboardStyles.heroGreeting}>
+          Olá, "usuario" ! 
+        </Text>
       </View>
 
-      <ScrollView
+    </View>
+
+  </View>
+
+      <ScrollView 
         contentContainerStyle={dashboardStyles.scrollContainer}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            colors={[colors.pink]}
+            colors={[colors.dustypink]}
           />
         }
       >
@@ -178,7 +188,7 @@ export default function Dashboard() {
         <DashboardCard
           title="Sugestão de Compra (IA)"
           icon="bulb-outline"
-          iconColor={colors.pink}
+          iconColor={colors.dustypink}
         >
           <View style={dashboardStyles.aiCardBody}>
             <Text style={dashboardStyles.aiNumber}>
@@ -187,7 +197,7 @@ export default function Dashboard() {
             <Text
               style={[
                 dashboardStyles.subText,
-                { color: colors.pink, marginBottom: 8 },
+                { color: colors.dustypink, marginBottom: 8 },
               ]}
             >
               Foco na Categoria:{" "}
@@ -237,7 +247,7 @@ export default function Dashboard() {
                 data={mixVendasData.map((item) => ({
                   name: item.name,
                   population: item.population,
-                  color: item.color || colors.pink,
+                  color: item.color || colors.dustypink,
                   legendFontColor: "#7F7F7F",
                   legendFontSize: 12,
                 }))}
@@ -265,7 +275,7 @@ export default function Dashboard() {
             </View>
           </View>
         </DashboardCard>
-      </ScrollView>
+</ScrollView>
 
       <TabBar />
     </View>

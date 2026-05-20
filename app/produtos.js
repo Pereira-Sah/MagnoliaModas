@@ -324,6 +324,96 @@ export default function Produtos() {
           }
         />
       )}
+<View style={styles.headerContainer}>
+
+  <View style={styles.heroSection}>
+
+    <View style={styles.heroBlob} />
+
+    <View style={styles.heroTopRow}>
+
+      <View>
+
+        <Text style={styles.heroGreeting}>
+          Olá, "usuario" ! 
+        </Text>
+      </View>
+
+    </View>
+
+  </View>
+
+  <View style={styles.searchSection}>
+
+    <Ionicons
+      name="search-outline"
+      size={20}
+      color="#8E8E8E"
+      style={styles.searchIcon}
+    />
+
+    <TextInput
+      style={styles.searchInput}
+      placeholder="Pesquisar peças..."
+      placeholderTextColor="#999"
+    />
+
+    <TouchableOpacity
+      onPress={() => setScannerBuscaVisible(true)}
+    >
+      <Ionicons
+        name="barcode-outline"
+        size={24}
+        color={colors.dustypink}
+      />
+    </TouchableOpacity>
+
+  </View>
+
+  <ScrollView
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    contentContainerStyle={styles.filterScroll}
+  >
+
+    {["Tudo", "Vestidos", "Blusas", "Calças", "Acessórios"].map(
+      (tipo, index) => (
+        <TouchableOpacity
+          key={tipo}
+          style={[
+            styles.filterPill,
+            index === 0 && styles.filterPillActive,
+          ]}
+        >
+
+          <Text
+            style={[
+              styles.filterPillText,
+              index === 0 &&
+                styles.filterPillTextActive,
+            ]}
+          >
+            {tipo}
+          </Text>
+
+        </TouchableOpacity>
+      ),
+    )}
+
+  </ScrollView>
+
+</View>
+
+      <FlatList
+        data={listaProdutos}
+        keyExtractor={(item) => item.id.toString()}
+        numColumns={2}
+        columnWrapperStyle={styles.row}
+        contentContainerStyle={styles.listContent}
+        renderItem={({ item }) => (
+          <ProductCard item={item} onPress={abrirModal} />
+        )}
+      />
 
       {/* Botões Flutuantes */}
       <TouchableOpacity
@@ -331,15 +421,15 @@ export default function Produtos() {
         onPress={() => setCreateModalVisible(true)}
         activeOpacity={0.8}
       >
-        <Ionicons name="add" size={30} color={colors.white} />
+        <Ionicons name="add" size={30} color='white' />
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.fab, { bottom: 200, backgroundColor: colors.green }]}
+        style={[styles.fab, { bottom: 230, backgroundColor: colors.Lightolivegreen }]}
         onPress={() => setSaleModalVisible(true)}
         activeOpacity={0.8}
       >
-        <Ionicons name="cart-outline" size={28} color="white" />
+        <Ionicons name="cart-outline" size={30} color="white" />
       </TouchableOpacity>
       
       {/* Modais */}

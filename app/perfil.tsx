@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  Platform,
-} from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
@@ -17,7 +10,7 @@ import TabBar from '../components/TabBar';
 const InfoItem = ({ icon, label, value, isLast = false }: any) => (
   <View style={[perfilStyles.infoRow, isLast && { marginBottom: 0 }]}>
     <View style={perfilStyles.iconBox}>
-      <Ionicons name={icon} size={20} color={colors.green} />
+      <Ionicons name={icon} size={20} color={colors.Lightolivegreen} />
     </View>
     <View>
       <Text style={perfilStyles.infoLabel}>{label}</Text>
@@ -35,7 +28,6 @@ export default function Perfil() {
         await SecureStore.deleteItemAsync('userToken');
       }
 
-      // Redireciona para a tela de login e impede voltar com o botão "voltar"
       router.replace('/');
     } catch (error) {
       console.log('Erro ao fazer logout:', error);
@@ -45,12 +37,6 @@ export default function Perfil() {
 
   return (
     <View style={perfilStyles.container}>
-      <View style={perfilStyles.logoWrapper}>
-        <Image
-          source={require('../assets/images/magnoliaModas_logo.png')}
-          style={perfilStyles.logo}
-        />
-      </View>
 
       <ScrollView
         contentContainerStyle={perfilStyles.scrollContainer}
@@ -66,6 +52,7 @@ export default function Perfil() {
           <TouchableOpacity
             style={perfilStyles.editIconButton}
             activeOpacity={0.7}
+            onPress={() => router.push('/editarPerfil')}
           >
             <Ionicons
               name="pencil"
