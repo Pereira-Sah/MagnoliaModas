@@ -1,11 +1,47 @@
-import React from 'react';
-import { View, Text, ScrollView, Image, Dimensions } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { LineChart, PieChart } from 'react-native-chart-kit';
-import TabBar from '../components/TabBar';
-import { dashboardStyles, colors } from '../styles/dashboardStyles';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  ScrollView,
+  Image,
+  Dimensions,
+  ActivityIndicator,
+  RefreshControl,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { LineChart, PieChart } from "react-native-chart-kit";
+import TabBar from "../components/TabBar";
+import { dashboardStyles, colors } from "../styles/dashboardStyles";
+import api from "../src/services/api";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
+
+interface AlertaEstoque {
+  item: string;
+  status: "Esgotado" | "Baixo";
+}
+
+interface ItemMix {
+  name: string;
+  population: number;
+  color: string;
+}
+
+interface DashboardData {
+  vendas_hoje: {
+    total_reais: number;
+    itens_vendidos: number;
+    grafico_horas: string[];
+    grafico_valores: number[];
+  };
+  sugestao_ia: {
+    quantidade: number;
+    categoria: string;
+    texto: string;
+  };
+  alertas_estoque: AlertaEstoque[];
+  mix_vendas: ItemMix[];
+}
 
 interface DashboardCardProps {
   title: string;
@@ -14,7 +50,12 @@ interface DashboardCardProps {
   iconColor?: string;
 }
 
-const DashboardCard = ({ title, children, icon, iconColor }: DashboardCardProps) => (
+const DashboardCard = ({
+  title,
+  children,
+  icon,
+  iconColor,
+}: DashboardCardProps) => (
   <View style={dashboardStyles.card}>
     <View style={dashboardStyles.cardHeader}>
       <View style={dashboardStyles.titleRow}>
@@ -27,32 +68,101 @@ const DashboardCard = ({ title, children, icon, iconColor }: DashboardCardProps)
 );
 
 export default function Dashboard() {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await api.get("/dashboard/dados");
+      setData(response.data);
+    } catch (error) {
+      console.log("Erro ao buscar dados do dashboard:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchDashboardData();
+  };
+
+  if (loading) {
+    return (
+      <View
+        style={[
+          dashboardStyles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color={colors.pink} />
+        <Text style={{ marginTop: 10, color: "#666" }}>
+          Carregando dados do painel...
+        </Text>
+      </View>
+    );
+  }
+
+  const graficoHoras = data?.vendas_hoje?.grafico_horas?.length
+    ? data.vendas_hoje.grafico_horas
+    : ["9h", "12h", "15h", "18h"];
+
+  const graficoValores = data?.vendas_hoje?.grafico_valores?.length
+    ? data.vendas_hoje.grafico_valores
+    : [0, 0, 0, 0];
+
+  const mixVendasData = data?.mix_vendas?.length ? data.mix_vendas : [];
+
   return (
     <View style={dashboardStyles.container}>
       <View style={dashboardStyles.logoWrapper}>
-        <Image 
-          source={require('../assets/images/magnoliaModas_logo.png')} 
-          style={dashboardStyles.logo} 
+        <Image
+          source={require("../assets/images/magnoliaModas_logo.png")}
+          style={dashboardStyles.logo}
         />
       </View>
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={dashboardStyles.scrollContainer}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            colors={[colors.pink]}
+          />
+        }
       >
         <Text style={dashboardStyles.welcomeText}>Painel de Controle</Text>
 
+        {/* CARD 1: VENDAS DE HOJE */}
         <DashboardCard title="Vendas de Hoje" icon="stats-chart-outline">
           <View style={dashboardStyles.salesRow}>
             <View>
-              <Text style={dashboardStyles.mainNumber}>R$ 1.250,00</Text>
-              <Text style={dashboardStyles.subText}>18 itens vendidos</Text>
+              <Text style={dashboardStyles.mainNumber}>
+                R${" "}
+                {data?.vendas_hoje?.total_reais !== undefined
+                  ? data.vendas_hoje.total_reais.toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
+                  : "0,00"}
+              </Text>
+              <Text style={dashboardStyles.subText}>
+                {data?.vendas_hoje?.itens_vendidos || 0} itens vendidos
+              </Text>
             </View>
           </View>
           <LineChart
             data={{
-              labels: ["9h", "12h", "15h", "18h"],
-              datasets: [{ data: [200, 450, 280, 800] }]
+              labels: graficoHoras,
+              datasets: [{ data: graficoValores }],
             }}
             width={width - 64}
             height={140}
@@ -64,76 +174,97 @@ export default function Dashboard() {
           />
         </DashboardCard>
 
-        <DashboardCard title="Sugestão de Compra (IA)" icon="bulb-outline" iconColor={colors.pink}>
+        {/* CARD 2: SUGESTÃO DE COMPRA*/}
+        <DashboardCard
+          title="Sugestão de Compra (IA)"
+          icon="bulb-outline"
+          iconColor={colors.pink}
+        >
           <View style={dashboardStyles.aiCardBody}>
-            <Text style={dashboardStyles.aiNumber}>25 unid.</Text>
-            <Text style={[dashboardStyles.subText, {color: colors.pink, marginBottom: 8}]}>Recomendação de estoque</Text>
+            <Text style={dashboardStyles.aiNumber}>
+              {data?.sugestao_ia?.quantidade || 0} unid.
+            </Text>
+            <Text
+              style={[
+                dashboardStyles.subText,
+                { color: colors.pink, marginBottom: 8 },
+              ]}
+            >
+              Foco na Categoria:{" "}
+              {data?.sugestao_ia?.categoria || "Carregando..."}
+            </Text>
             <Text style={dashboardStyles.subText}>
-              Tendência de alta para a categoria "Vestidos" nos próximos 7 dias.
+              {data?.sugestao_ia?.texto ||
+                "Aguardando projeção inteligente do modelo."}
             </Text>
           </View>
         </DashboardCard>
 
-        <DashboardCard title="Alertas de Estoque" icon="warning-outline" iconColor="#E57373">
-          <View style={dashboardStyles.alertItem}>
-            <View style={[dashboardStyles.statusDot, {backgroundColor: '#E57373'}]} />
-            <Text style={dashboardStyles.subText}>Vestido Floral (G) - Esgotado</Text>
-          </View>
-          <View style={dashboardStyles.alertItem}>
-            <View style={[dashboardStyles.statusDot, {backgroundColor: '#FFB74D'}]} />
-            <Text style={dashboardStyles.subText}>Calça Jeans (38) - Estoque Baixo</Text>
-          </View>
+        {/* CARD 3: ALERTAS DE ESTOQUE */}
+        <DashboardCard
+          title="Alertas de Estoque"
+          icon="warning-outline"
+          iconColor="#E57373"
+        >
+          {data?.alertas_estoque && data.alertas_estoque.length > 0 ? (
+            data.alertas_estoque.map((alerta, index) => (
+              <View key={index} style={dashboardStyles.alertItem}>
+                <View
+                  style={[
+                    dashboardStyles.statusDot,
+                    {
+                      backgroundColor:
+                        alerta.status === "Esgotado" ? "#E57373" : "#FFB74D",
+                    },
+                  ]}
+                />
+                <Text style={dashboardStyles.subText}>
+                  {alerta.item} - {alerta.status}
+                </Text>
+              </View>
+            ))
+          ) : (
+            <Text style={dashboardStyles.subText}>
+              🎉 Todos os produtos estão com estoque em dia!
+            </Text>
+          )}
         </DashboardCard>
 
-<DashboardCard title="Mix de Vendas" icon="pie-chart-outline">
-  <View style={{ alignItems: 'center', justifyContent: 'center' }}>
-    <PieChart
-      data={[
-        {
-          name: 'Vestidos',
-          population: 45,
-          color: colors.pink,
-          legendFontColor: '#7F7F7F',
-          legendFontSize: 12,
-        },
-        {
-          name: 'Camisetas',
-          population: 25,
-          color: colors.green,
-          legendFontColor: '#7F7F7F',
-          legendFontSize: 12,
-        },
-        {
-          name: 'Acessórios',
-          population: 20,
-          color: '#D1D1D1',
-          legendFontColor: '#7F7F7F',
-          legendFontSize: 12,
-        },
-        {
-          name: 'Outros',
-          population: 10,
-          color: '#F5F5F5',
-          legendFontColor: '#7F7F7F',
-          legendFontSize: 12,
-        },
-      ]}
-      width={width - 40}
-      height={180}
-      chartConfig={pieChartConfig}
-      accessor={"population"}
-      backgroundColor={"transparent"}
-      paddingLeft={"15"}
-      center={[10, 0]}
-      absolute 
-    />
-    <View style={dashboardStyles.insightBadge}>
-      <Text style={dashboardStyles.insightText}>
-        💡 Dica: Vestidos representam quase metade das suas vendas!
-      </Text>
-    </View>
-  </View>
-</DashboardCard>
+        <DashboardCard title="Mix de Vendas" icon="pie-chart-outline">
+          <View style={{ alignItems: "center", justifyContent: "center" }}>
+            {mixVendasData.length > 0 ? (
+              <PieChart
+                data={mixVendasData.map((item) => ({
+                  name: item.name,
+                  population: item.population,
+                  color: item.color || colors.pink,
+                  legendFontColor: "#7F7F7F",
+                  legendFontSize: 12,
+                }))}
+                width={width - 40}
+                height={180}
+                chartConfig={pieChartConfig}
+                accessor={"population"}
+                backgroundColor={"transparent"}
+                paddingLeft={"15"}
+                center={[10, 0]}
+                absolute
+              />
+            ) : (
+              <Text style={[dashboardStyles.subText, { marginVertical: 20 }]}>
+                Nenhuma venda registrada hoje.
+              </Text>
+            )}
+
+            <View style={dashboardStyles.insightBadge}>
+              <Text style={dashboardStyles.insightText}>
+                💡 Dica: A categoria "
+                {mixVendasData[0]?.name || "Principais Peças"}" é o seu
+                principal destaque hoje!
+              </Text>
+            </View>
+          </View>
+        </DashboardCard>
       </ScrollView>
 
       <TabBar />
@@ -148,7 +279,7 @@ const lineChartConfig = {
   color: (opacity = 1) => `rgba(96, 135, 91, ${opacity})`,
   labelColor: (opacity = 1) => `rgba(100, 100, 100, ${opacity})`,
   strokeWidth: 3,
-  propsForDots: { r: "5", strokeWidth: "2", stroke: "#60875b" }
+  propsForDots: { r: "5", strokeWidth: "2", stroke: "#60875b" },
 };
 
 const pieChartConfig = {

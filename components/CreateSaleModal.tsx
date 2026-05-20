@@ -23,6 +23,7 @@ interface Produto {
   nome: string;
   preco_base: number;
   imagem?: string;
+  categoria: string;
 }
 
 interface ItemCarrinho {
@@ -30,6 +31,7 @@ interface ItemCarrinho {
   nome: string;
   quantidade: number;
   preco_unitario_venda: number;
+  categoria: string;
 }
 
 interface Props {
@@ -89,6 +91,7 @@ export default function CreateSaleModal({
             nome: `${produto.nome} (${variacao.cor} ${variacao.tamanho})`,
             quantidade: 1,
             preco_unitario_venda: Number(produto.preco_base) || 0,
+            categoria: produto.categoria || "Geral", 
           },
         ];
       });
@@ -96,20 +99,19 @@ export default function CreateSaleModal({
       alert("Produto adicionado ao carrinho!");
     } catch (error: any) {
       console.log("Erro ao buscar produto:", error.response?.data || error);
-
       alert(error.response?.data?.detail || "Produto não encontrado.");
     }
   }
 
-  function alterarQuantidade(id: string, quantidade: number) {
-    if (quantidade <= 0) {
+  function alterarQuantidade(id: string, quantity: number) {
+    if (quantity <= 0) {
       setCarrinho((prev) => prev.filter((item) => item.id_item_estoque !== id));
       return;
     }
 
     setCarrinho((prev) =>
       prev.map((item) =>
-        item.id_item_estoque === id ? { ...item, quantidade } : item,
+        item.id_item_estoque === id ? { ...item, quantidade: quantity } : item,
       ),
     );
   }
@@ -129,7 +131,6 @@ export default function CreateSaleModal({
 
     try {
       setCarregando(true);
-
       const token = await AsyncStorage.getItem("token");
 
       const payload = {
@@ -142,6 +143,7 @@ export default function CreateSaleModal({
           id_item_estoque: item.id_item_estoque,
           quantidade: item.quantidade,
           preco_unitario_venda: item.preco_unitario_venda,
+          categoria: item.categoria, 
         })),
       };
 
@@ -160,7 +162,6 @@ export default function CreateSaleModal({
       onClose();
     } catch (error: any) {
       console.log("Erro ao processar venda:", error.response?.data || error);
-
       alert(error.response?.data?.detail || "Erro ao processar venda.");
     } finally {
       setCarregando(false);
@@ -207,8 +208,10 @@ export default function CreateSaleModal({
                 }}
               >
                 <Text style={{ fontWeight: "600" }}>{item.nome}</Text>
-
                 <Text>R$ {item.preco_unitario_venda.toFixed(2)}</Text>
+                <Text style={{ fontSize: 11, color: "#999", marginTop: 2 }}>
+                  Categoria: {item.categoria}
+                </Text>
 
                 <View
                   style={{

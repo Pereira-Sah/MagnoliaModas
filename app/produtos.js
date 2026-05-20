@@ -7,8 +7,10 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Importado para cache local
 import api from "../src/services/api";
 import { styles, colors } from "../styles/produtosStyles";
 import ProductCard from "../components/ProductCard";
@@ -19,8 +21,13 @@ import { router } from "expo-router";
 import ScannerModal from "../components/ScannerModal";
 import CreateSaleModal from "../components/CreateSaleModal";
 
+const CACHE_KEY = "@magnolia:produtos";
+
 export default function Produtos() {
-  const [listaProdutos, setListaProdutos] = useState([]);
+  const [todosProdutos, setTodosProdutos] = useState([]);
+  const [listaFiltrada, setListaFiltrada] = useState([]);
+  const [carregando, setCarregando] = useState(false);
+
   const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -32,39 +39,70 @@ export default function Produtos() {
 
   const categorias = ["Tudo", "Camisetas", "Vestidos", "Calças", "Acessórios"];
 
-  async function carregarProdutos() {
+  async function carregarProdutos(forcarAtualizacao = false) {
     try {
-      let url = "/produtos/filtrar";
-      const params = new URLSearchParams();
+      setCarregando(true);
 
-      if (termoBusca.trim() !== "") {
-        params.append("nome", termoBusca.trim());
+      if (!forcarAtualizacao) {
+        const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
+        if (cacheLocal) {
+          const produtosSalvos = JSON.parse(cacheLocal);
+          setTodosProdutos(produtosSalvos);
+          filtrarLocalmente(produtosSalvos, termoBusca, categoriaSelecionada);
+          setCarregando(false);
+
+          sincronizarComBackend();
+          return;
+        }
       }
 
-      if (categoriaSelecionada !== "Tudo") {
-        params.append("categoria", categoriaSelecionada);
-      }
-
-      const queryString = params.toString();
-
-      if (!queryString) {
-        url = "/produtos/";
-      } else {
-        url = `${url}?${queryString}`;
-      }
-
-      console.log("Buscando produtos em:", url);
-
-      const response = await api.get(url);
-      setListaProdutos(response.data);
+      await sincronizarComBackend();
     } catch (error) {
-      console.error("Erro ao carregar produtos:", error);
+      console.error("Erro no fluxo de carregar produtos:", error);
+    } finally {
+      setCarregando(false);
     }
+  }
+
+  async function sincronizarComBackend() {
+    try {
+      console.log(
+        "Buscando lista mestre de produtos na API para atualizar cache...",
+      );
+      const response = await api.get("/produtos/");
+
+      if (Array.isArray(response.data)) {
+        setTodosProdutos(response.data);
+        await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(response.data));
+        filtrarLocalmente(response.data, termoBusca, categoriaSelecionada);
+      }
+    } catch (e) {
+      console.error("Erro ao sincronizar com backend, mantendo local.", e);
+    }
+  }
+
+  function filtrarLocalmente(produtos, busca, categoria) {
+    let resultado = [...produtos];
+
+    if (busca.trim() !== "") {
+      const termo = busca.toLowerCase().trim();
+      resultado = resultado.filter((p) => p.nome.toLowerCase().includes(termo));
+    }
+
+    if (categoria !== "Tudo") {
+      resultado = resultado.filter((p) => p.categoria === categoria);
+    }
+
+    setListaFiltrada(resultado);
   }
 
   useEffect(() => {
     carregarProdutos();
-  }, [termoBusca, categoriaSelecionada]);
+  }, []);
+
+  useEffect(() => {
+    filtrarLocalmente(todosProdutos, termoBusca, categoriaSelecionada);
+  }, [termoBusca, categoriaSelecionada, todosProdutos]);
 
   const handleScanSearch = async (codigo) => {
     try {
@@ -72,7 +110,7 @@ export default function Produtos() {
       setProdutoSelecionado(response.data);
       setModalVisible(true);
     } catch (error) {
-      alert("Produto não encontrado no estoque.");
+      alert("Produto não encontrado na sincronização direta.");
     }
   };
 
@@ -86,16 +124,24 @@ export default function Produtos() {
       <View style={styles.headerContainer}>
         <View style={styles.logoWrapper}>
           <Image
-            source={require("../assets/images/magnoliaModas_logo.svg")}
+            source={require("../assets/images/magnoliaModas_logo.png")} // Ajustado fallback de extensão se necessário
             style={styles.logo}
           />
         </View>
         <TouchableOpacity onPress={() => router.push("/listaVendas")}>
-          <Text>Ver Vendas</Text>
+          <Text style={{ fontWeight: "600", color: colors.pink }}>
+            Ver Vendas
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => router.push("/botaoImprimirEtiquetas")}>
-          <Text>Imprimir Etiquetas</Text>
+        <TouchableOpacity
+          onPress={() => router.push("/botaoImprimirEtiquetas")}
+        >
+          <Text style={{ color: "#666", marginTop: 4 }}>
+            Imprimir Etiquetas
+          </Text>
         </TouchableOpacity>
+
+        {/* Barra de Pesquisa */}
         <View style={styles.searchSection}>
           <Ionicons
             name="search-outline"
@@ -106,7 +152,7 @@ export default function Produtos() {
 
           <TextInput
             style={styles.searchInput}
-            placeholder="Pesquisar..."
+            placeholder="Pesquisar no estoque..."
             placeholderTextColor="#999"
             value={termoBusca}
             onChangeText={setTermoBusca}
@@ -122,6 +168,7 @@ export default function Produtos() {
           </TouchableOpacity>
         </View>
 
+        {/* Carrossel de Categorias */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -149,17 +196,31 @@ export default function Produtos() {
         </ScrollView>
       </View>
 
-      <FlatList
-        data={listaProdutos}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => (
-          <ProductCard item={item} onPress={abrirModal} />
-        )}
-      />
+      {carregando && listaFiltrada.length === 0 ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color={colors.pink} />
+        </View>
+      ) : (
+        <FlatList
+          data={listaFiltrada}
+          keyExtractor={(item) => item.id.toString()}
+          numColumns={2}
+          columnWrapperStyle={styles.row}
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => (
+            <ProductCard item={item} onPress={abrirModal} />
+          )}
+          ListEmptyComponent={
+            <Text style={{ textAlign: "center", color: "#999", marginTop: 40 }}>
+              Nenhum produto encontrado nesta seção.
+            </Text>
+          }
+        />
+      )}
 
+      {/* Botões Flutuantes */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => setCreateModalVisible(true)}
@@ -176,6 +237,7 @@ export default function Produtos() {
         <Ionicons name="cart-outline" size={28} color="white" />
       </TouchableOpacity>
 
+      {/* Modais */}
       <ProductModal
         visible={modalVisible}
         produto={produtoSelecionado}
@@ -184,7 +246,10 @@ export default function Produtos() {
 
       <CreateProductModal
         visible={createModalVisible}
-        onClose={() => setCreateModalVisible(false)}
+        onClose={() => {
+          setCreateModalVisible(false);
+          carregarProdutos(true);
+        }}
       />
 
       <TabBar />
@@ -203,7 +268,7 @@ export default function Produtos() {
         onClose={() => setSaleModalVisible(false)}
         onSuccess={async () => {
           setSaleModalVisible(false);
-          carregarProdutos();
+          carregarProdutos(true);
         }}
       />
     </View>
