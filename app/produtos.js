@@ -64,7 +64,6 @@ export default function Produtos() {
       <View style={styles.headerContainer}>
         <View style={styles.logoWrapper}>
           <Image
-            source={require("../assets/images/magnoliaModas_logo.svg")}
             style={styles.logo}
           />
         </View>

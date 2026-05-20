@@ -31,7 +31,6 @@ export default function Dashboard() {
     <View style={dashboardStyles.container}>
       <View style={dashboardStyles.logoWrapper}>
         <Image 
-          source={require('../assets/images/magnoliaModas_logo.png')} 
           style={dashboardStyles.logo} 
         />
       </View>

@@ -12,6 +12,7 @@ import { router } from 'expo-router';
 import { authStyles } from '../styles/authStyles';
 import AuthLayout from './AuthLayout';
 import api from '../src/services/api';
+import AuthInput from '../components/AuthInput';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -74,43 +75,49 @@ export default function Login() {
   }
 
   return (
-    <AuthLayout>
-      <Image
-        source={require('../assets/images/magnoliaModas_logo.png')}
-        style={authStyles.logo}
+    <AuthLayout
+    title="Bem-vinda de volta"
+    subtitle='Sentimos sua Falta!'
+  >
+
+    <View style={authStyles.formContainer}>
+
+      <Text style={authStyles.description}>
+        Entre com sua conta para acessar
+      </Text>
+
+      <AuthInput
+        icon="mail-outline"
+        placeholder="E-mail"
+        onChangeText={setEmail}
       />
 
-      <View style={authStyles.card}>
-        <Text style={authStyles.title}>Login</Text>
+      <AuthInput
+        icon="lock-closed-outline"
+        placeholder="Senha"
+        secureTextEntry
+        onChangeText={setSenha}
+      />
 
-        <TextInput
-          style={authStyles.input}
-          placeholder="E-mail"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          onChangeText={setEmail}
-        />
+      <TouchableOpacity
+        style={authStyles.button}
+        onPress={handleLogin}
+      >
+        <Text style={authStyles.buttonText}>
+          Entrar
+        </Text>
+      </TouchableOpacity>
 
-        <TextInput
-          style={authStyles.input}
-          placeholder="Senha"
-          secureTextEntry
-          onChangeText={setSenha}
-        />
+      <TouchableOpacity
+        onPress={() => router.push('/cadastro')}
+      >
+        <Text style={authStyles.link}>
+          Não possui conta? Cadastre-se
+        </Text>
+      </TouchableOpacity>
 
-        <TouchableOpacity
-          style={authStyles.button}
-          onPress={handleLogin}
-        >
-          <Text style={authStyles.buttonText}>Entrar</Text>
-        </TouchableOpacity>
+    </View>
 
-        <TouchableOpacity onPress={() => router.push('/cadastro')}>
-          <Text style={authStyles.link}>
-            Não tem conta? Cadastre-se
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </AuthLayout>
+  </AuthLayout>
   );
 }
