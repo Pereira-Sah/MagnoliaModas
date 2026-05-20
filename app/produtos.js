@@ -26,7 +26,6 @@ export default function Produtos() {
 
   const [isSearching, setIsSearching] = useState(false);
   const [scannerBuscaVisible, setScannerBuscaVisible] = useState(false);
-  // dentro do componente Produtos()
   const [saleModalVisible, setSaleModalVisible] = useState(false);
   const handleScanSearch = async (codigo) => {
     try {
@@ -61,66 +60,93 @@ export default function Produtos() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <View style={styles.logoWrapper}>
-          <Image
-            style={styles.logo}
-          />
-        </View>
-<TouchableOpacity
-  onPress={() => router.push("/listaVendas")}
->
-  <Text>Ver Vendas</Text>
-</TouchableOpacity>
-        <View style={styles.searchSection}>
-          <Ionicons
-            name="search-outline"
-            size={20}
-            color="#999"
-            style={styles.searchIcon}
-          />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Pesquisar..."
-            placeholderTextColor="#999"
-          />
-          <TouchableOpacity onPress={() => setScannerBuscaVisible(true)}>
-            <Ionicons
-              name="barcode-outline"
-              size={24}
-              color={colors.pink}
-              style={{ marginRight: 10 }}
-            />
-          </TouchableOpacity>
-        </View>
+<View style={styles.headerContainer}>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterScroll}
-        >
-          {["Tudo", "Camisetas", "Vestidos", "Calças", "Acessórios"].map(
-            (tipo, index) => (
-              <TouchableOpacity
-                key={tipo}
-                style={[
-                  styles.filterPill,
-                  index === 0 && styles.filterPillActive,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.filterPillText,
-                    index === 0 && styles.filterPillTextActive,
-                  ]}
-                >
-                  {tipo}
-                </Text>
-              </TouchableOpacity>
-            ),
-          )}
-        </ScrollView>
+  <View style={styles.heroSection}>
+
+    <View style={styles.heroBlob} />
+
+    <View style={styles.heroTopRow}>
+
+      <View>
+
+        <Text style={styles.heroGreeting}>
+          Olá, "usuario" ! 
+        </Text>
       </View>
+{/* 
+      <View style={styles.logoCircle}>
+        <Image
+          source={require('../assets/images/logo_fundo.png')}
+          style={styles.logo}
+        />
+      </View> */}
+
+    </View>
+
+  </View>
+
+  {/* SEARCH */}
+  <View style={styles.searchSection}>
+
+    <Ionicons
+      name="search-outline"
+      size={20}
+      color="#8E8E8E"
+      style={styles.searchIcon}
+    />
+
+    <TextInput
+      style={styles.searchInput}
+      placeholder="Pesquisar peças..."
+      placeholderTextColor="#999"
+    />
+
+    <TouchableOpacity
+      onPress={() => setScannerBuscaVisible(true)}
+    >
+      <Ionicons
+        name="barcode-outline"
+        size={24}
+        color={colors.dustypink}
+      />
+    </TouchableOpacity>
+
+  </View>
+
+  <ScrollView
+    horizontal
+    showsHorizontalScrollIndicator={false}
+    contentContainerStyle={styles.filterScroll}
+  >
+
+    {["Tudo", "Vestidos", "Blusas", "Calças", "Acessórios"].map(
+      (tipo, index) => (
+        <TouchableOpacity
+          key={tipo}
+          style={[
+            styles.filterPill,
+            index === 0 && styles.filterPillActive,
+          ]}
+        >
+
+          <Text
+            style={[
+              styles.filterPillText,
+              index === 0 &&
+                styles.filterPillTextActive,
+            ]}
+          >
+            {tipo}
+          </Text>
+
+        </TouchableOpacity>
+      ),
+    )}
+
+  </ScrollView>
+
+</View>
 
       <FlatList
         data={listaProdutos}
@@ -138,15 +164,15 @@ export default function Produtos() {
         onPress={() => setCreateModalVisible(true)}
         activeOpacity={0.8}
       >
-        <Ionicons name="add" size={30} color={colors.white} />
+        <Ionicons name="add" size={30} color='white' />
       </TouchableOpacity>
       
       <TouchableOpacity
-        style={[styles.fab, { bottom: 200, backgroundColor: colors.green }]}
+        style={[styles.fab, { bottom: 230, backgroundColor: colors.Lightolivegreen }]}
         onPress={() => setSaleModalVisible(true)}
         activeOpacity={0.8}
       >
-        <Ionicons name="cart-outline" size={28} color="white" />
+        <Ionicons name="cart-outline" size={30} color="white" />
       </TouchableOpacity>
       <ProductModal
         visible={modalVisible}

@@ -1,9 +1,9 @@
 import { StyleSheet, Dimensions } from 'react-native';
 
 export const colors = {
-  green: '#60875b',
-  pink: '#e5aeab',
-  white: '#fff',
+  dustypink: '#DFA3B2',
+  Lightolivegreen: '#B8C4A5',
+  Warmbeigebackground: '#F3E7DD',
 };
 
 export const fonts = {
@@ -30,38 +30,65 @@ export const styles = StyleSheet.create({
     paddingBottom: 10,
   },
 
-  logoWrapper: {
-    backgroundColor: colors.green, 
-    width: width,
-    height: 120, 
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20, 
-    // paddingTop: 30, 
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
-  },
 
-  logo: {
-    width: '40%',
-    height: 100,
-    resizeMode: 'cover',
-  },
+heroSection: {
+  marginBottom: 24,
+  backgroundColor: colors.Warmbeigebackground,
+  paddingTop: 45,
+  paddingHorizontal: 24,
+  paddingBottom: 30,
+  borderBottomLeftRadius: 36,
+  borderBottomRightRadius: 36,
+  overflow: 'hidden',
+},
 
-  searchSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F0F0F0',
-    borderRadius: 15,
-    marginHorizontal: 16,
-    paddingHorizontal: 15,
-    height: 45,
-    marginBottom: 16,
-  },
+heroBlob: {
+  position: 'absolute',
+  width: 220,
+  height: 200,
+  borderRadius: 140,
+  backgroundColor: 'rgba(223,163,178,0.16)',
+  top: -90,
+  right: -60,
+},
+
+heroTopRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+},
+
+heroGreeting: {
+  fontSize: 20,
+  color: '#7D7D7D',
+  fontFamily: fonts.regular,
+},
+
+
+
+// logo: {
+//   width: 70,
+//   height: 70,
+//   resizeMode: 'contain',
+//   borderRadius: 999,
+//   borderWidth: 2,
+//   borderColor: colors.Lightolivegreen,
+// },
+
+searchSection: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: '#FFFFFF',
+  marginHorizontal: 18,
+  borderRadius: 20,
+  paddingHorizontal: 18,
+  height: 48,
+  marginBottom: 18,
+  shadowColor: '#000',
+  shadowOpacity: 0.04,
+  shadowRadius: 10,
+  elevation: 3,
+},
 
   searchIcon: {
     marginRight: 10,
@@ -95,8 +122,8 @@ export const styles = StyleSheet.create({
   },
 
   filterPillActive: {
-    backgroundColor: colors.pink,
-    borderColor: colors.pink,
+    backgroundColor: colors.dustypink,
+    borderColor: colors.dustypink,
   },
 
   filterPillText: {
@@ -166,7 +193,7 @@ export const styles = StyleSheet.create({
   gridPrice: {
     fontFamily: fonts.semiBold,
     fontSize: 15,
-    color: colors.green,
+    color: '#4E5B48',
     position: 'absolute',
     top: 10,
     right: 10,
@@ -238,9 +265,13 @@ export const styles = StyleSheet.create({
     width: 120,
     height: 150,
     borderRadius: 16,
-    borderWidth: 4,
-    borderColor: colors.green,
     backgroundColor: '#EEE',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    elevation: 3,
+
   },
 
   modalMainInfo: {
@@ -260,7 +291,7 @@ export const styles = StyleSheet.create({
 
   modalPriceText: {
     fontSize: 18,
-    color: colors.green,
+    color: '#577549',
     fontWeight: '600',
     marginBottom: 10,
     fontFamily: fonts.semiBold,
@@ -348,8 +379,8 @@ export const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 20,
-    bottom: 100, 
-    backgroundColor: colors.green,
+    bottom: 130, 
+    backgroundColor: colors.Lightolivegreen,
     width: 60,
     height: 60,
     borderRadius: 30,

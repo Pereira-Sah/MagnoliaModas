@@ -213,7 +213,6 @@ export default function EditProductModal({
             showsVerticalScrollIndicator={false}
             contentContainerStyle={s.formScroll}
           >
-            {/* IMAGEM */}
             <View style={s.imageUploadSection}>
               <TouchableOpacity
                 style={s.imagePreviewContainer}
