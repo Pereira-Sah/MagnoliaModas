@@ -3,8 +3,9 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width } = Dimensions.get('window');
 
 export const colors = {
-  green: '#60875b',
-  pink: '#e5aeab',
+  dustypink: '#DFA3B2',
+  Lightolivegreen: '#B8C4A5',
+  Warmbeigebackground: '#F3E7DD',
   white: '#fff',
   background: '#FBFBFB',
   textMain: '#333',
@@ -24,27 +25,39 @@ export const dashboardStyles = StyleSheet.create({
     backgroundColor: colors.background,
   },
 
-  logoWrapper: {
-    backgroundColor: colors.green, 
-    width: width,
-      height: 120, 
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20, 
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+heroSection: {
+  marginBottom: 24,
+  backgroundColor: colors.Warmbeigebackground,
+  paddingTop: 45,
+  paddingHorizontal: 24,
+  paddingBottom: 30,
+  borderBottomLeftRadius: 36,
+  borderBottomRightRadius: 36,
+  overflow: 'hidden',
+},
 
-  },
+heroBlob: {
+  position: 'absolute',
+  width: 220,
+  height: 200,
+  borderRadius: 140,
+  backgroundColor: 'rgba(223,163,178,0.16)',
+  top: -90,
+  right: -60,
+},
 
-  logo: {
-    width: '40%',
-    height: 100,
-    resizeMode: 'cover',
-  },
+heroTopRow: {
+  flexDirection: 'row',
+  justifyContent: 'space-between',
+  alignItems: 'center',
+},
+
+heroGreeting: {
+  fontSize: 20,
+  color: '#7D7D7D',
+  fontFamily: fonts.regular,
+},
+
 
   scrollContainer: {
     paddingHorizontal: 16,
@@ -92,7 +105,7 @@ export const dashboardStyles = StyleSheet.create({
   mainNumber: {
     fontFamily: fonts.semiBold,
     fontSize: 26,
-    color: colors.green,
+    color: colors.Lightolivegreen,
   },
   subText: {
     fontFamily: fonts.regular,
@@ -112,7 +125,7 @@ export const dashboardStyles = StyleSheet.create({
   aiNumber: {
     fontSize: 32,
     fontFamily: fonts.semiBold,
-    color: colors.pink,
+    color: colors.dustypink,
   },
   alertItem: {
     flexDirection: 'row',
@@ -134,9 +147,9 @@ export const dashboardStyles = StyleSheet.create({
     marginTop: 10,
     width: '100%',
     borderLeftWidth: 4,
-    borderLeftColor: colors.green,
+    borderLeftColor: colors.Lightolivegreen,
     borderRightWidth: 4,
-    borderRightColor: colors.green,
+    borderRightColor: colors.Lightolivegreen,
   },
   insightText: {
     fontFamily: fonts.regular,

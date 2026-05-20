@@ -59,12 +59,22 @@ export default function EditarPerfil() {
 
     <View style={perfilStyles.container}>
 
-      <View style={perfilStyles.logoWrapper}>
-        <Image
-          source={require('../assets/images/magnoliaModas_logo.png')}
-          style={perfilStyles.logo}
-        />
-      </View>
+        <View style={perfilStyles.heroSection}>
+
+          <View style={perfilStyles.heroBlob} />
+
+          <View style={perfilStyles.heroTopRow}>
+
+            <View>
+
+              <Text style={perfilStyles.heroGreeting}>
+                Olá, "usuario" ! 
+              </Text>
+            </View>
+
+          </View>
+
+        </View>
 
       <ScrollView contentContainerStyle={perfilStyles.scrollContainer} showsVerticalScrollIndicator={false}>
 

@@ -74,19 +74,11 @@ export default function Produtos() {
           Olá, "usuario" ! 
         </Text>
       </View>
-{/* 
-      <View style={styles.logoCircle}>
-        <Image
-          source={require('../assets/images/logo_fundo.png')}
-          style={styles.logo}
-        />
-      </View> */}
 
     </View>
 
   </View>
 
-  {/* SEARCH */}
   <View style={styles.searchSection}>
 
     <Ionicons

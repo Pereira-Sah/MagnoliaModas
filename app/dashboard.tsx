@@ -18,7 +18,7 @@ const DashboardCard = ({ title, children, icon, iconColor }: DashboardCardProps)
   <View style={dashboardStyles.card}>
     <View style={dashboardStyles.cardHeader}>
       <View style={dashboardStyles.titleRow}>
-        <Ionicons name={icon} size={20} color={iconColor || colors.green} />
+        <Ionicons name={icon} size={20} color={iconColor || colors.Lightolivegreen} />
         <Text style={dashboardStyles.cardTitle}>{title}</Text>
       </View>
     </View>
@@ -29,11 +29,22 @@ const DashboardCard = ({ title, children, icon, iconColor }: DashboardCardProps)
 export default function Dashboard() {
   return (
     <View style={dashboardStyles.container}>
-      <View style={dashboardStyles.logoWrapper}>
-        <Image 
-          style={dashboardStyles.logo} 
-        />
+  <View style={dashboardStyles.heroSection}>
+
+    <View style={dashboardStyles.heroBlob} />
+
+    <View style={dashboardStyles.heroTopRow}>
+
+      <View>
+
+        <Text style={dashboardStyles.heroGreeting}>
+          Olá, "usuario" ! 
+        </Text>
       </View>
+
+    </View>
+
+  </View>
 
       <ScrollView 
         contentContainerStyle={dashboardStyles.scrollContainer}
@@ -63,10 +74,10 @@ export default function Dashboard() {
           />
         </DashboardCard>
 
-        <DashboardCard title="Sugestão de Compra (IA)" icon="bulb-outline" iconColor={colors.pink}>
+        <DashboardCard title="Sugestão de Compra (IA)" icon="bulb-outline" iconColor={colors.dustypink}>
           <View style={dashboardStyles.aiCardBody}>
             <Text style={dashboardStyles.aiNumber}>25 unid.</Text>
-            <Text style={[dashboardStyles.subText, {color: colors.pink, marginBottom: 8}]}>Recomendação de estoque</Text>
+            <Text style={[dashboardStyles.subText, {color: colors.dustypink, marginBottom: 8}]}>Recomendação de estoque</Text>
             <Text style={dashboardStyles.subText}>
               Tendência de alta para a categoria "Vestidos" nos próximos 7 dias.
             </Text>
@@ -91,14 +102,14 @@ export default function Dashboard() {
         {
           name: 'Vestidos',
           population: 45,
-          color: colors.pink,
+          color: colors.dustypink,
           legendFontColor: '#7F7F7F',
           legendFontSize: 12,
         },
         {
           name: 'Camisetas',
           population: 25,
-          color: colors.green,
+          color: colors.Lightolivegreen,
           legendFontColor: '#7F7F7F',
           legendFontSize: 12,
         },

@@ -10,7 +10,7 @@ import TabBar from '../components/TabBar';
 const InfoItem = ({ icon, label, value, isLast = false }: any) => (
   <View style={[perfilStyles.infoRow, isLast && { marginBottom: 0 }]}>
     <View style={perfilStyles.iconBox}>
-      <Ionicons name={icon} size={20} color={colors.green} />
+      <Ionicons name={icon} size={20} color={colors.Lightolivegreen} />
     </View>
     <View>
       <Text style={perfilStyles.infoLabel}>{label}</Text>
@@ -37,11 +37,6 @@ export default function Perfil() {
 
   return (
     <View style={perfilStyles.container}>
-      <View style={perfilStyles.logoWrapper}>
-        <Image
-          style={perfilStyles.logo}
-        />
-      </View>
 
       <ScrollView
         contentContainerStyle={perfilStyles.scrollContainer}
