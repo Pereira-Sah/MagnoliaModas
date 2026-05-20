@@ -174,9 +174,9 @@ searchSection: {
   },
 
   gridDescription:{
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: '#777',
+      fontFamily: fonts.regular,
+      fontSize: 12,
+      color: '#777',
   },
 
   gridInfo: {
@@ -247,7 +247,6 @@ searchSection: {
   actionButtons: {
     flexDirection: 'row',
     justifyContent:'space-between',
-     
   },
 
   iconBtn: {
@@ -344,7 +343,7 @@ searchSection: {
     marginBottom: 24,
     fontFamily: fonts.regular,
   },
-  
+
   modernTable: {
     backgroundColor: '#fbd3d238',
     borderRadius: 12,
