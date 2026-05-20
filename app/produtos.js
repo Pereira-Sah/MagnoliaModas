@@ -214,13 +214,26 @@ export default function Produtos() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <View style={styles.logoWrapper}>
-          <Image
-            source={require("../assets/images/magnoliaModas_logo.png")} // Ajustado fallback de extensão se necessário
-            style={styles.logo}
-          />
-        </View>
+       
+<View style={styles.headerContainer}>
+
+  <View style={styles.heroSection}>
+
+    <View style={styles.heroBlob} />
+
+    <View style={styles.heroTopRow}>
+
+      <View>
+
+        <Text style={styles.heroGreeting}>
+          Olá, "usuario" ! 
+        </Text>
+      </View>
+
+    </View>
+
+  </View>
+
         <TouchableOpacity onPress={() => router.push("/listaVendas")}>
           <Text style={{ fontWeight: "600", color: colors.pink }}>
             Ver Vendas
@@ -324,98 +337,9 @@ export default function Produtos() {
           }
         />
       )}
-<View style={styles.headerContainer}>
 
-  <View style={styles.heroSection}>
 
-    <View style={styles.heroBlob} />
-
-    <View style={styles.heroTopRow}>
-
-      <View>
-
-        <Text style={styles.heroGreeting}>
-          Olá, "usuario" ! 
-        </Text>
-      </View>
-
-    </View>
-
-  </View>
-
-  <View style={styles.searchSection}>
-
-    <Ionicons
-      name="search-outline"
-      size={20}
-      color="#8E8E8E"
-      style={styles.searchIcon}
-    />
-
-    <TextInput
-      style={styles.searchInput}
-      placeholder="Pesquisar peças..."
-      placeholderTextColor="#999"
-    />
-
-    <TouchableOpacity
-      onPress={() => setScannerBuscaVisible(true)}
-    >
-      <Ionicons
-        name="barcode-outline"
-        size={24}
-        color={colors.dustypink}
-      />
-    </TouchableOpacity>
-
-  </View>
-
-  <ScrollView
-    horizontal
-    showsHorizontalScrollIndicator={false}
-    contentContainerStyle={styles.filterScroll}
-  >
-
-    {["Tudo", "Vestidos", "Blusas", "Calças", "Acessórios"].map(
-      (tipo, index) => (
-        <TouchableOpacity
-          key={tipo}
-          style={[
-            styles.filterPill,
-            index === 0 && styles.filterPillActive,
-          ]}
-        >
-
-          <Text
-            style={[
-              styles.filterPillText,
-              index === 0 &&
-                styles.filterPillTextActive,
-            ]}
-          >
-            {tipo}
-          </Text>
-
-        </TouchableOpacity>
-      ),
-    )}
-
-  </ScrollView>
-
-</View>
-
-      <FlatList
-        data={listaProdutos}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.listContent}
-        renderItem={({ item }) => (
-          <ProductCard item={item} onPress={abrirModal} />
-        )}
-      />
-
-      {/* Botões Flutuantes */}
+{/* Botões Flutuantes */}
       <TouchableOpacity
         style={styles.fab}
         onPress={() => setCreateModalVisible(true)}

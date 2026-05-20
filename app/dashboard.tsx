@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { LineChart, PieChart } from "react-native-chart-kit";
 import TabBar from "../components/TabBar";
 import { dashboardStyles, colors } from "../styles/dashboardStyles";
