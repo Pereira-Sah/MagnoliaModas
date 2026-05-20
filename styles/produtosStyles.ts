@@ -33,7 +33,7 @@ export const styles = StyleSheet.create({
   logoWrapper: {
     backgroundColor: colors.green, 
     width: width,
-    height: 120, 
+      height: 120, 
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 20, 
@@ -147,9 +147,9 @@ export const styles = StyleSheet.create({
   },
 
   gridDescription:{
-    fontFamily: fonts.regular,
-    fontSize: 12,
-    color: '#777',
+      fontFamily: fonts.regular,
+      fontSize: 12,
+      color: '#777',
   },
 
   gridInfo: {
@@ -220,7 +220,6 @@ export const styles = StyleSheet.create({
   actionButtons: {
     flexDirection: 'row',
     justifyContent:'space-between',
-     
   },
 
   iconBtn: {
@@ -238,8 +237,6 @@ export const styles = StyleSheet.create({
     width: 120,
     height: 150,
     borderRadius: 16,
-    borderWidth: 4,
-    borderColor: colors.green,
     backgroundColor: '#EEE',
   },
 
@@ -313,7 +310,7 @@ export const styles = StyleSheet.create({
     marginBottom: 24,
     fontFamily: fonts.regular,
   },
-  
+
   modernTable: {
     backgroundColor: '#fbd3d238',
     borderRadius: 12,

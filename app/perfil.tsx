@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  Platform,
-} from 'react-native';
+import { View, Text, Image, ScrollView, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as SecureStore from 'expo-secure-store';
 import { router } from 'expo-router';
@@ -66,6 +59,7 @@ export default function Perfil() {
           <TouchableOpacity
             style={perfilStyles.editIconButton}
             activeOpacity={0.7}
+            onPress={() => router.push('/editarPerfil')}
           >
             <Ionicons
               name="pencil"

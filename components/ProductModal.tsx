@@ -1,14 +1,5 @@
-// ProductModal.tsx
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  Modal,
-  ScrollView,
-  Pressable,
-} from "react-native";
+import { View, Text, Image, TouchableOpacity, Modal, ScrollView, Pressable, } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "../styles/produtosStyles";
 import EditProductModal from "./EditProductModal";
@@ -68,11 +59,16 @@ export default function ProductModal({
         transparent={true}
         onRequestClose={onClose}
       >
-        <Pressable style={styles.modalOverlay} onPress={onClose}>
+        <View style={styles.modalOverlay}>
+          <Pressable onPress={onClose} />
           <View style={styles.modalContent}>
             <View style={styles.modalHeaderRow}>
               <TouchableOpacity onPress={onClose}>
-                <Ionicons name="close" size={24} color="#e6aeac" />
+                <Ionicons
+                  name="close"
+                  size={24}
+                  color="#e6aeac"
+                />
               </TouchableOpacity>
             </View>
 
@@ -84,7 +80,10 @@ export default function ProductModal({
                 />
 
                 <View style={styles.modalMainInfo}>
-                  <Text style={styles.modalNome}>{produto.nome}</Text>
+                  <Text style={styles.modalNome}>
+                    {produto.nome}
+                  </Text>
+
                   <Text style={styles.modalPriceText}>
                     R$ {produto.preco_base}
                   </Text>
@@ -113,28 +112,47 @@ export default function ProductModal({
               <View style={styles.divider} />
 
               <View style={styles.modalDetailsSection}>
-                <Text style={styles.sectionLabel}>Descrição</Text>
+                <Text style={styles.sectionLabel}>
+                  Descrição
+                </Text>
+
                 <Text style={styles.modalDescricaoText}>
                   {produto.descricao}
                 </Text>
 
-                <Text style={styles.sectionLabel}>Estoque por Variação</Text>
+                <Text style={styles.sectionLabel}>
+                  Estoque por Variação
+                </Text>
 
-                {produto.estoque && produto.estoque.length > 0 ? (
+                {produto.estoque &&
+                produto.estoque.length > 0 ? (
                   <View style={styles.modernTable}>
-                    {produto.estoque.map((variacao, index) => (
-                      <View key={index} style={styles.modernTableRow}>
-                        <Text style={styles.tableCellMain}>
-                          {variacao.cor} • {variacao.tamanho}
-                        </Text>
-                        <Text style={styles.tableCellSide}>
-                          {variacao.quantidade} unid.
-                        </Text>
-                      </View>
-                    ))}
+                    {produto.estoque.map(
+                      (variacao, index) => (
+                        <View
+                          key={index}
+                          style={styles.modernTableRow}
+                        >
+                          <Text
+                            style={styles.tableCellMain}
+                          >
+                            {variacao.cor} •{" "}
+                            {variacao.tamanho}
+                          </Text>
+
+                          <Text
+                            style={styles.tableCellSide}
+                          >
+                            {variacao.quantidade} unid.
+                          </Text>
+                        </View>
+                      )
+                    )}
                   </View>
                 ) : (
-                  <Text style={styles.semEstoque}>Nenhum item em estoque</Text>
+                  <Text style={styles.semEstoque}>
+                    Nenhum item em estoque
+                  </Text>
                 )}
               </View>
 
@@ -143,24 +161,39 @@ export default function ProductModal({
                   style={styles.iconBtn}
                   onPress={editarProduto}
                 >
-                  <Ionicons name="pencil-outline" size={20} color="#666" />
+                  <Ionicons
+                    name="pencil-outline"
+                    size={20}
+                    color="#666"
+                  />
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                  style={[styles.iconBtn, { marginLeft: 12 }]}
-                  onPress={() => onDelete(produto.id)}
+                  style={[
+                    styles.iconBtn,
+                    { marginLeft: 12 },
+                  ]}
+                  onPress={() =>
+                    onDelete(produto.id)
+                  }
                 >
-                  <Ionicons name="archive" size={20} color="#E57373" />
+                  <Ionicons
+                    name="archive"
+                    size={20}
+                    color="#E57373"
+                  />
                 </TouchableOpacity>
               </View>
             </ScrollView>
           </View>
-        </Pressable>
+        </View>
       </Modal>
 
       <EditProductModal
         visible={editVisible}
-        onClose={() => setEditVisible(false)}
+        onClose={() =>
+          setEditVisible(false)
+        }
         onUpdated={handleEditSuccess}
         produto={produto}
       />
