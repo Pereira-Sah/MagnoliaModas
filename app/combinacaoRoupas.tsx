@@ -692,6 +692,7 @@ import TabBar from "../components/TabBar";
       flexDirection: "row",
       justifyContent: "space-between",
       alignItems: "center",
+      paddingBottom: 125,
     },
     checkoutPrecoContainer: { flexDirection: "column" },
     checkoutTotalLabel: { fontSize: 11, color: "#666" },
