@@ -21,6 +21,7 @@ import QRCode from "react-native-qrcode-svg";
 import ScannerModal from "./ScannerModal";
 
 interface Estoque {
+  id?: string;
   id_variacao?: string;
   cor: string;
   tamanho: string;
@@ -84,7 +85,8 @@ export default function EditProductModal({
     setImageUrl(produto.imagem ?? "");
     setSelectedTags(produto.tags ?? []);
 
-    setEstoque(produto.estoque ?? []);
+    // Alterado aqui: O estado de estoque agora inicializa sempre vazio
+    setEstoque([]);
 
     const primeiroCodigo = produto.estoque?.[0]?.codigo_barras ?? "";
     setCodigoBarras(primeiroCodigo);
@@ -149,18 +151,42 @@ export default function EditProductModal({
     try {
       setSalvando(true);
 
-      const payload = {
-        nome,
-        descricao,
-        categoria,
-        estacao,
-        preco_base: parseFloat(preco.replace(",", ".")) || 0,
-        tags: selectedTags,
-        imagem: imageUrl,
-      };
+      const formData = new FormData();
+      formData.append("nome", nome);
+      formData.append("descricao", descricao);
+      formData.append("categoria", categoria);
+      formData.append("estacao", estacao);
+      formData.append(
+        "preco_base",
+        String(parseFloat(preco.replace(",", ".")) || 0),
+      );
+      formData.append("tags", JSON.stringify(selectedTags));
 
-      await api.put(`/produtos/${produto.id}`, payload);
+      if (
+        imageUrl &&
+        (imageUrl.startsWith("file://") || imageUrl.startsWith("content://"))
+      ) {
+        const uriParts = imageUrl.split(".");
+        const fileType = uriParts[uriParts.length - 1];
+        const fileName = imageUrl.split("/").pop();
 
+        formData.append("imagem", {
+          uri: imageUrl,
+          name: fileName || `photo.${fileType}`,
+          type: `image/${fileType === "jpg" ? "jpeg" : fileType}`,
+        } as any);
+      } else {
+        formData.append("imagem_url", imageUrl);
+      }
+
+      // 1. Atualiza os dados principais do produto
+      await api.put(`/produtos/${produto.id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      // 2. Salva apenas as novas variações adicionadas manualmente na lista voluntária
       for (const variacao of estoque) {
         const payloadEstoque = {
           tamanho: variacao.tamanho,
@@ -169,9 +195,12 @@ export default function EditProductModal({
           codigo_barras: variacao.codigo_barras || "",
         };
 
-        if (variacao.id_variacao) {
-          await api.put(`/estoque/${variacao.id_variacao}`, payloadEstoque);
+        const idVariacaoAtual = variacao.id_variacao || variacao.id;
+
+        if (idVariacaoAtual) {
+          await api.put(`/estoque/${idVariacaoAtual}`, payloadEstoque);
         } else {
+          // Como a lista veio vazia, qualquer item adicionado cai aqui como novo POST
           await api.post(
             `/estoque/adicionar-variacao?id_produto=${produto.id}`,
             payloadEstoque,
@@ -179,7 +208,7 @@ export default function EditProductModal({
         }
       }
 
-      alert("Produto e estoque atualizados com sucesso!");
+      alert("Produto atualizado com sucesso!");
       onUpdated?.();
       onClose();
     } catch (error: any) {
@@ -321,6 +350,7 @@ export default function EditProductModal({
                 </TouchableOpacity>
               ))}
             </View>
+
             <Text style={s.label}>Variações de Estoque</Text>
 
             {estoque.map((variacao, index) => (
@@ -344,7 +374,7 @@ export default function EditProductModal({
                   }}
                 >
                   <Text style={{ fontWeight: "600" }}>
-                    Variação {index + 1}
+                    Nova Variação {index + 1}
                   </Text>
 
                   <TouchableOpacity onPress={() => removerVariacao(index)}>
@@ -407,9 +437,10 @@ export default function EditProductModal({
                   fontWeight: "600",
                 }}
               >
-                + Adicionar Variação
+                + Adicionar Nova Variação
               </Text>
             </TouchableOpacity>
+
             <View style={s.inputGroup}>
               <Text style={s.label}>Código de Barras da Etiqueta</Text>
 
