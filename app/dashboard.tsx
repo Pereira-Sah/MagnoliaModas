@@ -7,12 +7,15 @@ import {
   Dimensions,
   ActivityIndicator,
   RefreshControl,
+  Platform,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { LineChart, PieChart } from "react-native-chart-kit";
 import TabBar from "../components/TabBar";
 import { dashboardStyles, colors } from "../styles/dashboardStyles";
 import api from "../src/services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SecureStore from "expo-secure-store";
 
 const { width } = Dimensions.get("window");
 
@@ -59,7 +62,11 @@ const DashboardCard = ({
   <View style={dashboardStyles.card}>
     <View style={dashboardStyles.cardHeader}>
       <View style={dashboardStyles.titleRow}>
-        <Ionicons name={icon} size={20} color={iconColor || colors.Lightolivegreen} />
+        <Ionicons
+          name={icon}
+          size={20}
+          color={iconColor || colors.Lightolivegreen}
+        />
         <Text style={dashboardStyles.cardTitle}>{title}</Text>
       </View>
     </View>
@@ -71,7 +78,7 @@ export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
+  const [nome, setNome] = useState("Usuária");
   const fetchDashboardData = async () => {
     try {
       const response = await api.get("/dashboard/dados");
@@ -85,6 +92,19 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    const obterDadosUsuario = async () => {
+      let nomeSalvo;
+
+      if (Platform.OS === "web") {
+        nomeSalvo = localStorage.getItem("userName");
+      } else {
+        nomeSalvo = await SecureStore.getItemAsync("userName");
+      }
+
+      if (nomeSalvo) setNome(nomeSalvo);
+    };
+
+    obterDadosUsuario();
     fetchDashboardData();
   }, []);
 
@@ -121,24 +141,17 @@ export default function Dashboard() {
 
   return (
     <View style={dashboardStyles.container}>
-  <View style={dashboardStyles.heroSection}>
+      <View style={dashboardStyles.heroSection}>
+        <View style={dashboardStyles.heroBlob} />
 
-    <View style={dashboardStyles.heroBlob} />
-
-    <View style={dashboardStyles.heroTopRow}>
-
-      <View>
-
-        <Text style={dashboardStyles.heroGreeting}>
-          Olá, "usuario" ! 
-        </Text>
+        <View style={dashboardStyles.heroTopRow}>
+          <View>
+            <Text style={dashboardStyles.heroGreeting}>Olá, {nome} !</Text>
+          </View>
+        </View>
       </View>
 
-    </View>
-
-  </View>
-
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={dashboardStyles.scrollContainer}
         showsVerticalScrollIndicator={false}
         refreshControl={
@@ -275,7 +288,7 @@ export default function Dashboard() {
             </View>
           </View>
         </DashboardCard>
-</ScrollView>
+      </ScrollView>
 
       <TabBar />
     </View>
