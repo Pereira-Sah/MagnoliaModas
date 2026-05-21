@@ -163,9 +163,10 @@ export default function Produtos() {
               <Text style={styles.heroGreeting}>
                 Olá, {nome}!
               </Text>
-
               <Text style={styles.heroSubtitle}>
-               Controle total das peças
+                {isCliente
+                  ? "Descubra suas peças favoritas"
+                  : "Controle total das peças"}
               </Text>
             </View>
 
@@ -199,17 +200,18 @@ export default function Produtos() {
             value={termoBusca}
             onChangeText={setTermoBusca}
           />
-          <TouchableOpacity onPress={() => setScannerBuscaVisible(true)}>
-            <Ionicons
-              name="barcode-outline"
-              size={24}
-              color={colors.dustypink}
-              style={{ marginRight: 10 }}
-            />
-          </TouchableOpacity>
+          {!isCliente && (
+            <TouchableOpacity onPress={() => setScannerBuscaVisible(true)}>
+              <Ionicons
+                name="barcode-outline"
+                size={24}
+                color={colors.dustypink}
+                style={{ marginRight: 10 }}
+              />
+            </TouchableOpacity>
+          )}
         </View>
 
-        {/* Carrossel de Categorias */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}

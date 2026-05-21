@@ -167,11 +167,23 @@ export default function ListaVendas() {
             />
             
             <Text style={styles.productText} numberOfLines={1} ellipsizeMode="tail">
-              {item.itens && item.itens.length > 0
-                ? `${item.itens[0].nome_produto || item.itens[0].produto_nome || "Produto"}${
-                    item.itens.length > 1 ? "..." : ""
-                  }`
-                : "Nenhum produto"}
+        {item.itens && item.itens.length > 0
+          ? (() => {
+              const nome =
+                item.itens[0].nome_produto ||
+                item.itens[0].produto_nome ||
+                "Produto";
+
+              const palavras = nome.split(" ");
+
+              const nomeLimitado =
+                palavras.length > 5
+                  ? palavras.slice(0, 4).join(" ") + "..."
+                  : nome;
+
+              return nomeLimitado;
+            })()
+          : "Nenhum produto"}
             </Text>
           </View>
 
@@ -496,6 +508,7 @@ const styles = StyleSheet.create({
     color: "#666",
     fontSize: 12,
   },
+
   moreItems: {
     color: "#999",
     marginTop: 4,
@@ -579,10 +592,9 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
 
-  /* NOVOS ESTILOS DO MODAL */
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(51, 43, 45, 0.45)", // Escurecimento suave voltado ao tom dusty
+    backgroundColor: "rgba(51, 43, 45, 0.45)",
     justifyContent: "flex-end",
   },
   modalCloseOverlay: {

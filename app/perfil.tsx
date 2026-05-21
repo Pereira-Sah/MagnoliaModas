@@ -31,7 +31,8 @@ const InfoItem = ({ icon, label, value, isLast = false }: any) => (
 export default function Perfil() {
   const [usuario, setUsuario] = useState<any>(null);
   const [carregando, setCarregando] = useState(true);
-
+  const isCliente = usuario?.role === "cliente";  
+  
   const DEFAULT_AVATAR =
     "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200";
 
@@ -181,35 +182,37 @@ export default function Perfil() {
           />
         </View>
 
+      {!isCliente && (
         <TouchableOpacity
-  style={perfilStyles.managementCard}
-  activeOpacity={0.85}
-  onPress={() => router.push("/cadastroFuncionario")}
->
-    <View style={perfilStyles.managementIcon}>
-      <Ionicons
-        name="person-add-outline"
-        size={22}
-        color="#FFF"
-      />
-    </View>
+          style={perfilStyles.managementCard}
+          activeOpacity={0.85}
+          onPress={() => router.push("/cadastroFuncionario")}
+        >
+          <View style={perfilStyles.managementIcon}>
+            <Ionicons
+              name="person-add-outline"
+              size={22}
+              color="#FFF"
+            />
+          </View>
 
-    <View style={{ flex: 1 }}>
-      <Text style={perfilStyles.managementTitle}>
-        Gerenciar equipe
-      </Text>
+          <View style={{ flex: 1 }}>
+            <Text style={perfilStyles.managementTitle}>
+              Gerenciar equipe
+            </Text>
 
-      <Text style={perfilStyles.managementSubtitle}>
-        Cadastrar novo funcionário
-      </Text>
-    </View>
+            <Text style={perfilStyles.managementSubtitle}>
+              Cadastrar novo funcionário
+            </Text>
+          </View>
 
-    <Ionicons
-      name="chevron-forward"
-      size={18}
-      color="#AAA"
-    />
-  </TouchableOpacity>
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color="#AAA"
+          />
+        </TouchableOpacity>
+      )}
 
 
 
