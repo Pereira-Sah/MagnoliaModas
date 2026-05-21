@@ -21,7 +21,7 @@ export default function TabBar() {
         <Ionicons
           name="home"
           size={28}
-          color={pathname === '/produtos' ? '#60875b' : '#e5aeab'}
+          color={pathname === '/produtos' ? '#B8C4A5' : '#DFA3B2'}
         />
       </TouchableOpacity>
 
@@ -29,17 +29,27 @@ export default function TabBar() {
         <Ionicons
           name="stats-chart"
           size={28}
-          color={pathname === '/dashboard' ? '#60875b' : '#e5aeab'}
+          color={pathname === '/dashboard' ? '#B8C4A5' : '#DFA3B2'}
         />
       </TouchableOpacity>
 
+        <TouchableOpacity onPress={() => router.push('/listaVendas')}>
+        <Ionicons
+          name="bag-handle"
+          size={28}
+          color={pathname === '/listaVendas' ? '#B8C4A5' : '#DFA3B2'}
+        />
+      </TouchableOpacity>
+      
       <TouchableOpacity onPress={() => router.push('/perfil')}>
         <Ionicons
           name="person"
           size={28}
-          color={pathname === '/perfil' ? '#60875b' : '#e5aeab'}
+          color={pathname === '/perfil' ? '#B8C4A5' : '#DFA3B2'}
         />
       </TouchableOpacity>
+
+
     </View>
   );
 }

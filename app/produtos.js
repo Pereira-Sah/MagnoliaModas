@@ -234,11 +234,11 @@ export default function Produtos() {
 
   </View>
 
-        <TouchableOpacity onPress={() => router.push("/listaVendas")}>
+        {/* <TouchableOpacity onPress={() => router.push("/listaVendas")}>
           <Text style={{ fontWeight: "600", color: colors.pink }}>
             Ver Vendas
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity
           onPress={() => router.push("/botaoImprimirEtiquetas")}
         >
@@ -280,7 +280,7 @@ export default function Produtos() {
             <Ionicons
               name="barcode-outline"
               size={24}
-              color={colors.pink}
+              color={colors.dustypink}
               style={{ marginRight: 10 }}
             />
           </TouchableOpacity>
