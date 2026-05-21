@@ -1,11 +1,20 @@
-import React from 'react';
-import { View, Text, Image, ScrollView, TouchableOpacity, Platform } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import * as SecureStore from 'expo-secure-store';
-import { router } from 'expo-router';
-
-import { perfilStyles, colors } from '../styles/perfilStyles';
-import TabBar from '../components/TabBar';
+import React, { useState, useCallback } from "react";
+import {
+  View,
+  Text,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Platform,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import * as SecureStore from "expo-secure-store";
+import { router, useFocusEffect } from "expo-router";
+import { perfilStyles, colors } from "../styles/perfilStyles";
+import TabBar from "../components/TabBar";
+import api from "../src/services/api";
 
 const InfoItem = ({ icon, label, value, isLast = false }: any) => (
   <View style={[perfilStyles.infoRow, isLast && { marginBottom: 0 }]}>
@@ -14,30 +23,75 @@ const InfoItem = ({ icon, label, value, isLast = false }: any) => (
     </View>
     <View>
       <Text style={perfilStyles.infoLabel}>{label}</Text>
-      <Text style={perfilStyles.infoValue}>{value}</Text>
+      <Text style={perfilStyles.infoValue}>{value || "Não informado"}</Text>
     </View>
   </View>
 );
 
 export default function Perfil() {
-  async function logout() {
-    try {
-      if (Platform.OS === 'web') {
-        localStorage.removeItem('userToken');
-      } else {
-        await SecureStore.deleteItemAsync('userToken');
+  const [usuario, setUsuario] = useState<any>(null);
+  const [carregando, setCarregando] = useState(true);
+
+  const DEFAULT_AVATAR =
+    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200";
+
+  useFocusEffect(
+    useCallback(() => {
+      async function buscarPerfil() {
+        try {
+          const response = await api.get("/auth/me");
+          setUsuario(response.data);
+        } catch (error: any) {
+          console.error("Erro ao buscar dados do perfil:", error);
+          Alert.alert(
+            "Erro",
+            "Não foi possível atualizar as informações do perfil.",
+          );
+        } finally {
+          setCarregando(false);
+        }
       }
 
-      router.replace('/');
+      buscarPerfil();
+    }, []),
+  );
+
+  async function logout() {
+    try {
+      if (Platform.OS === "web") {
+        localStorage.removeItem("userToken");
+      } else {
+        await SecureStore.deleteItemAsync("userToken");
+      }
+
+      router.replace("/");
     } catch (error) {
-      console.log('Erro ao fazer logout:', error);
-      alert('Não foi possível sair da conta.');
+      console.log("Erro ao fazer logout:", error);
+      alert("Não foi possível sair da conta.");
     }
+  }
+
+  const formatarCargo = (role: string) => {
+    if (role === "admin") return "Administradora";
+    if (role === "funcionario") return "Funcionária";
+    return "Cliente";
+  };
+
+  if (carregando) {
+    return (
+      <View
+        style={[
+          perfilStyles.container,
+          { justifyContent: "center", alignItems: "center" },
+        ]}
+      >
+        <ActivityIndicator size="large" color={colors.Lightolivegreen} />
+      </View>
+    );
   }
 
   return (
     <View style={perfilStyles.container}>
-
       <ScrollView
         contentContainerStyle={perfilStyles.scrollContainer}
         showsVerticalScrollIndicator={false}
@@ -45,30 +99,24 @@ export default function Perfil() {
         <View style={perfilStyles.avatarWrapper}>
           <Image
             source={{
-              uri: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200',
+              uri: usuario?.foto_url || DEFAULT_AVATAR,
             }}
             style={perfilStyles.avatar}
           />
           <TouchableOpacity
             style={perfilStyles.editIconButton}
             activeOpacity={0.7}
-            onPress={() => router.push('/editarPerfil')}
+            onPress={() => router.push("/editarPerfil")}
           >
-            <Ionicons
-              name="pencil"
-              size={16}
-              color={colors.white}
-            />
+            <Ionicons name="pencil" size={16} color={colors.white} />
           </TouchableOpacity>
         </View>
 
-        <Text style={perfilStyles.userName}>
-          Fernanda Magnolia
-        </Text>
+        <Text style={perfilStyles.userName}>{usuario?.nome || "Usuária"}</Text>
 
         <View style={perfilStyles.roleBadge}>
           <Text style={perfilStyles.roleText}>
-            Administradora
+            {formatarCargo(usuario?.role)}
           </Text>
         </View>
 
@@ -76,17 +124,17 @@ export default function Perfil() {
           <InfoItem
             icon="mail-outline"
             label="E-mail Cadastrado"
-            value="fernanda@magnoliamodas.com"
+            value={usuario?.email}
           />
           <InfoItem
             icon="call-outline"
             label="Telefone"
-            value="(11) 98888-7777"
+            value={usuario?.telefone}
           />
           <InfoItem
             icon="business-outline"
             label="Loja"
-            value="Magnolia Modas"
+            value={usuario?.loja}
             isLast
           />
         </View>
@@ -95,13 +143,16 @@ export default function Perfil() {
           <InfoItem
             icon="calendar-outline"
             label="Membro desde"
-            value="Janeiro de 2024"
+            value={usuario?.criado_em}
           />
+          
+          <TouchableOpacity onPress={() => router.push("/cadastro")}>
           <InfoItem
-            icon="cube-outline"
-            label="Produtos cadastrados pelo usuário"
-            value="128"
+            icon="person-add-outline"
+            label="Gerenciamento"
+            value="Cadastrar novo funcionário"
           />
+          </TouchableOpacity>
           <InfoItem
             icon="checkmark-circle-outline"
             label="Status"
@@ -115,20 +166,14 @@ export default function Perfil() {
           activeOpacity={0.6}
           onPress={logout}
         >
-          <Ionicons
-            name="log-out-outline"
-            size={20}
-            color={colors.danger}
-          />
-          <Text style={perfilStyles.logoutText}>
-            Sair da Conta
-          </Text>
+          <Ionicons name="log-out-outline" size={20} color={colors.danger} />
+          <Text style={perfilStyles.logoutText}>Sair da Conta</Text>
         </TouchableOpacity>
 
         <Text
           style={{
             marginTop: 20,
-            color: '#CCC',
+            color: "#CCC",
             fontSize: 10,
           }}
         >

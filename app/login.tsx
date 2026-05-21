@@ -19,17 +19,21 @@ export default function Login() {
   const [senha, setSenha] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+useEffect(() => {
     const verificarToken = async () => {
       let token;
-
+      let nomeUsuario; 
+      
       if (Platform.OS === 'web') {
         token = localStorage.getItem('userToken');
+        nomeUsuario = localStorage.getItem('userName');
       } else {
         token = await SecureStore.getItemAsync('userToken');
+        nomeUsuario = await SecureStore.getItemAsync('userName');
       }
 
       if (token) {
+        console.log("Usuário já logado:", nomeUsuario);
         router.replace('/produtos');
       } else {
         setLoading(false);
@@ -54,15 +58,19 @@ export default function Login() {
       });
 
       const token = response.data.token;
+      const nomeUsuario = response.data.user?.nome || response.data.nome || "Usuária";
 
       if (token) {
         if (Platform.OS === 'web') {
           localStorage.setItem('userToken', token);
+          localStorage.setItem('userName', nomeUsuario);
         } else {
           await SecureStore.setItemAsync('userToken', token);
+          await SecureStore.setItemAsync('userName', nomeUsuario);
         }
 
         router.replace('/produtos');
+      
       }
     } catch (error) {
       alert('Erro ao fazer login');
