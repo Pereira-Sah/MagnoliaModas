@@ -47,10 +47,11 @@ heroBlob: {
   width: 220,
   height: 200,
   borderRadius: 140,
-  backgroundColor: 'rgba(223,163,178,0.16)',
+  backgroundColor: '#b8c4a542',
   top: -90,
   right: -60,
 },
+
 
 heroTopRow: {
   flexDirection: 'row',
@@ -62,6 +63,26 @@ heroGreeting: {
   fontSize: 20,
   color: '#7D7D7D',
   fontFamily: fonts.regular,
+},
+
+heroSubtitle: {
+  marginTop: 4,
+  fontSize: 13,
+  color: '#9A9A9A',
+  fontFamily: fonts.regular,
+},
+
+heroIconContainer: {
+  width: 52,
+  height: 52,
+  borderRadius: 26,
+  backgroundColor: colors.dustypink,
+
+  justifyContent: 'center',
+  alignItems: 'center',
+
+  borderWidth: 1,
+  borderColor: colors.dustypink,
 },
 
 

@@ -25,14 +25,18 @@ export const perfilStyles = StyleSheet.create({
   },
 
 heroSection: {
-  marginBottom: 24,
   backgroundColor: colors.Warmbeigebackground,
-  paddingTop: 45,
+
+  paddingTop: 60,
   paddingHorizontal: 24,
-  paddingBottom: 30,
+  paddingBottom: 28,
+
   borderBottomLeftRadius: 36,
   borderBottomRightRadius: 36,
+
   overflow: 'hidden',
+
+  marginBottom: 10,
 },
 
 heroBlob: {
@@ -45,25 +49,40 @@ heroBlob: {
   right: -60,
 },
 
-heroTopRow: {
+heroBlob2: {
+  position: 'absolute',
+  width: 140,
+  height: 140,
+  borderRadius: 999,
+  backgroundColor: 'rgba(255,255,255,0.12)',
+  bottom: -40,
+  left: -20,
+},
+
+
+profileHeroRow: {
   flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
 },
 
-heroGreeting: {
-  fontSize: 20,
-  color: '#7D7D7D',
-  fontFamily: fonts.regular,
+
+profileInfo: {
+  flex: 1,
+  paddingRight: 16,
 },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 4,
-    borderColor: colors.white,
-    backgroundColor: '#EEE',
-  },
+
+
+
+avatar: {
+  width: 100,
+  height: 100,
+  borderRadius: 46,
+  borderWidth: 4,
+  borderColor: colors.white,
+  backgroundColor: '#EEE',
+},
+
 
   editIconButton: {
     position: 'absolute',
@@ -81,10 +100,17 @@ heroGreeting: {
   },
 
   userName: {
-    fontFamily: fonts.semiBold,
-    fontSize: 22,
-    color: colors.textMain,
+  fontSize: 20,
+  color: '#7D7D7D',
+  fontFamily: fonts.regular,
   },
+
+  heroSubtitle: {
+  marginTop: 4,
+  fontSize: 14,
+  color: '#9A8E86',
+  fontFamily: fonts.regular,
+},
 
   roleText: {
     fontFamily: fonts.regular,
@@ -92,7 +118,7 @@ heroGreeting: {
     color: colors.Lightolivegreen,
     textTransform: 'uppercase',
   },
-  // Info Cards
+
   sectionCard: {
     backgroundColor: colors.white,
     width: width - 32,
@@ -105,6 +131,50 @@ heroGreeting: {
     shadowRadius: 10,
     elevation: 3,
   },
+
+  managementCard: {
+  width: width - 32,
+  alignSelf: 'center',
+  backgroundColor: '#FFF',
+  marginTop: 20,
+  borderRadius: 22,
+  paddingVertical: 18,
+  paddingHorizontal: 18,
+
+  flexDirection: 'row',
+  alignItems: 'center',
+
+  shadowColor: '#000',
+  shadowOffset: { width: 0, height: 4 },
+  shadowOpacity: 0.05,
+  shadowRadius: 10,
+  elevation: 3,
+},
+
+managementIcon: {
+  width: 48,
+  height: 48,
+  borderRadius: 16,
+  backgroundColor: colors.dustypink,
+
+  justifyContent: 'center',
+  alignItems: 'center',
+
+  marginRight: 15,
+},
+
+managementTitle: {
+  fontSize: 15,
+  color: colors.textMain,
+  fontFamily: fonts.semiBold,
+},
+managementSubtitle: {
+  marginTop: 2,
+  fontSize: 13,
+  color: '#888',
+  fontFamily: fonts.regular,
+},
+
 
   infoRow: {
     flexDirection: 'row',
@@ -173,15 +243,26 @@ heroGreeting: {
     fontFamily: fonts.regular,
   },
 
-  cancelButton: {
-    marginTop: 18,
+cancelEditButton: {
+    flexDirection: 'row',
     alignItems: 'center',
-  },
+    justifyContent: 'center',
+    marginTop: 30,
+    padding: 18,
+    width: 230,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#FFEBEE',
+},
 
-  cancelText: {
-    color: '#888',
-    fontFamily: fonts.regular,
-  },
+cancelEditText: {
+    fontFamily: fonts.semiBold,
+    color: colors.danger,
+    marginLeft: 10,
+    fontSize: 16,
+},
+
+
 
   editScrollContainer: {
   paddingHorizontal: 20,
@@ -230,12 +311,9 @@ input: {
 
 saveButton: {
   backgroundColor: colors.Lightolivegreen,
-
   marginTop: 20,
   padding: 18,
-
   borderRadius: 15,
-
   flexDirection: 'row',
   justifyContent: 'center',
   alignItems: 'center',
@@ -276,8 +354,7 @@ editPageTitle: {
 
 scrollContainer: {
   alignItems: 'center',
-  paddingBottom: 100,
-  paddingTop: 60,
+  paddingBottom: 160,
 },
 
 avatarWrapper: {
@@ -289,9 +366,10 @@ avatarWrapper: {
 roleBadge: {
   backgroundColor: '#F0F4EF',
   paddingHorizontal: 12,
-  paddingVertical: 4,
+  paddingVertical: 5,
   borderRadius: 20,
-  marginTop: 5,
-  alignSelf: 'center',
+  marginTop: 12,
+  alignSelf: 'flex-start',
 },
+
 });

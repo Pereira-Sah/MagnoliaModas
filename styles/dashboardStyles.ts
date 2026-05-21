@@ -58,6 +58,110 @@ heroGreeting: {
   fontFamily: fonts.regular,
 },
 
+heroBlob2: {
+  position: "absolute",
+  width: 180,
+  height: 180,
+  borderRadius: 999,
+  backgroundColor: "rgba(184,196,165,0.15)",
+  bottom: -60,
+  left: -40,
+},
+
+heroMiniText: {
+  fontSize: 13,
+  color: "#888",
+  marginBottom: 6,
+  letterSpacing: 1,
+  textTransform: "uppercase",
+},
+
+heroSubText: {
+  color: "#777",
+  marginTop: 6,
+  fontSize: 14,
+},
+
+heroIconCircle: {
+  width: 58,
+  height: 58,
+  borderRadius: 999,
+  backgroundColor: colors.dustypink,
+
+  justifyContent: "center",
+  alignItems: "center",
+
+  shadowColor: colors.dustypink,
+  shadowOpacity: 0.25,
+  shadowRadius: 12,
+  elevation: 6,
+},
+
+heroActionsRow: {
+  flexDirection: "row",
+  marginTop: 26,
+  gap: 14,
+},
+
+heroActionCardPink: {
+  flex: 1,
+  backgroundColor: "rgba(255,255,255,0.55)",
+
+  borderRadius: 26,
+  padding: 18,
+
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,0.6)",
+},
+
+heroActionCardGreen: {
+  flex: 1,
+  backgroundColor: "rgba(255,255,255,0.55)",
+
+  borderRadius: 26,
+  padding: 18,
+
+  borderWidth: 1,
+  borderColor: "rgba(255,255,255,0.6)",
+},
+
+heroActionIconPink: {
+  width: 42,
+  height: 42,
+  borderRadius: 999,
+  backgroundColor: colors.dustypink,
+
+  justifyContent: "center",
+  alignItems: "center",
+
+  marginBottom: 14,
+},
+
+heroActionIconGreen: {
+  width: 42,
+  height: 42,
+  borderRadius: 999,
+  backgroundColor: colors.Lightolivegreen,
+
+  justifyContent: "center",
+  alignItems: "center",
+
+  marginBottom: 14,
+},
+
+heroActionTitle: {
+  fontSize: 15,
+  fontWeight: "700",
+  color: "#333",
+},
+
+heroActionSubtitle: {
+  marginTop: 4,
+  fontSize: 12,
+  color: "#777",
+  lineHeight: 18,
+},
+
 
   scrollContainer: {
     paddingHorizontal: 16,

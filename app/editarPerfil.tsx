@@ -44,6 +44,7 @@ export default function EditarPerfil() {
         }
       } catch (error: any) {
         console.error("Erro ao carregar dados do perfil:", error);
+
         Alert.alert(
           "Erro",
           "Não foi possível carregar os dados do seu perfil.",
@@ -79,6 +80,7 @@ export default function EditarPerfil() {
       setSalvando(true);
 
       const formData = new FormData();
+
       formData.append("nome", nome.trim());
       formData.append("email", email.trim());
       formData.append("telefone", telefone.trim());
@@ -89,8 +91,12 @@ export default function EditarPerfil() {
 
       if (foto && foto.startsWith("file://")) {
         const filename = foto.split("/").pop();
+
         const match = /\.(\w+)$/.exec(filename || "");
-        const type = match ? `image/${match[1]}` : `image`;
+
+        const type = match
+          ? `image/${match[1]}`
+          : `image`;
 
         formData.append("imagem", {
           uri: foto,
@@ -99,24 +105,38 @@ export default function EditarPerfil() {
         } as any);
       }
 
-      const response = await api.put("/auth/atualizar", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
+      const response = await api.put(
+        "/auth/atualizar",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         },
-      });
+      );
 
       if (response.status === 200) {
-        Alert.alert("Sucesso", "Perfil atualizado com sucesso!", [
-          {
-            text: "OK",
-            onPress: () => router.back(),
-          },
-        ]);
+        Alert.alert(
+          "Sucesso",
+          "Perfil atualizado com sucesso!",
+          [
+            {
+              text: "OK",
+              onPress: () => router.back(),
+            },
+          ],
+        );
       }
     } catch (error: any) {
-      console.error("Erro ao salvar alterações do perfil:", error);
+      console.error(
+        "Erro ao salvar alterações do perfil:",
+        error,
+      );
+
       const mensagemErro =
-        error.response?.data?.detail || "Não foi possível atualizar o perfil.";
+        error.response?.data?.detail ||
+        "Não foi possível atualizar o perfil.";
+
       Alert.alert("Erro ao salvar", mensagemErro);
     } finally {
       setSalvando(false);
@@ -128,55 +148,88 @@ export default function EditarPerfil() {
       <View
         style={[
           perfilStyles.container,
-          { justifyContent: "center", alignItems: "center" },
+          {
+            justifyContent: "center",
+            alignItems: "center",
+          },
         ]}
       >
-        <ActivityIndicator size="large" color={colors.Lightolivegreen} />
+        <ActivityIndicator
+          size="large"
+          color={colors.Lightolivegreen}
+        />
       </View>
     );
   }
 
   return (
     <View style={perfilStyles.container}>
+
       <View style={perfilStyles.heroSection}>
+
         <View style={perfilStyles.heroBlob} />
-        <View style={perfilStyles.heroTopRow}>
-          <View>
-            <Text style={perfilStyles.heroGreeting}>
-              Olá, {nome ? nome.split(" ")[0] : "Usuária"}!
+        <View style={perfilStyles.heroBlob2} />
+
+        <View style={perfilStyles.profileHeroRow}>
+
+          <View style={perfilStyles.profileInfo}>
+
+            <Text style={perfilStyles.userName}>
+              Editar Perfil
             </Text>
+
+            <Text style={perfilStyles.heroSubtitle}>
+              Atualize suas informações
+            </Text>
+
           </View>
+
+          <View style={perfilStyles.avatarWrapper}>
+
+            <Image
+              source={{
+                uri: foto || DEFAULT_AVATAR,
+              }}
+              style={perfilStyles.avatar}
+            />
+
+            <TouchableOpacity
+              style={perfilStyles.cameraButton}
+              onPress={alterarFoto}
+            >
+              <Ionicons
+                name="camera"
+                size={16}
+                color={colors.white}
+              />
+            </TouchableOpacity>
+
+          </View>
+
         </View>
+
       </View>
 
       <ScrollView
         contentContainerStyle={perfilStyles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={perfilStyles.editPageTitle}>Editar Perfil</Text>
 
-        <View style={perfilStyles.avatarWrapper}>
-          <Image
-            source={{ uri: foto || DEFAULT_AVATAR }}
-            style={perfilStyles.avatar}
-          />
 
-          <TouchableOpacity
-            style={perfilStyles.cameraButton}
-            onPress={alterarFoto}
-          >
-            <Ionicons name="camera" size={16} color={colors.white} />
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity onPress={alterarFoto}>
-          <Text style={perfilStyles.changePhotoText}>Alterar foto</Text>
-        </TouchableOpacity>
 
         <View style={perfilStyles.sectionCard}>
-          <Text style={perfilStyles.inputLabel}>Nome</Text>
+
+          <Text style={perfilStyles.inputLabel}>
+            Nome
+          </Text>
+
           <View style={perfilStyles.inputContainer}>
-            <Ionicons name="person-outline" size={18} color="#888" />
+            <Ionicons
+              name="person-outline"
+              size={18}
+              color="#888"
+            />
+
             <TextInput
               value={nome}
               onChangeText={setNome}
@@ -185,9 +238,17 @@ export default function EditarPerfil() {
             />
           </View>
 
-          <Text style={perfilStyles.inputLabel}>Email</Text>
+          <Text style={perfilStyles.inputLabel}>
+            Email
+          </Text>
+
           <View style={perfilStyles.inputContainer}>
-            <Ionicons name="mail-outline" size={18} color="#888" />
+            <Ionicons
+              name="mail-outline"
+              size={18}
+              color="#888"
+            />
+
             <TextInput
               value={email}
               onChangeText={setEmail}
@@ -198,9 +259,17 @@ export default function EditarPerfil() {
             />
           </View>
 
-          <Text style={perfilStyles.inputLabel}>Telefone</Text>
+          <Text style={perfilStyles.inputLabel}>
+            Telefone
+          </Text>
+
           <View style={perfilStyles.inputContainer}>
-            <Ionicons name="call-outline" size={18} color="#888" />
+            <Ionicons
+              name="call-outline"
+              size={18}
+              color="#888"
+            />
+
             <TextInput
               value={telefone}
               onChangeText={setTelefone}
@@ -210,9 +279,17 @@ export default function EditarPerfil() {
             />
           </View>
 
-          <Text style={perfilStyles.inputLabel}>Nova senha</Text>
+          <Text style={perfilStyles.inputLabel}>
+            Nova senha
+          </Text>
+
           <View style={perfilStyles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={18} color="#888" />
+            <Ionicons
+              name="lock-closed-outline"
+              size={18}
+              color="#888"
+            />
+
             <TextInput
               value={senha}
               onChangeText={setSenha}
@@ -221,23 +298,50 @@ export default function EditarPerfil() {
               style={perfilStyles.input}
             />
           </View>
+
         </View>
 
         <TouchableOpacity
-          style={[perfilStyles.saveButton, salvando && { opacity: 0.6 }]}
+          style={[
+            perfilStyles.saveButton,
+            salvando && { opacity: 0.6 },
+          ]}
           onPress={salvar}
           disabled={salvando}
         >
           {salvando ? (
-            <ActivityIndicator size="small" color={colors.white} />
+            <ActivityIndicator
+              size="small"
+              color={colors.white}
+            />
           ) : (
             <>
-              <Ionicons name="save-outline" size={20} color={colors.white} />
-              <Text style={perfilStyles.saveButtonText}>Salvar alterações</Text>
+              <Ionicons
+                name="save-outline"
+                size={20}
+                color={colors.white}
+              />
+
+              <Text style={perfilStyles.saveButtonText}>
+                Salvar alterações
+              </Text>
             </>
           )}
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={perfilStyles.cancelEditButton}
+          activeOpacity={0.7}
+          onPress={() => router.back()}
+        >
+          <Text style={perfilStyles.cancelEditText}>
+            Cancelar
+          </Text>
+          
+        </TouchableOpacity>
+
       </ScrollView>
+
     </View>
   );
 }

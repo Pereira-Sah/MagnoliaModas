@@ -92,33 +92,60 @@ export default function Perfil() {
 
   return (
     <View style={perfilStyles.container}>
+      <View style={perfilStyles.heroSection}>
+
+  <View style={perfilStyles.heroBlob} />
+  <View style={perfilStyles.heroBlob2} />
+
+<View style={perfilStyles.profileHeroRow}>
+
+  <View style={perfilStyles.profileInfo}>
+    <Text style={perfilStyles.userName}>
+      {usuario?.nome || "Usuária"}
+    </Text>
+
+    <Text style={perfilStyles.heroSubtitle}>
+      Sua área pessoal
+    </Text>
+
+    <View style={perfilStyles.roleBadge}>
+      <Text style={perfilStyles.roleText}>
+        {formatarCargo(usuario?.role)}
+      </Text>
+    </View>
+  </View>
+
+  <View style={perfilStyles.avatarWrapper}>
+    <Image
+      source={{
+        uri: usuario?.foto_url || DEFAULT_AVATAR,
+      }}
+      style={perfilStyles.avatar}
+    />
+
+    <TouchableOpacity
+      style={perfilStyles.editIconButton}
+      activeOpacity={0.7}
+      onPress={() => router.push("/editarPerfil")}
+    >
+      <Ionicons
+        name="pencil"
+        size={16}
+        color={colors.white}
+      />
+    </TouchableOpacity>
+  </View>
+
+</View>
+
+</View>
+
       <ScrollView
         contentContainerStyle={perfilStyles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        <View style={perfilStyles.avatarWrapper}>
-          <Image
-            source={{
-              uri: usuario?.foto_url || DEFAULT_AVATAR,
-            }}
-            style={perfilStyles.avatar}
-          />
-          <TouchableOpacity
-            style={perfilStyles.editIconButton}
-            activeOpacity={0.7}
-            onPress={() => router.push("/editarPerfil")}
-          >
-            <Ionicons name="pencil" size={16} color={colors.white} />
-          </TouchableOpacity>
-        </View>
 
-        <Text style={perfilStyles.userName}>{usuario?.nome || "Usuária"}</Text>
 
-        <View style={perfilStyles.roleBadge}>
-          <Text style={perfilStyles.roleText}>
-            {formatarCargo(usuario?.role)}
-          </Text>
-        </View>
 
         <View style={perfilStyles.sectionCard}>
           <InfoItem
@@ -145,14 +172,7 @@ export default function Perfil() {
             label="Membro desde"
             value={usuario?.criado_em}
           />
-          
-          <TouchableOpacity onPress={() => router.push("/cadastro")}>
-          <InfoItem
-            icon="person-add-outline"
-            label="Gerenciamento"
-            value="Cadastrar novo funcionário"
-          />
-          </TouchableOpacity>
+
           <InfoItem
             icon="checkmark-circle-outline"
             label="Status"
@@ -160,6 +180,38 @@ export default function Perfil() {
             isLast
           />
         </View>
+
+        <TouchableOpacity
+  style={perfilStyles.managementCard}
+  activeOpacity={0.85}
+  onPress={() => router.push("/cadastroFuncionario")}
+>
+    <View style={perfilStyles.managementIcon}>
+      <Ionicons
+        name="person-add-outline"
+        size={22}
+        color="#FFF"
+      />
+    </View>
+
+    <View style={{ flex: 1 }}>
+      <Text style={perfilStyles.managementTitle}>
+        Gerenciar equipe
+      </Text>
+
+      <Text style={perfilStyles.managementSubtitle}>
+        Cadastrar novo funcionário
+      </Text>
+    </View>
+
+    <Ionicons
+      name="chevron-forward"
+      size={18}
+      color="#AAA"
+    />
+  </TouchableOpacity>
+
+
 
         <TouchableOpacity
           style={perfilStyles.logoutButton}
@@ -170,15 +222,7 @@ export default function Perfil() {
           <Text style={perfilStyles.logoutText}>Sair da Conta</Text>
         </TouchableOpacity>
 
-        <Text
-          style={{
-            marginTop: 20,
-            color: "#CCC",
-            fontSize: 10,
-          }}
-        >
-          Magnolia Systems - Todos os direitos reservados
-        </Text>
+
       </ScrollView>
 
       <TabBar />
