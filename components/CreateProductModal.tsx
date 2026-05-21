@@ -125,9 +125,11 @@ function removerVariacao(index: number) {
   }
 
   async function handlePhotoCaptured(uri: string) {
-    setCameraVisible(false);
     setImageUrl(uri);
+
     await IAProductModal(uri);
+
+    setCameraVisible(false);
   }
 
   const handleTagPress = (tag: string) => {

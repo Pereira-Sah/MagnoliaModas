@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Modal, View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
+import { colors } from '../styles/produtosStyles';
 
 interface ScannerProps {
   visible: boolean;
@@ -59,25 +60,39 @@ export default function ScannerModal({ visible, onClose, onCodeScanned }: Scanne
 }
 
 const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.8)', justifyContent: 'center', alignItems: 'center' },
-  cameraContainer: { width: '90%', height: '70%', borderRadius: 20, overflow: 'hidden', backgroundColor: 'black' },
-  camera: { flex: 1 },
+overlay: { 
+    flex: 1, 
+    backgroundColor: 'black', 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  cameraContainer: { 
+    width: '100%', 
+    height: '100%',
+  },
+  camera: { 
+    flex: 1 
+  },
   scannerFrame: {
     position: 'absolute',
-    top: '30%',
-    left: '10%',
-    width: '80%',
-    height: '40%',
-    borderWidth: 2,
-    borderColor: '#FF1493',
-    borderRadius: 10,
+    top: '35%',
+    left: '15%',
+    width: '70%',
+    height: '30%',
+    borderWidth: 3,
+    borderColor: colors.Lightolivegreen,
+    borderRadius: 16, 
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 10,
   },
-  laser: { width: '90%', height: 2, backgroundColor: 'red', shadowColor: 'red', shadowOffset: {width: 0, height: 0}, shadowOpacity: 1, shadowRadius: 5 },
+  laser: { width: '90%', height: 2, backgroundColor: colors.dustypink, },
   closeBtn: { position: 'absolute', top: 20, right: 20 },
   container: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
   text: { fontSize: 16, textAlign: 'center', marginBottom: 20 },
-  button: { backgroundColor: '#FF1493', padding: 15, borderRadius: 10 },
+  button: { backgroundColor: colors.dustypink, padding: 15, borderRadius: 10 },
   buttonText: { color: 'white', fontWeight: 'bold' }
 });
