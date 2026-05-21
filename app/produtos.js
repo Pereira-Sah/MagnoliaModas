@@ -7,8 +7,11 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
+  Platform,
   ActivityIndicator,
 } from "react-native";
+import * as SecureStore from 'expo-secure-store';
+
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../src/services/api";
@@ -133,7 +136,22 @@ export default function Produtos() {
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("Tudo");
 
   const categorias = ["Tudo", "Camisetas","Casacos", "Vestidos", "Calças", "Acessórios","Sapatos", "Outros"];
+  const [nome, setNome] = useState('Usuária');
 
+  useEffect(() => {
+    const obterNome = async () => {
+      let nomeSalvo;
+      if (Platform.OS === 'web') {
+        nomeSalvo = localStorage.getItem('userName');
+      } else {
+        nomeSalvo = await SecureStore.getItemAsync('userName');
+      }
+      
+      if (nomeSalvo) setNome(nomeSalvo);
+    };
+
+    obterNome();
+  }, []);
   async function carregarProdutos(forcarAtualizacao = false) {
   try {
     setCarregando(true)
@@ -226,7 +244,7 @@ export default function Produtos() {
       <View>
 
         <Text style={styles.heroGreeting}>
-          Olá, "usuario" ! 
+          Olá, {nome}! 
         </Text>
       </View>
 
