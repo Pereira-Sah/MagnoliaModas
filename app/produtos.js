@@ -10,7 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import * as SecureStore from 'expo-secure-store';
+import * as SecureStore from "expo-secure-store";
 
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -41,26 +41,35 @@ export default function Produtos() {
   const [termoBusca, setTermoBusca] = useState("");
   const [categoriaSelecionada, setCategoriaSelecionada] = useState("Tudo");
 
-  const categorias = ["Tudo", "Camisetas","Casacos", "Vestidos", "Calças", "Acessórios","Sapatos", "Outros"];
-  const [nome, setNome] = useState('Usuária');
-  
+  const categorias = [
+    "Tudo",
+    "Camisetas",
+    "Casacos",
+    "Vestidos",
+    "Calças",
+    "Acessórios",
+    "Sapatos",
+    "Outros",
+  ];
+  const [nome, setNome] = useState("Usuária");
+
   const [isCliente, setIsCliente] = useState(false);
 
   useEffect(() => {
     const obterDadosUsuario = async () => {
       let nomeSalvo;
       let roleSalva;
-      
-      if (Platform.OS === 'web') {
-        nomeSalvo = localStorage.getItem('userName');
-        roleSalva = localStorage.getItem('userRole');
+
+      if (Platform.OS === "web") {
+        nomeSalvo = localStorage.getItem("userName");
+        roleSalva = localStorage.getItem("userRole");
       } else {
-        nomeSalvo = await SecureStore.getItemAsync('userName');
-        roleSalva = await SecureStore.getItemAsync('userRole');
+        nomeSalvo = await SecureStore.getItemAsync("userName");
+        roleSalva = await SecureStore.getItemAsync("userRole");
       }
-      
+
       if (nomeSalvo) setNome(nomeSalvo);
-      if (roleSalva === 'cliente') {
+      if (roleSalva === "cliente") {
         setIsCliente(true);
       }
     };
@@ -139,17 +148,17 @@ export default function Produtos() {
 
   return (
     <View style={styles.container}>
-       
       <View style={styles.headerContainer}>
         <View style={styles.heroSection}>
           <View style={styles.heroBlob} />
+
           <View style={styles.heroTopRow}>
             <View>
               <Text style={styles.heroGreeting}>
-                {isCliente ? `Bem-vinda, ${nome}! ✨` : `Olá, ${nome}!`} 
+                {isCliente ? `Bem-vinda, ${nome}! ✨` : `Olá, ${nome}!`}
               </Text>
               {isCliente && (
-                <Text style={{ color: '#666', fontSize: 13, marginTop: 2 }}>
+                <Text style={{ color: "#666", fontSize: 13, marginTop: 2 }}>
                   Explore nossa coleção e monte o look perfeito
                 </Text>
               )}
@@ -157,6 +166,31 @@ export default function Produtos() {
           </View>
         </View>
 
+        {/* <TouchableOpacity onPress={() => router.push("/listaVendas")}>
+          <Text style={{ fontWeight: "600", color: colors.pink }}>
+            Ver Vendas
+          </Text>
+        </TouchableOpacity> */}
+        <TouchableOpacity
+          onPress={() => router.push("/botaoImprimirEtiquetas")}
+        >
+          <Text style={{ color: "#666", marginTop: 4 }}>
+            Imprimir Etiquetas
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={imprimirRelatorioEstoque}>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}
+          >
+            <Ionicons
+              name="print-outline"
+              size={16}
+              color={colors.pink}
+              style={{ marginRight: 4 }}
+            />
+            <Text style={{ color: "#666" }}>Imprimir para a Feira</Text>
+          </View>
+        </TouchableOpacity>
         {/* BOTÕES ADM PROTEGIDOS: Só renderizam se NÃO for cliente */}
         {!isCliente && (
           <View style={{ marginBottom: 10 }}>
@@ -165,14 +199,31 @@ export default function Produtos() {
                 Ver Vendas
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => router.push("/botaoImprimirEtiquetas")}>
+            <TouchableOpacity
+              onPress={() => router.push("/botaoImprimirEtiquetas")}
+            >
               <Text style={{ color: "#666", marginTop: 4 }}>
                 Imprimir Etiqueta
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={async () => { /* Sua função de imprimir aqui */ }}>
-              <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
-                <Ionicons name="print-outline" size={16} color={colors.pink} style={{ marginRight: 4 }} />
+            <TouchableOpacity
+              onPress={async () => {
+                /* Sua função de imprimir aqui */
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 4,
+                }}
+              >
+                <Ionicons
+                  name="print-outline"
+                  size={16}
+                  color={colors.pink}
+                  style={{ marginRight: 4 }}
+                />
                 <Text style={{ color: "#666" }}>Imprimir para a Feira</Text>
               </View>
             </TouchableOpacity>
@@ -181,28 +232,52 @@ export default function Produtos() {
 
         {/* Barra de Pesquisa */}
         <View style={styles.searchSection}>
-          <Ionicons name="search-outline" size={20} color="#999" style={styles.searchIcon} />
+          <Ionicons
+            name="search-outline"
+            size={20}
+            color="#999"
+            style={styles.searchIcon}
+          />
           <TextInput
             style={styles.searchInput}
-            placeholder={isCliente ? "Procurar aquele look..." : "Pesquisar no estoque..."}
+            placeholder={
+              isCliente ? "Procurar aquele look..." : "Pesquisar no estoque..."
+            }
             placeholderTextColor="#999"
             value={termoBusca}
             onChangeText={setTermoBusca}
           />
           <TouchableOpacity onPress={() => setScannerBuscaVisible(true)}>
-            <Ionicons name="barcode-outline" size={24} color={colors.pink} style={{ marginRight: 10 }} />
+            <Ionicons
+              name="barcode-outline"
+              size={24}
+              color={colors.dustypink}
+              style={{ marginRight: 10 }}
+            />
           </TouchableOpacity>
         </View>
 
         {/* Carrossel de Categorias */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterScroll}
+        >
           {categorias.map((tipo) => (
             <TouchableOpacity
               key={tipo}
               onPress={() => setCategoriaSelecionada(tipo)}
-              style={[styles.filterPill, categoriaSelecionada === tipo && styles.filterPillActive]}
+              style={[
+                styles.filterPill,
+                categoriaSelecionada === tipo && styles.filterPillActive,
+              ]}
             >
-              <Text style={[styles.filterPillText, categoriaSelecionada === tipo && styles.filterPillTextActive]}>
+              <Text
+                style={[
+                  styles.filterPillText,
+                  categoriaSelecionada === tipo && styles.filterPillTextActive,
+                ]}
+              >
                 {tipo}
               </Text>
             </TouchableOpacity>
@@ -211,7 +286,9 @@ export default function Produtos() {
       </View>
 
       {carregando && listaFiltrada.length === 0 ? (
-        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
           <ActivityIndicator size="large" color={colors.pink} />
         </View>
       ) : (
@@ -240,11 +317,14 @@ export default function Produtos() {
             onPress={() => setCreateModalVisible(true)}
             activeOpacity={0.8}
           >
-            <Ionicons name="add" size={30} color='white' />
+            <Ionicons name="add" size={30} color="white" />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.fab, { bottom: 230, backgroundColor: colors.Lightolivegreen }]}
+            style={[
+              styles.fab,
+              { bottom: 230, backgroundColor: colors.Lightolivegreen },
+            ]}
             onPress={() => setSaleModalVisible(true)}
             activeOpacity={0.8}
           >
@@ -252,7 +332,7 @@ export default function Produtos() {
           </TouchableOpacity>
         </>
       )}
-      
+
       <ProductModal
         visible={modalVisible}
         produto={produtoSelecionado}
@@ -263,7 +343,7 @@ export default function Produtos() {
 
           router.push({
             pathname: "/combinacaoRoupas",
-            params: { produtoInicialId: prod.id }
+            params: { produtoInicialId: prod.id },
           });
         }}
       />
