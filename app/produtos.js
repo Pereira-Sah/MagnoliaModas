@@ -23,103 +23,9 @@ import TabBar from "../components/TabBar";
 import { router } from "expo-router";
 import ScannerModal from "../components/ScannerModal";
 import CreateSaleModal from "../components/CreateSaleModal";
-
-const CACHE_KEY = "@magnolia:produtos";
 import * as Print from "expo-print";
 
-async function imprimirRelatorioEstoque() {
-  try {
-    const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
-
-    if (!cacheLocal) {
-      alert(
-        "Nenhum produto encontrado no cache para imprimir. Carregue a lista primeiro.",
-      );
-      return;
-    }
-
-    const produtos = JSON.parse(cacheLocal);
-
-    if (produtos.length === 0) {
-      alert("A sua lista de produtos está vazia.");
-      return;
-    }
-
-    const produtosOrdenados = [...produtos].sort((a, b) => {
-      const nomeA = a.nome || "";
-      const nomeB = b.nome || "";
-      return nomeA.localeCompare(nomeB, "pt-BR", { sensitivity: "base" });
-    });
-
-    const linhasTabela = produtosOrdenados
-      .map((p, index) => {
-        const estoqueTexto =
-          p.estoque && Array.isArray(p.estoque)
-            ? p.estoque
-                .map((e) => `${e.tamanho}: ${e.quantidade}un`)
-                .join(" | ")
-            : "Verificar no app";
-
-        return `
-        <tr style="background-color: ${index % 2 === 0 ? "#ffffff" : "#f9f9f9"};">
-          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">${p.nome}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #555;">${p.categoria || "Geral"}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: center;">R$ ${Number(p.preco_base).toFixed(2)}</td>
-          <td style="padding: 10px; border-bottom: 1px solid #ddd; font-size: 12px;">${estoqueTexto}</td>
-        </tr>
-      `;
-      })
-      .join("");
-
-    const htmlDaImpressao = `
-      <html>
-        <head>
-          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
-          <style>
-            body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px; color: #333; }
-            .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #FFC0CB; padding-bottom: 10px; }
-            .header h1 { margin: 0; color: #FFC0CB; font-size: 28px; }
-            .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-            th { background-color: #FFC0CB; color: white; padding: 12px; text-align: left; font-size: 14px; }
-            .footer { margin-top: 30px; text-align: center; font-size: 11px; color: #999; border-top: 1px solid #eee; padding-top: 10px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h1>Magnólia Modas</h1>
-            <p>Relatório de Estoque para Feira — Gerado em ${new Date().toLocaleDateString("pt-BR")}</p>
-          </div>
-          
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 35%;">Produto</th>
-                <th style="width: 20%;">Categoria</th>
-                <th style="width: 15%; text-align: center;">Preço</th>
-                <th style="width: 30%;">Grade de Estoque</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${linhasTabela}
-            </tbody>
-          </table>
-
-          <div class="footer">
-            <p>Magnólia Modas App — Controle de Estoque Inteligente</p>
-          </div>
-        </body>
-      </html>
-    `;
-
-    await Print.printAsync({
-      html: htmlDaImpressao,
-    });
-  } catch (error) {
-    console.error("Erro ao gerar impressão:", error);
-    alert("Não foi possível abrir a tela de impressão.");
-  }
-}
+const CACHE_KEY = "@magnolia:produtos";
 
 export default function Produtos() {
   const [todosProdutos, setTodosProdutos] = useState([]);
@@ -137,51 +43,55 @@ export default function Produtos() {
 
   const categorias = ["Tudo", "Camisetas","Casacos", "Vestidos", "Calças", "Acessórios","Sapatos", "Outros"];
   const [nome, setNome] = useState('Usuária');
+  
+  const [isCliente, setIsCliente] = useState(false);
 
   useEffect(() => {
-    const obterNome = async () => {
+    const obterDadosUsuario = async () => {
       let nomeSalvo;
+      let roleSalva;
+      
       if (Platform.OS === 'web') {
         nomeSalvo = localStorage.getItem('userName');
+        roleSalva = localStorage.getItem('userRole');
       } else {
         nomeSalvo = await SecureStore.getItemAsync('userName');
+        roleSalva = await SecureStore.getItemAsync('userRole');
       }
       
       if (nomeSalvo) setNome(nomeSalvo);
+      if (roleSalva === 'cliente') {
+        setIsCliente(true);
+      }
     };
 
-    obterNome();
+    obterDadosUsuario();
   }, []);
+
   async function carregarProdutos(forcarAtualizacao = false) {
-  try {
-    setCarregando(true)
-
-    if (!forcarAtualizacao) {
-      const cacheLocal = await AsyncStorage.getItem(CACHE_KEY)
-      if (cacheLocal) {
-        const produtosSalvos = JSON.parse(cacheLocal)
-        setTodosProdutos(produtosSalvos)
-        filtrarLocalmente(produtosSalvos, termoBusca, categoriaSelecionada)
-        setCarregando(false)
-        return
+    try {
+      setCarregando(true);
+      if (!forcarAtualizacao) {
+        const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
+        if (cacheLocal) {
+          const produtosSalvos = JSON.parse(cacheLocal);
+          setTodosProdutos(produtosSalvos);
+          filtrarLocalmente(produtosSalvos, termoBusca, categoriaSelecionada);
+          setCarregando(false);
+          return;
+        }
       }
+      await sincronizarComBackend();
+    } catch (error) {
+      console.error("Erro no fluxo de carregar produtos:", error);
+    } finally {
+      setCarregando(false);
     }
-
-    await sincronizarComBackend()
-  } catch (error) {
-    console.error("Erro no fluxo de carregar produtos:", error)
-  } finally {
-    setCarregando(false)
   }
-}
 
   async function sincronizarComBackend() {
     try {
-      console.log(
-        "Buscando lista mestre de produtos na API para atualizar cache...",
-      );
       const response = await api.get("/produtos/");
-
       if (Array.isArray(response.data)) {
         setTodosProdutos(response.data);
         await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(response.data));
@@ -194,16 +104,13 @@ export default function Produtos() {
 
   function filtrarLocalmente(produtos, busca, categoria) {
     let resultado = [...produtos];
-
     if (busca.trim() !== "") {
       const termo = busca.toLowerCase().trim();
       resultado = resultado.filter((p) => p.nome.toLowerCase().includes(termo));
     }
-
     if (categoria !== "Tudo") {
       resultado = resultado.filter((p) => p.categoria === categoria);
     }
-
     setListaFiltrada(resultado);
   }
 
@@ -233,98 +140,69 @@ export default function Produtos() {
   return (
     <View style={styles.container}>
        
-<View style={styles.headerContainer}>
-
-  <View style={styles.heroSection}>
-
-    <View style={styles.heroBlob} />
-
-    <View style={styles.heroTopRow}>
-
-      <View>
-
-        <Text style={styles.heroGreeting}>
-          Olá, {nome}! 
-        </Text>
-      </View>
-
-    </View>
-
-  </View>
-
-        <TouchableOpacity onPress={() => router.push("/listaVendas")}>
-          <Text style={{ fontWeight: "600", color: colors.pink }}>
-            Ver Vendas
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => router.push("/botaoImprimirEtiquetas")}
-        >
-          <Text style={{ color: "#666", marginTop: 4 }}>
-            Imprimir Etiquetas
-          </Text>
-        </TouchableOpacity>
-<TouchableOpacity onPress={imprimirRelatorioEstoque}>
-        <View
-          style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}
-        >
-          <Ionicons
-            name="print-outline"
-            size={16}
-            color={colors.pink}
-            style={{ marginRight: 4 }}
-          />
-          <Text style={{ color: "#666" }}>Imprimir para a Feira</Text>
+      <View style={styles.headerContainer}>
+        <View style={styles.heroSection}>
+          <View style={styles.heroBlob} />
+          <View style={styles.heroTopRow}>
+            <View>
+              <Text style={styles.heroGreeting}>
+                {isCliente ? `Bem-vinda, ${nome}! ✨` : `Olá, ${nome}!`} 
+              </Text>
+              {isCliente && (
+                <Text style={{ color: '#666', fontSize: 13, marginTop: 2 }}>
+                  Explore nossa coleção e monte o look perfeito
+                </Text>
+              )}
+            </View>
+          </View>
         </View>
-      </TouchableOpacity>
+
+        {/* BOTÕES ADM PROTEGIDOS: Só renderizam se NÃO for cliente */}
+        {!isCliente && (
+          <View style={{ marginBottom: 10 }}>
+            <TouchableOpacity onPress={() => router.push("/listaVendas")}>
+              <Text style={{ fontWeight: "600", color: colors.pink }}>
+                Ver Vendas
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/botaoImprimirEtiquetas")}>
+              <Text style={{ color: "#666", marginTop: 4 }}>
+                Imprimir Etiqueta
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={async () => { /* Sua função de imprimir aqui */ }}>
+              <View style={{ flexDirection: "row", alignItems: "center", marginTop: 4 }}>
+                <Ionicons name="print-outline" size={16} color={colors.pink} style={{ marginRight: 4 }} />
+                <Text style={{ color: "#666" }}>Imprimir para a Feira</Text>
+              </View>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Barra de Pesquisa */}
         <View style={styles.searchSection}>
-          <Ionicons
-            name="search-outline"
-            size={20}
-            color="#999"
-            style={styles.searchIcon}
-          />
-
+          <Ionicons name="search-outline" size={20} color="#999" style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Pesquisar no estoque..."
+            placeholder={isCliente ? "Procurar aquele look..." : "Pesquisar no estoque..."}
             placeholderTextColor="#999"
             value={termoBusca}
             onChangeText={setTermoBusca}
           />
-
           <TouchableOpacity onPress={() => setScannerBuscaVisible(true)}>
-            <Ionicons
-              name="barcode-outline"
-              size={24}
-              color={colors.pink}
-              style={{ marginRight: 10 }}
-            />
+            <Ionicons name="barcode-outline" size={24} color={colors.pink} style={{ marginRight: 10 }} />
           </TouchableOpacity>
         </View>
 
         {/* Carrossel de Categorias */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.filterScroll}
-        >
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
           {categorias.map((tipo) => (
             <TouchableOpacity
               key={tipo}
               onPress={() => setCategoriaSelecionada(tipo)}
-              style={[
-                styles.filterPill,
-                categoriaSelecionada === tipo && styles.filterPillActive,
-              ]}
+              style={[styles.filterPill, categoriaSelecionada === tipo && styles.filterPillActive]}
             >
-              <Text
-                style={[
-                  styles.filterPillText,
-                  categoriaSelecionada === tipo && styles.filterPillTextActive,
-                ]}
-              >
+              <Text style={[styles.filterPillText, categoriaSelecionada === tipo && styles.filterPillTextActive]}>
                 {tipo}
               </Text>
             </TouchableOpacity>
@@ -333,9 +211,7 @@ export default function Produtos() {
       </View>
 
       {carregando && listaFiltrada.length === 0 ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
           <ActivityIndicator size="large" color={colors.pink} />
         </View>
       ) : (
@@ -356,29 +232,40 @@ export default function Produtos() {
         />
       )}
 
+      {/* BOTOES FLUTUANTES PROTEGIDOS: Ocultos para o Cliente */}
+      {!isCliente && (
+        <>
+          <TouchableOpacity
+            style={styles.fab}
+            onPress={() => setCreateModalVisible(true)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="add" size={30} color='white' />
+          </TouchableOpacity>
 
-{/* Botões Flutuantes */}
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={() => setCreateModalVisible(true)}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="add" size={30} color='white' />
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.fab, { bottom: 230, backgroundColor: colors.Lightolivegreen }]}
-        onPress={() => setSaleModalVisible(true)}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="cart-outline" size={30} color="white" />
-      </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.fab, { bottom: 230, backgroundColor: colors.Lightolivegreen }]}
+            onPress={() => setSaleModalVisible(true)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="cart-outline" size={30} color="white" />
+          </TouchableOpacity>
+        </>
+      )}
       
-      {/* Modais */}
       <ProductModal
         visible={modalVisible}
         produto={produtoSelecionado}
+        isCliente={isCliente}
         onClose={() => setModalVisible(false)}
+        onAdicionarAoLook={(prod) => {
+          setModalVisible(false);
+
+          router.push({
+            pathname: "/combinacaoRoupas",
+            params: { produtoInicialId: prod.id }
+          });
+        }}
       />
 
       <CreateProductModal

@@ -1,7 +1,15 @@
 import React, { useState } from "react";
-import { View, Text, Image, TouchableOpacity, Modal, ScrollView, Pressable, } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  Modal,
+  ScrollView,
+  Pressable,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { styles } from "../styles/produtosStyles";
+import { styles, colors } from "../styles/produtosStyles"; // 🌟 Importado colors caso use para o novo botão
 import EditProductModal from "./EditProductModal";
 
 interface Estoque {
@@ -28,6 +36,8 @@ interface ProductModalProps {
   onClose: () => void;
   onEdit?: (produto: Produto) => void;
   onDelete: (id: string) => void;
+  isCliente?: boolean; // 🌟 Controla se a visão é a do Cliente
+  onAdicionarAoLook?: (produto: Produto) => void; // 🌟 Ação do botão do cliente
 }
 
 export default function ProductModal({
@@ -36,6 +46,8 @@ export default function ProductModal({
   onClose,
   onEdit,
   onDelete,
+  isCliente = false, // 🌟 Padrão falso para não quebrar onde já é usado no ADM
+  onAdicionarAoLook,
 }: ProductModalProps) {
   const [editVisible, setEditVisible] = useState(false);
 
@@ -64,11 +76,7 @@ export default function ProductModal({
           <View style={styles.modalContent}>
             <View style={styles.modalHeaderRow}>
               <TouchableOpacity onPress={onClose}>
-                <Ionicons
-                  name="close"
-                  size={24}
-                  color="#e6aeac"
-                />
+                <Ionicons name="close" size={24} color="#e6aeac" />
               </TouchableOpacity>
             </View>
 
@@ -80,20 +88,13 @@ export default function ProductModal({
                 />
 
                 <View style={styles.modalMainInfo}>
-                  <Text style={styles.modalNome}>
-                    {produto.nome}
-                  </Text>
+                  <Text style={styles.modalNome}>{produto.nome}</Text>
 
                   <Text style={styles.modalPriceText}>
                     R$ {produto.preco_base}
                   </Text>
 
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      marginTop: 8,
-                    }}
-                  >
+                  <View style={{ flexDirection: "row", marginTop: 8 }}>
                     <View style={styles.categoryBadge}>
                       <Text style={styles.categoryBadgeText}>
                         {produto.categoria}
@@ -112,74 +113,75 @@ export default function ProductModal({
               <View style={styles.divider} />
 
               <View style={styles.modalDetailsSection}>
-                <Text style={styles.sectionLabel}>
-                  Descrição
-                </Text>
+                <Text style={styles.sectionLabel}>Descrição</Text>
 
                 <Text style={styles.modalDescricaoText}>
                   {produto.descricao}
                 </Text>
 
-                <Text style={styles.sectionLabel}>
-                  Estoque por Variação
-                </Text>
+                <Text style={styles.sectionLabel}>Estoque por Variação</Text>
 
-                {produto.estoque &&
-                produto.estoque.length > 0 ? (
+                {produto.estoque && produto.estoque.length > 0 ? (
                   <View style={styles.modernTable}>
-                    {produto.estoque.map(
-                      (variacao, index) => (
-                        <View
-                          key={index}
-                          style={styles.modernTableRow}
-                        >
-                          <Text
-                            style={styles.tableCellMain}
-                          >
-                            {variacao.cor} •{" "}
-                            {variacao.tamanho}
-                          </Text>
+                    {produto.estoque.map((variacao, index) => (
+                      <View key={index} style={styles.modernTableRow}>
+                        <Text style={styles.tableCellMain}>
+                          {variacao.cor} • {variacao.tamanho}
+                        </Text>
 
-                          <Text
-                            style={styles.tableCellSide}
-                          >
-                            {variacao.quantidade} unid.
-                          </Text>
-                        </View>
-                      )
-                    )}
+                        <Text style={styles.tableCellSide}>
+                          {variacao.quantidade} unid.
+                        </Text>
+                      </View>
+                    ))}
                   </View>
                 ) : (
-                  <Text style={styles.semEstoque}>
-                    Nenhum item em estoque
-                  </Text>
+                  <Text style={styles.semEstoque}>Nenhum item em estoque</Text>
                 )}
               </View>
 
-              <View style={styles.actionButtons}>
+              {/* 🌟 RENDERIZAÇÃO CONDICIONAL DE BOTÕES */}
+              {isCliente ? (
+                /* INTERFACE DO CLIENTE: Botão Call-To-Action chamando o Provador */
                 <TouchableOpacity
-                  style={styles.iconBtn}
-                  onPress={editarProduto}
+                  style={{
+                    backgroundColor: colors?.Lightolivegreen || "#808000",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 16,
+                    borderRadius: 12,
+                    marginTop: 10,
+                    marginBottom: 20,
+                    gap: 8,
+                  }}
+                  onPress={() => onAdicionarAoLook?.(produto)}
                 >
-                <Ionicons name="pencil-outline" size={20} color="#666" />
+                  <Ionicons name="sparkles-outline" size={20} color="white" />
+                  <Text
+                    style={{ color: "white", fontWeight: "bold", fontSize: 16 }}
+                  >
+                    Adicionar ao Look & Combinar
+                  </Text>
                 </TouchableOpacity>
+              ) : (
+                /* INTERFACE ADMINISTRATIVA: Lápis e Lixeira originais */
+                <View style={styles.actionButtons}>
+                  <TouchableOpacity
+                    style={styles.iconBtn}
+                    onPress={editarProduto}
+                  >
+                    <Ionicons name="pencil-outline" size={20} color="#666" />
+                  </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={[
-                    styles.iconBtn,
-                    { marginLeft: 12 },
-                  ]}
-                  onPress={() =>
-                    onDelete(produto.id)
-                  }
-                >
-                  <Ionicons
-                    name="archive"
-                    size={20}
-                    color="#E57373"
-                  />
-                </TouchableOpacity>
-              </View>
+                  <TouchableOpacity
+                    style={[styles.iconBtn, { marginLeft: 12 }]}
+                    onPress={() => onDelete(produto.id)}
+                  >
+                    <Ionicons name="archive" size={20} color="#E57373" />
+                  </TouchableOpacity>
+                </View>
+              )}
             </ScrollView>
           </View>
         </View>
@@ -187,9 +189,7 @@ export default function ProductModal({
 
       <EditProductModal
         visible={editVisible}
-        onClose={() =>
-          setEditVisible(false)
-        }
+        onClose={() => setEditVisible(false)}
         onUpdated={handleEditSuccess}
         produto={produto}
       />
