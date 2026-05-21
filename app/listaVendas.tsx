@@ -158,22 +158,29 @@ export default function ListaVendas() {
           </View>
         </View>
 
-        <View style={styles.productsPreview}>
-          {item.itens?.slice(0, 2).map((produto, index) => (
-            <View key={index} style={styles.productRow}>
-              <Ionicons name="sparkles-outline" size={14} color={colors.Lightolivegreen} />
-              <Text style={styles.productText}>
-                {produto.nome_produto || produto.produto_nome || "Produto"}
-              </Text>
-            </View>
-          ))}
-          <View style={styles.totalBubble}>
-            <Text style={styles.totalText}>R$ {(item.total ?? 0).toFixed(2)}</Text>
+<View style={styles.productsPreview}>
+          <View style={styles.productRow}>
+            <Ionicons
+              name="sparkles-outline"
+              size={14}
+              color={colors.Lightolivegreen}
+            />
+            
+            <Text style={styles.productText} numberOfLines={1} ellipsizeMode="tail">
+              {item.itens && item.itens.length > 0
+                ? `${item.itens[0].nome_produto || item.itens[0].produto_nome || "Produto"}${
+                    item.itens.length > 1 ? "..." : ""
+                  }`
+                : "Nenhum produto"}
+            </Text>
           </View>
 
-          {item.itens && item.itens.length > 2 && (
-            <Text style={styles.moreItems}>+{item.itens.length - 2} itens</Text>
-          )}
+          <View style={styles.totalBubble}>
+            <Text style={styles.totalText}>
+              R$ {(item.total ?? 0).toFixed(2)}
+            </Text>
+          </View>
+
         </View>
       </TouchableOpacity>
     );
