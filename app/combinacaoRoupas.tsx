@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, router } from "expo-router";
 import api from "../src/services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { width } = Dimensions.get("window");
 
@@ -25,6 +26,8 @@ interface ItemCarrinho {
   quantidade: number;
   variacaoSelecionada: any;
   estoqueCompleto: any[];
+  codigo_barras?: string; // Garantindo a tipagem do código de barras na raiz
+  id_item_estoque?: string; // Para facilitar futuras validações
 }
 
 export default function CombinacaoRoupas() {
@@ -37,7 +40,6 @@ export default function CombinacaoRoupas() {
   const [carregandoSugestoes, setCarregandoSugestoes] = useState(false);
 
   const [produtosNoPedido, setProdutosNoPedido] = useState<ItemCarrinho[]>([]);
-
   const [produtoFocoId, setProdutoFocoId] = useState<string | null>(null);
 
   // Carrega a vitrine e adiciona o primeiro produto vindo do catálogo
@@ -54,6 +56,11 @@ export default function CombinacaoRoupas() {
             (p: any) => String(p.id) === String(produtoInicialId),
           );
           if (itemMatch) {
+            const primeiraVariacao =
+              itemMatch.estoque && itemMatch.estoque.length > 0
+                ? itemMatch.estoque[0]
+                : null;
+
             const novoItem: ItemCarrinho = {
               id: String(itemMatch.id),
               nome: itemMatch.nome,
@@ -61,11 +68,10 @@ export default function CombinacaoRoupas() {
               imagem: itemMatch.imagem,
               categoria: itemMatch.categoria,
               quantidade: 1,
-              variacaoSelecionada:
-                itemMatch.estoque && itemMatch.estoque.length > 0
-                  ? itemMatch.estoque[0]
-                  : null,
+              variacaoSelecionada: primeiraVariacao,
               estoqueCompleto: itemMatch.estoque || [],
+              id_item_estoque: primeiraVariacao?.id_variacao || undefined, // Para facilitar futuras validações
+              codigo_barras: primeiraVariacao?.codigo_barras || undefined, // injetado dinamicamente
             };
             setProdutosNoPedido([novoItem]);
             setProdutoFocoId(String(itemMatch.id));
@@ -102,29 +108,45 @@ export default function CombinacaoRoupas() {
   };
 
   const adicionarOuFocarProduto = async (produto: any) => {
-    const produtoIdStr = String(produto.id);
+    const produtoIdStr = String(produto.id || produto.produto_id);
+
+    const produtoRealVitrine = produtosVitrine.find(
+      (p) => String(p.id) === produtoIdStr,
+    );
+
+    const estoqueConfiavel =
+      produtoRealVitrine?.estoque && produtoRealVitrine.estoque.length > 0
+        ? produtoRealVitrine.estoque
+        : produto.estoque || [];
+
     const jaExiste = produtosNoPedido.find(
       (item) => String(item.id) === produtoIdStr,
     );
 
     if (jaExiste) {
-      // Se já está no topo, apenas foca nele para atualizar as sugestões do ML
       setProdutoFocoId(produtoIdStr);
       await buscarRecomendacoesML(produtoIdStr);
     } else {
-      // Se é um produto novo, adiciona mantendo os anteriores intactos
+      const variacaoValida =
+        estoqueConfiavel.find((e: any) => e.id_variacao) ||
+        estoqueConfiavel[0] ||
+        null;
+
       const novoItem: ItemCarrinho = {
         id: produtoIdStr,
-        nome: produto.nome,
-        preco_base: Number(produto.preco_base || produto.preco),
-        imagem: produto.imagem,
-        categoria: produto.categoria,
+        nome: produtoRealVitrine?.nome || produto.nome,
+        preco_base: Number(
+          produtoRealVitrine?.preco_base || produto.preco_base || produto.preco,
+        ),
+        imagem: produtoRealVitrine?.imagem || produto.imagem,
+        categoria:
+          produtoRealVitrine?.categoria || produto.categoria || "Geral",
         quantidade: 1,
-        variacaoSelecionada:
-          produto.estoque && produto.estoque.length > 0
-            ? produto.estoque[0]
-            : null,
-        estoqueCompleto: produto.estoque || [],
+        variacaoSelecionada: variacaoValida,
+        estoqueCompleto: estoqueConfiavel,
+        id_item_estoque: variacaoValida?.id_variacao || undefined, // Para facilitar futuras validações
+        codigo_barras:
+          variacaoValida?.codigo_barras || produto.codigo_barras || undefined, // Garante rastreio pelo código de barras
       };
 
       setProdutosNoPedido((prev) => [...prev, novoItem]);
@@ -133,7 +155,6 @@ export default function CombinacaoRoupas() {
     }
   };
 
-  // Remove um produto específico da lista do topo
   const removerProdutoDoTopo = (id: string) => {
     const idStr = String(id);
     const novaLista = produtosNoPedido.filter(
@@ -152,7 +173,6 @@ export default function CombinacaoRoupas() {
     }
   };
 
-  // Gerenciadores de Quantidade por Item
   const mudarQuantidade = (id: string, operacao: "somar" | "subtrair") => {
     const idStr = String(id);
     setProdutosNoPedido((prev) =>
@@ -178,20 +198,23 @@ export default function CombinacaoRoupas() {
     );
   };
 
-  // Altera a variação (Tamanho/Cor) de um item específico do topo
   const mudarVariacaoItem = (id: string, variacao: any) => {
     const idStr = String(id);
     setProdutosNoPedido((prev) =>
       prev.map((item) => {
         if (String(item.id) === idStr) {
-          return { ...item, variacaoSelecionada: variacao, quantidade: 1 };
+          return {
+            ...item,
+            variacaoSelecionada: variacao,
+            quantidade: 1,
+            codigo_barras: variacao?.codigo_barras || item.codigo_barras,
+          };
         }
         return item;
       }),
     );
   };
 
-  // Calcula o valor somado de todas as peças
   const calcularTotalPedido = () => {
     return produtosNoPedido.reduce(
       (soma, item) => soma + item.preco_base * item.quantidade,
@@ -199,17 +222,89 @@ export default function CombinacaoRoupas() {
     );
   };
 
-  const finalizarPedido = () => {
+  const finalizarPedidoLookSugerido = async () => {
     if (produtosNoPedido.length === 0) {
-      Alert.alert(
-        "Sacola Vazia",
-        "Adicione pelo menos um produto ao seu pedido.",
-      );
+      Alert.alert("Sacola Vazia", "Nenhum produto selecionado.");
       return;
     }
-    console.log("Enviando lista completa de produtos:", produtosNoPedido);
-    Alert.alert("Pedido Confirmado!", "Suas peças e combinações foram salvas.");
-    router.push("/produtos");
+
+    try {
+      setCarregando(true);
+      const itensFormatados = await Promise.all(
+        produtosNoPedido.map(async (item) => {
+          console.log(`Validando item do Look: ${item.nome}`, item);
+
+          let idItemEstoqueReal =
+            item.variacaoSelecionada?.id_variacao || item.id_item_estoque;
+          const codigoBusca =
+            item.codigo_barras || item.variacaoSelecionada?.codigo_barras;
+
+          // Contingência inteligente baseada no código de barras se o ID direto falhar
+          if (!idItemEstoqueReal && codigoBusca) {
+            try {
+              const response = await api.get(
+                `/produtos/buscar-por-codigo/${String(codigoBusca).trim()}`,
+              );
+              if (response.data && response.data.variacao_encontrada) {
+                idItemEstoqueReal =
+                  response.data.variacao_encontrada.id_variacao;
+              }
+            } catch (err) {
+              console.log(
+                `Não foi possível recuperar variação pelo código de barras para o item ${item.nome}`,
+              );
+            }
+          }
+
+          if (!idItemEstoqueReal) {
+            throw new Error(
+              `Não foi possível determinar o ID da variação para o item: ${item.nome}`,
+            );
+          }
+
+          return {
+            id_item_estoque: String(idItemEstoqueReal),
+            quantidade: item.quantidade || 1,
+            preco_unitario_venda: Number(item.preco_base) || 0,
+            categoria: item.categoria || "Geral",
+          };
+        }),
+      );
+
+      const token = await AsyncStorage.getItem("token");
+
+      const payloadVenda = {
+        meio_venda: "WhatsApp",
+        status_venda: "Pendente",
+        nome_comprador: "Cliente Provador Look IA",
+        telefone_comprador: "",
+        dados_pagamento: "Pix",
+        itens: itensFormatados,
+      };
+
+      console.log("Enviando venda do look validada:", payloadVenda);
+
+      const response = await api.post("/vendas", payloadVenda, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        Alert.alert(
+          "Pedido Confirmado!",
+          "A venda do look sugerido foi salva no sistema.",
+        );
+        setProdutosNoPedido([]);
+        setProdutoFocoId(null);
+        setSugestoesML([]);
+      }
+    } catch (error: any) {
+      console.error("Erro completo ao salvar pedido:", error);
+      Alert.alert("Erro ao Finalizar", error.message || "Erro desconhecido.");
+    } finally {
+      setCarregando(false);
+    }
   };
 
   const itemFocado = produtosNoPedido.find(
@@ -313,7 +408,7 @@ export default function CombinacaoRoupas() {
           </ScrollView>
         )}
 
-        {/* SELETOR DE VARIAÇÃO DO ITEM QUE ESTÁ SELECIONADO/FOCADO */}
+        {/* SELETOR DE VARIAÇÃO */}
         {itemFocado && (
           <View style={styles.variacaoContainer}>
             <Text style={styles.seletorTitulo}>
@@ -349,7 +444,7 @@ export default function CombinacaoRoupas() {
           </View>
         )}
 
-        {/* COMBINAÇÕES GERADAS PELA IA BASEADO NO ITEM FOCADO */}
+        {/* COMBINAÇÕES GERADAS PELA IA */}
         <View style={styles.sugestoesSection}>
           <Text style={styles.sectionTitle}>
             <Ionicons name="sparkles" size={18} color="#808000" />
@@ -369,7 +464,7 @@ export default function CombinacaoRoupas() {
               Selecione ou adicione um produto acima para ver sugestões de
               looks.
             </Text>
-          ) : { sugestoesML }.sugestoesML.length === 0 ? (
+          ) : sugestoesML.length === 0 ? (
             <Text style={styles.semSugestaoTexto}>
               Nenhum par ideal listado para este item.
             </Text>
@@ -404,9 +499,8 @@ export default function CombinacaoRoupas() {
                           preco_base: Number(sugestao.preco),
                           imagem: sugestao.imagem,
                           categoria: sugestao.categoria,
-                          estoque: AppConfig.normalizarEstoque
-                            ? sugestao.estoque || []
-                            : sugestao.estoque || [],
+                          codigo_barras: sugestao.codigo_barras, // Passando o código vindo do ML
+                          estoque: sugestao.estoque || [],
                         });
                       }}
                     >
@@ -431,7 +525,7 @@ export default function CombinacaoRoupas() {
           )}
         </View>
 
-        {/* NAVEGAÇÃO PELAS OUTRAS ROUPAS */}
+        {/* NAVEGAÇÃO VITRINE */}
         <Text style={styles.sectionTitle}>
           Navegar por outras peças da loja:
         </Text>
@@ -469,7 +563,7 @@ export default function CombinacaoRoupas() {
         </ScrollView>
       </ScrollView>
 
-      {/* CARD FIXO DE TOTAL INFERIOR */}
+      {/* FOOTER CHECKOUT */}
       <View style={styles.footerCheckout}>
         <View style={styles.checkoutPrecoContainer}>
           <Text style={styles.checkoutTotalLabel}>Total do seu Pedido:</Text>
@@ -477,7 +571,10 @@ export default function CombinacaoRoupas() {
             R$ {calcularTotalPedido().toFixed(2)}
           </Text>
         </View>
-        <TouchableOpacity style={styles.btnFinalizar} onPress={finalizarPedido}>
+        <TouchableOpacity
+          style={styles.btnFinalizar}
+          onPress={finalizarPedidoLookSugerido}
+        >
           <Text style={styles.btnFinalizarTexto}>Fechar Venda</Text>
           <Ionicons name="chevron-forward" size={18} color="white" />
         </TouchableOpacity>
@@ -485,8 +582,6 @@ export default function CombinacaoRoupas() {
     </View>
   );
 }
-
-const AppConfig = { normalizarEstoque: true };
 
 const styles = StyleSheet.create({
   container: {
