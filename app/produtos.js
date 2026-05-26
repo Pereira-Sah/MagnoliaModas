@@ -23,7 +23,6 @@ import TabBar from "../components/TabBar";
 import { router } from "expo-router";
 import ScannerModal from "../components/ScannerModal";
 import CreateSaleModal from "../components/CreateSaleModal";
-// import * as Print from "expo-print";
 
 const CACHE_KEY = "@magnolia:produtos";
 
@@ -82,18 +81,15 @@ export default function Produtos() {
   try {
     setCarregando(true);
     
-    // 1. Tenta carregar o cache primeiro para renderização rápida
     if (!forcarAtualizacao) {
       const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
       if (cacheLocal) {
         const produtosSalvos = JSON.parse(cacheLocal);
         setTodosProdutos(produtosSalvos);
         filtrarLocalmente(produtosSalvos, termoBusca, categoriaSelecionada);
-        // Não damos 'return' aqui! Deixamos o fluxo continuar para validar com o banco.
       }
     }
     
-    // 2. Sempre busca do banco em segundo plano para sincronizar os dados reais
     await sincronizarComBackend();
 
   } catch (error) {
