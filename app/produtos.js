@@ -55,7 +55,6 @@ export default function Produtos() {
 
   const [isCliente, setIsCliente] = useState(false);
 
-
   useEffect(() => {
     const obterDadosUsuario = async () => {
       let nomeSalvo;
@@ -79,29 +78,25 @@ export default function Produtos() {
   }, []);
 
   async function carregarProdutos(forcarAtualizacao = false) {
-  try {
-    setCarregando(true);
-    
-    // 1. Tenta carregar o cache primeiro para renderização rápida
-    if (!forcarAtualizacao) {
-      const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
-      if (cacheLocal) {
-        const produtosSalvos = JSON.parse(cacheLocal);
-        setTodosProdutos(produtosSalvos);
-        filtrarLocalmente(produtosSalvos, termoBusca, categoriaSelecionada);
-        // Não damos 'return' aqui! Deixamos o fluxo continuar para validar com o banco.
-      }
-    }
-    
-    // 2. Sempre busca do banco em segundo plano para sincronizar os dados reais
-    await sincronizarComBackend();
+    try {
+      setCarregando(true);
 
-  } catch (error) {
-    console.error("Erro no fluxo de carregar produtos:", error);
-  } finally {
-    setCarregando(false);
+      if (!forcarAtualizacao) {
+        const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
+        if (cacheLocal) {
+          const produtosSalvos = JSON.parse(cacheLocal);
+          setTodosProdutos(produtosSalvos);
+          filtrarLocalmente(produtosSalvos, termoBusca, categoriaSelecionada);
+        }
+      }
+
+      await sincronizarComBackend();
+    } catch (error) {
+      console.error("Erro no fluxo de carregar produtos:", error);
+    } finally {
+      setCarregando(false);
+    }
   }
-}
   async function sincronizarComBackend() {
     try {
       const response = await api.get("/produtos/");
@@ -152,20 +147,14 @@ export default function Produtos() {
 
   return (
     <View style={styles.container}>
-
       <View style={styles.headerContainer}>
-
-          <View style={styles.heroSection}>
-            
-            <View style={styles.heroBlob} />
-            <View style={styles.heroBlob2} />
+        <View style={styles.heroSection}>
+          <View style={styles.heroBlob} />
+          <View style={styles.heroBlob2} />
 
           <View style={styles.heroTopRow}>
-
             <View>
-              <Text style={styles.heroGreeting}>
-                Olá, {nome}!
-              </Text>
+              <Text style={styles.heroGreeting}>Olá, {nome}!</Text>
               <Text style={styles.heroSubtitle}>
                 {isCliente
                   ? "Descubra suas peças favoritas"
@@ -174,18 +163,10 @@ export default function Produtos() {
             </View>
 
             <View style={styles.heroIconContainer}>
-              <Ionicons
-                name="shirt-outline"
-                size={24}
-                color='white'
-              />
+              <Ionicons name="shirt-outline" size={24} color="white" />
             </View>
-
           </View>
-          </View>
-        
-
-        
+        </View>
 
         <View style={styles.searchSection}>
           <Ionicons
@@ -290,18 +271,16 @@ export default function Produtos() {
         </>
       )}
 
-<ProductModal
-  visible={modalVisible}
-  produto={produtoSelecionado}
-  isCliente={isCliente}
-  onClose={() => setModalVisible(false)}
-        onUpdated={() => {
-    setModalVisible(false);
-    carregarProdutos(true); // Isso limpa o cache antigo e grava o novo vindo do backend
-  }}
-  onAdicionarAoLook={(prod) => {
+      <ProductModal
+        visible={modalVisible}
+        produto={produtoSelecionado}
+        isCliente={isCliente}
+        onClose={() => setModalVisible(false)}
+        onEstoqueAtualizado={() => {
+          carregarProdutos(true);
+        }}
+        onAdicionarAoLook={(prod) => {
           setModalVisible(false);
-
           router.push({
             pathname: "/combinacaoRoupas",
             params: { produtoInicialId: prod.id },

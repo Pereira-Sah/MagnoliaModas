@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Image,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -71,7 +72,7 @@ export default function EditProductModal({
   const [estoque, setEstoque] = useState<Estoque[]>([]);
 
   useEffect(() => {
-    if (!produto) return;
+    if (!produto || !visible) return;
 
     setNome(produto.nome ?? "");
     setDescricao(produto.descricao ?? "");
@@ -85,8 +86,12 @@ export default function EditProductModal({
     setImageUrl(produto.imagem ?? "");
     setSelectedTags(produto.tags ?? []);
 
-    // Alterado aqui: O estado de estoque agora inicializa sempre vazio
-    setEstoque([]);
+    // Mantém e carrega as variações de estoque originais do produto na tela
+    if (produto.estoque) {
+      setEstoque([...produto.estoque]);
+    } else {
+      setEstoque([]);
+    }
 
     const primeiroCodigo = produto.estoque?.[0]?.codigo_barras ?? "";
     setCodigoBarras(primeiroCodigo);
@@ -107,7 +112,7 @@ export default function EditProductModal({
       const novoEstoque = [...prev];
 
       if (campo === "quantidade") {
-        novoEstoque[index][campo] = Number(valor) as any;
+        novoEstoque[index][campo] = Number(valor) || 0;
       } else {
         novoEstoque[index][campo] = valor as any;
       }
@@ -128,8 +133,32 @@ export default function EditProductModal({
     ]);
   }
 
-  function removerVariacao(index: number) {
-    setEstoque((prev) => prev.filter((_, i) => i !== index));
+  async function removerVariacao(index: number, variacao: Estoque) {
+    const idVariacao = variacao.id_variacao || variacao.id;
+
+    if (idVariacao) {
+      Alert.alert(
+        "Remover Variação",
+        "Deseja realmente excluir esta variação do banco de dados?",
+        [
+          { text: "Cancelar", style: "cancel" },
+          {
+            text: "Excluir",
+            style: "destructive",
+            onPress: async () => {
+              try {
+                await api.delete(`/estoque/${idVariacao}`);
+                setEstoque((prev) => prev.filter((_, i) => i !== index));
+              } catch (err) {
+                Alert.alert("Erro", "Não foi possível remover a variação.");
+              }
+            },
+          },
+        ]
+      );
+    } else {
+      setEstoque((prev) => prev.filter((_, i) => i !== index));
+    }
   }
 
   async function selecionarArquivo() {
@@ -186,7 +215,7 @@ export default function EditProductModal({
         },
       });
 
-      // 2. Salva apenas as novas variações adicionadas manualmente na lista voluntária
+      // 2. Salva as atualizações ou novas inserções do estoque de uma vez só
       for (const variacao of estoque) {
         const payloadEstoque = {
           tamanho: variacao.tamanho,
@@ -198,9 +227,9 @@ export default function EditProductModal({
         const idVariacaoAtual = variacao.id_variacao || variacao.id;
 
         if (idVariacaoAtual) {
+          // Rota PUT adicionada no backend para salvar tudo unificado
           await api.put(`/estoque/${idVariacaoAtual}`, payloadEstoque);
         } else {
-          // Como a lista veio vazia, qualquer item adicionado cai aqui como novo POST
           await api.post(
             `/estoque/adicionar-variacao?id_produto=${produto.id}`,
             payloadEstoque,
@@ -208,12 +237,12 @@ export default function EditProductModal({
         }
       }
 
-      alert("Produto atualizado com sucesso!");
+      Alert.alert("Sucesso", "Produto atualizado com sucesso!");
       onUpdated?.();
       onClose();
     } catch (error: any) {
       console.log("Erro ao atualizar produto:", error.response?.data || error);
-      alert("Não foi possível atualizar o produto.");
+      Alert.alert("Erro", "Não foi possível atualizar o produto.");
     } finally {
       setSalvando(false);
     }
@@ -242,6 +271,7 @@ export default function EditProductModal({
             showsVerticalScrollIndicator={false}
             contentContainerStyle={s.formScroll}
           >
+            {/* DESIGN ORIGINAL: SEÇÃO DE IMAGEM LADO A LADO */}
             <View style={s.imageUploadSection}>
               <TouchableOpacity
                 style={s.imagePreviewContainer}
@@ -283,6 +313,7 @@ export default function EditProductModal({
               </View>
             </View>
 
+            {/* DESIGN ORIGINAL: CAMPOS PRINCIPAIS */}
             <View style={s.inputGroup}>
               <Text style={s.label}>Nome da Peça</Text>
               <TextInput style={s.input} value={nome} onChangeText={setNome} />
@@ -328,6 +359,7 @@ export default function EditProductModal({
               />
             </View>
 
+            {/* DESIGN ORIGINAL: CONTAINER DE TAGS */}
             <Text style={s.label}>Tags Relacionadas</Text>
             <View style={s.tagsContainer}>
               {tagsDisponiveis.map((tag) => (
@@ -351,73 +383,78 @@ export default function EditProductModal({
               ))}
             </View>
 
+            {/* DESIGN ORIGINAL: CONTAINER DO GRUPO DE ESTOQUE */}
             <Text style={s.label}>Variações de Estoque</Text>
 
-            {estoque.map((variacao, index) => (
-              <View
-                key={index}
-                style={{
-                  marginBottom: 16,
-                  padding: 12,
-                  borderWidth: 1,
-                  borderColor: "#E8E8E8",
-                  borderRadius: 12,
-                  backgroundColor: "#FFF",
-                }}
-              >
+            {estoque.map((variacao, index) => {
+              const existeNoBanco = !!(variacao.id_variacao || variacao.id);
+              
+              return (
                 <View
+                  key={index}
                   style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: 10,
+                    marginBottom: 16,
+                    padding: 12,
+                    borderWidth: 1,
+                    borderColor: "#E8E8E8",
+                    borderRadius: 12,
+                    backgroundColor: "#FFF",
                   }}
                 >
-                  <Text style={{ fontWeight: "600" }}>
-                    Nova Variação {index + 1}
-                  </Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: 10,
+                    }}
+                  >
+                    <Text style={{ fontWeight: "600" }}>
+                      {existeNoBanco ? `Variação ${index + 1}` : `Nova Variação ${index + 1}`}
+                    </Text>
 
-                  <TouchableOpacity onPress={() => removerVariacao(index)}>
-                    <Ionicons name="trash-outline" size={20} color="#E57373" />
-                  </TouchableOpacity>
+                    <TouchableOpacity onPress={() => removerVariacao(index, variacao)}>
+                      <Ionicons name={existeNoBanco ? "archive-outline" : "trash-outline"} size={20} color="#E57373" />
+                    </TouchableOpacity>
+                  </View>
+
+                  <TextInput
+                    style={[s.input, { marginBottom: 8 }]}
+                    placeholder="Cor"
+                    value={variacao.cor}
+                    onChangeText={(text) => atualizarVariacao(index, "cor", text)}
+                  />
+
+                  <TextInput
+                    style={[s.input, { marginBottom: 8 }]}
+                    placeholder="Tamanho"
+                    value={variacao.tamanho}
+                    onChangeText={(text) =>
+                      atualizarVariacao(index, "tamanho", text)
+                    }
+                  />
+
+                  <TextInput
+                    style={[s.input, { marginBottom: 8 }]}
+                    placeholder="Quantidade"
+                    keyboardType="numeric"
+                    value={String(variacao.quantidade)}
+                    onChangeText={(text) =>
+                      atualizarVariacao(index, "quantidade", text)
+                    }
+                  />
+
+                  <TextInput
+                    style={s.input}
+                    placeholder="Código de barras"
+                    value={variacao.codigo_barras ?? ""}
+                    onChangeText={(text) =>
+                      atualizarVariacao(index, "codigo_barras", text)
+                    }
+                  />
                 </View>
-
-                <TextInput
-                  style={[s.input, { marginBottom: 8 }]}
-                  placeholder="Cor"
-                  value={variacao.cor}
-                  onChangeText={(text) => atualizarVariacao(index, "cor", text)}
-                />
-
-                <TextInput
-                  style={[s.input, { marginBottom: 8 }]}
-                  placeholder="Tamanho"
-                  value={variacao.tamanho}
-                  onChangeText={(text) =>
-                    atualizarVariacao(index, "tamanho", text)
-                  }
-                />
-
-                <TextInput
-                  style={[s.input, { marginBottom: 8 }]}
-                  placeholder="Quantidade"
-                  keyboardType="numeric"
-                  value={String(variacao.quantidade)}
-                  onChangeText={(text) =>
-                    atualizarVariacao(index, "quantidade", text)
-                  }
-                />
-
-                <TextInput
-                  style={s.input}
-                  placeholder="Código de barras"
-                  value={variacao.codigo_barras ?? ""}
-                  onChangeText={(text) =>
-                    atualizarVariacao(index, "codigo_barras", text)
-                  }
-                />
-              </View>
-            ))}
+              );
+            })}
 
             <TouchableOpacity
               onPress={adicionarVariacao}
@@ -441,6 +478,7 @@ export default function EditProductModal({
               </Text>
             </TouchableOpacity>
 
+            {/* DESIGN ORIGINAL: CÓDIGO DE BARRAS DA ETIQUETA E QR CODE */}
             <View style={s.inputGroup}>
               <Text style={s.label}>Código de Barras da Etiqueta</Text>
 
@@ -478,6 +516,7 @@ export default function EditProductModal({
               </View>
             ) : null}
 
+            {/* DESIGN ORIGINAL: SUBMIT BUTTON */}
             <TouchableOpacity
               style={[s.submitButton, salvando && { opacity: 0.7 }]}
               onPress={handleSalvar}
