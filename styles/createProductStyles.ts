@@ -3,9 +3,16 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width } = Dimensions.get('window');
 
 export const colors = {
-  green: '#60875b',
-  pink: '#e5aeab',
-  white: '#fff',
+  green: '#B8C4A5',
+  pink: '#DFA3B2',
+  beige: '#F3E7DD',
+
+  white: '#FFF',
+
+  textPrimary: '#4A4340',
+  textSecondary: '#7A716D',
+
+  overlay: 'rgba(0,0,0,0.45)',
 };
 
 export const fonts = {
@@ -196,5 +203,97 @@ imageUploadSection: {
     fontFamily: fonts.regular,
     fontSize: 14,
     color: '#999',
+  },
+  alertOverlay: {
+  flex: 1,
+  backgroundColor: colors.overlay,
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 20,
+  },
+
+  alertContainer: {
+    width: "100%",
+    backgroundColor: colors.beige,
+    borderRadius: 28,
+    padding: 25,
+
+    shadowColor:"#000",
+    shadowOpacity:0.12,
+    shadowRadius:15,
+    elevation:10,
+  },
+
+  alertIconContainer:{
+    width:70,
+    height:70,
+    borderRadius:35,
+
+    alignItems:"center",
+    justifyContent:"center",
+
+    alignSelf:"center",
+    marginBottom:20,
+
+    backgroundColor:"#FCECEF",
+    borderWidth:2,
+    borderColor:colors.pink
+  },
+
+  alertIcon:{
+    color:colors.pink,
+    fontSize:28,
+    fontFamily:fonts.semiBold,
+  },
+
+  alertTitle:{
+    textAlign:"center",
+    color:colors.textPrimary,
+    fontSize:24,
+    fontFamily:fonts.semiBold,
+    marginBottom:10,
+  },
+
+  alertMessage:{
+    textAlign:"center",
+    color:colors.textSecondary,
+    fontSize:16,
+    fontFamily:fonts.regular,
+    lineHeight:24,
+    marginBottom:30,
+  },
+
+  alertButtons:{
+    flexDirection:"row",
+    gap:10,
+  },
+
+  alertCancelButton:{
+    flex:1,
+    padding:15,
+    borderRadius:16,
+    borderWidth:1.5,
+    borderColor:colors.pink,
+    alignItems:"center",
+  },
+
+  alertConfirmButton:{
+    flex:1,
+    padding:15,
+    borderRadius:16,
+    backgroundColor:colors.green,
+    alignItems:"center",
+  },
+
+  alertCancelText:{
+    color:colors.pink,
+    fontFamily:fonts.semiBold,
+    fontSize:15,
+  },
+
+  alertConfirmText:{
+    color:"#FFF",
+    fontFamily:fonts.semiBold,
+    fontSize:15,
   },
 });

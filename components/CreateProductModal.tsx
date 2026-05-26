@@ -140,6 +140,9 @@ function removerVariacao(index: number) {
 
   const [cameraVisible, setCameraVisible] = useState(false);
 
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const [produtoCriadoId, setProdutoCriadoId] = useState("");
+
   async function openCamera() {
     setCameraVisible(true);
   }
@@ -221,32 +224,8 @@ function removerVariacao(index: number) {
 
       setSalvando(false);
 
-      Alert.alert(
-        "Sucesso!",
-        "Produto cadastrado com sucesso. Deseja imprimir as etiquetas de código de barras agora?",
-        [
-          {
-            text: "Não, fechar",
-            onPress: () => handleClose(),
-            style: "cancel",
-          },
-          {
-            text: "Sim, Imprimir",
-            onPress: async () => {
-              if (idProdutoCriado) {
-                await puxarEImprimirEtiqueta(idProdutoCriado);
-              } else {
-                Alert.alert(
-                  "Aviso",
-                  "ID do produto não retornado. Use a listagem geral para imprimir.",
-                );
-              }
-              handleClose();
-            },
-          },
-        ],
-        { cancelable: false },
-      );
+      setProdutoCriadoId(idProdutoCriado || "");
+      setConfirmVisible(true);
     } catch (error: any) {
       setSalvando(false);
       console.log(
@@ -599,6 +578,68 @@ function removerVariacao(index: number) {
             onClose={() => setCameraVisible(false)}
             onPhotoCaptured={handlePhotoCaptured}
           />
+
+        <Modal
+          visible={confirmVisible}
+          transparent
+          animationType="fade"
+        >
+          <View style={s.alertOverlay}>
+            <View style={s.alertContainer}>
+
+              <View style={s.alertIconContainer}>
+                <Text style={s.alertIcon}>?</Text>
+              </View>
+
+              <Text style={s.alertTitle}>
+                Imprimir etiquetas?
+              </Text>
+
+              <Text style={s.alertMessage}>
+                Deseja imprimir as etiquetas
+                de código de barras agora?
+              </Text>
+
+              <View style={s.alertButtons}>
+
+                <TouchableOpacity
+                  style={s.alertCancelButton}
+                  onPress={()=>{
+                    setConfirmVisible(false);
+                    handleClose();
+                  }}
+                >
+                  <Text style={s.alertCancelText}>
+                    Depois
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={s.alertConfirmButton}
+                  onPress={async()=>{
+
+                    setConfirmVisible(false);
+
+                    if(produtoCriadoId){
+                      await puxarEImprimirEtiqueta(
+                        produtoCriadoId
+                      );
+                    }
+
+                    handleClose();
+
+                  }}
+                >
+                  <Text style={s.alertConfirmText}>
+                    Imprimir
+                  </Text>
+                </TouchableOpacity>
+
+              </View>
+
+            </View>
+          </View>
+        </Modal>
 
           <ScannerModal
             visible={scannerVisible}
