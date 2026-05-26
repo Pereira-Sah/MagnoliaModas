@@ -49,10 +49,32 @@ export default function CreateSaleModal({
   const [carrinho, setCarrinho] = useState<ItemCarrinho[]>([]);
   const [carregando, setCarregando] = useState(false);
 
+  const [alertVisible, setAlertVisible] = useState(false);
+
+  const [alertData, setAlertData] = useState({
+    title: "",
+    message: "",
+    type: "success",
+  });
+
   const [nomeComprador, setNomeComprador] = useState("");
   const [telefoneComprador, setTelefoneComprador] = useState("");
   const [dadosPagamento, setDadosPagamento] = useState("Pix");
   const [meioVenda, setMeioVenda] = useState("Loja Física");
+
+  function mostrarAlerta(
+    title:string,
+    message:string,
+    type:"success"|"error"|"warning"|"info"
+  ){
+    setAlertData({
+      title,
+      message,
+      type
+    });
+
+    setAlertVisible(true);
+  }
 
   async function buscarProdutoPorCodigo(codigo: string) {
     try {
@@ -64,7 +86,11 @@ export default function CreateSaleModal({
       const variacao = produto.variacao_encontrada;
 
       if (!variacao) {
-        alert("Variação não encontrada.");
+        mostrarAlerta(
+          "Produto não encontrado",
+          "A variação escaneada não foi localizada.",
+          "warning"
+        );
         return;
       }
 
@@ -96,10 +122,19 @@ export default function CreateSaleModal({
         ];
       });
 
-      alert("Produto adicionado ao carrinho!");
+      mostrarAlerta(
+        "Produto adicionado",
+        "O item foi adicionado ao carrinho.",
+        "success"
+      );
     } catch (error: any) {
       console.log("Erro ao buscar produto:", error.response?.data || error);
-      alert(error.response?.data?.detail || "Produto não encontrado.");
+      mostrarAlerta(
+        "Erro",
+        error.response?.data?.detail ||
+        "Produto não encontrado.",
+        "error"
+      );
     }
   }
 
@@ -125,7 +160,11 @@ export default function CreateSaleModal({
 
   async function finalizarVenda() {
     if (carrinho.length === 0) {
-      alert("Adicione ao menos um produto.");
+      mostrarAlerta(
+        "Carrinho vazio",
+        "Adicione ao menos um produto antes de finalizar.",
+        "warning"
+      );
       return;
     }
 
@@ -152,17 +191,25 @@ export default function CreateSaleModal({
           Authorization: `Bearer ${token}`,
         },
       });
-      alert("Venda realizada com sucesso!");
-
       setCarrinho([]);
       setNomeComprador("");
       setTelefoneComprador("");
 
-      onSuccess?.();
-      onClose();
+      setAlertData({
+        title: "Venda concluída",
+        message: "Venda realizada com sucesso.",
+        type: "success",
+      });
+
+      setAlertVisible(true);
     } catch (error: any) {
       console.log("Erro ao processar venda:", error.response?.data || error);
-      alert(error.response?.data?.detail || "Erro ao processar venda.");
+      mostrarAlerta(
+        "Erro",
+        error.response?.data?.detail ||
+        "Erro ao processar venda.",
+        "error"
+      );
     } finally {
       setCarregando(false);
     }
@@ -324,6 +371,77 @@ export default function CreateSaleModal({
               buscarProdutoPorCodigo(codigo);
             }}
           />
+          {alertVisible && (
+          <View
+            style={[
+              s.alertOverlay,
+              {
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                zIndex: 999,
+                elevation: 999,
+              },
+            ]}
+          >
+            <View style={s.alertContainer}>
+              
+              <View
+                style={[
+                  s.alertIconContainer,
+                  {
+                    borderColor:
+                      alertData.type === "success"
+                        ? colors.green
+                        : colors.pink,
+                  },
+                ]}
+              >
+                <Ionicons
+                  name={
+                    alertData.type === "success"
+                      ? "checkmark"
+                      : alertData.type === "warning"
+                      ? "warning-outline"
+                      : "close"
+                  }
+                  size={30}
+                  color={
+                    alertData.type === "success"
+                      ? colors.green
+                      : colors.pink
+                  }
+                />
+              </View>
+
+              <Text style={s.alertTitle}>
+                {alertData.title}
+              </Text>
+
+              <Text style={s.alertMessage}>
+                {alertData.message}
+              </Text>
+
+              <TouchableOpacity
+                style={s.alertConfirmButton}
+                onPress={() => {
+                  setAlertVisible(false);
+                  if (alertData.title === "Venda concluída") {
+                    onSuccess?.();
+                    onClose();
+                  }
+                }}
+              >
+                <Text style={s.alertConfirmText}>
+                  Entendi
+                </Text>
+              </TouchableOpacity>
+
+            </View>
+          </View>
+        )}
         </View>
       </KeyboardAvoidingView>
     </Modal>
