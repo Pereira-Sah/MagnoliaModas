@@ -53,7 +53,7 @@ export default function Produtos() {
   const [nome, setNome] = useState("Usuária");
 
   const [isCliente, setIsCliente] = useState(false);
-
+  const CACHE_KEY = "@magnolia:produtos";
 
   useEffect(() => {
     const obterDadosUsuario = async () => {
@@ -98,21 +98,62 @@ export default function Produtos() {
     setCarregando(false);
   }
 }
-  async function sincronizarComBackend() {
-    try {
-      const response = await api.get("/produtos/");
-      if (Array.isArray(response.data)) {
-        setTodosProdutos(response.data);
-        await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(response.data));
-        filtrarLocalmente(response.data, termoBusca, categoriaSelecionada);
-      }
-    } catch (e) {
-      console.error("Erro ao sincronizar com backend, mantendo local.", e);
-    }
-  }
 
-function filtrarLocalmente(produtos, busca, categoria) {
+async function sincronizarComBackend() {
+  try {
+
+    const response = await api.get("/produtos/");
+
+    if (Array.isArray(response.data)) {
+
+      const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
+
+      let produtosLocais = [];
+
+      if (cacheLocal) {
+        produtosLocais = JSON.parse(cacheLocal);
+      }
+
+      const idsArquivados = produtosLocais
+        .filter((p) => p.arquivado === true)
+        .map((p) => p.id);
+
+      const produtosAtualizados = response.data.map((produto) => ({
+        ...produto,
+        arquivado: idsArquivados.includes(produto.id),
+      }));
+
+      setTodosProdutos(produtosAtualizados);
+
+      await AsyncStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify(produtosAtualizados)
+      );
+
+      filtrarLocalmente(
+        produtosAtualizados,
+        termoBusca,
+        categoriaSelecionada
+      );
+    }
+
+  } catch (e) {
+    console.error(
+      "Erro ao sincronizar com backend:",
+      e
+    );
+  }
+}
+
+
+
+async function filtrarLocalmente(produtos, busca, categoria){
+
   let resultado = [...produtos];
+
+  resultado = resultado.filter(
+    (p) => p.arquivado !== true
+  );
 
   if (isCliente) {
     resultado = resultado.filter((produto) => {
@@ -166,6 +207,41 @@ function filtrarLocalmente(produtos, busca, categoria) {
     setProdutoSelecionado(item);
     setModalVisible(true);
   };
+
+async function handleDelete(id) {
+  try {
+
+    const atualizados = todosProdutos.map((produto) => {
+
+      if (produto.id === id) {
+        return {
+          ...produto,
+          arquivado: true,
+        };
+      }
+
+      return produto;
+    });
+
+    await AsyncStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify(atualizados)
+    );
+
+    setTodosProdutos(atualizados);
+
+    await filtrarLocalmente(
+      atualizados,
+      termoBusca,
+      categoriaSelecionada
+    );
+
+    setModalVisible(false);
+
+  } catch (error) {
+    console.log(error);
+  }
+}
 
   return (
     <View style={styles.container}>
@@ -326,6 +402,7 @@ function filtrarLocalmente(produtos, busca, categoria) {
   visible={modalVisible}
   produto={produtoSelecionado}
   isCliente={isCliente}
+  onDelete={handleDelete}
   onClose={() => setModalVisible(false)}
         onUpdated={() => {
     setModalVisible(false);
