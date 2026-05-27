@@ -176,6 +176,9 @@ searchSection: {
     shadowOpacity: 0.09,
     shadowRadius: 8,
     elevation: 3,
+
+    
+    
   },
 
   imageContainer: {

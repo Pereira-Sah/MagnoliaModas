@@ -111,17 +111,38 @@ export default function Produtos() {
     }
   }
 
-  function filtrarLocalmente(produtos, busca, categoria) {
-    let resultado = [...produtos];
-    if (busca.trim() !== "") {
-      const termo = busca.toLowerCase().trim();
-      resultado = resultado.filter((p) => p.nome.toLowerCase().includes(termo));
-    }
-    if (categoria !== "Tudo") {
-      resultado = resultado.filter((p) => p.categoria === categoria);
-    }
-    setListaFiltrada(resultado);
+function filtrarLocalmente(produtos, busca, categoria) {
+  let resultado = [...produtos];
+
+  if (isCliente) {
+    resultado = resultado.filter((produto) => {
+
+      const temEstoque = produto.estoque?.some(
+        (itemEstoque) => Number(itemEstoque.quantidade) > 0
+      );
+
+      return temEstoque;
+    });
   }
+
+  if (busca.trim() !== "") {
+    const termo = busca.toLowerCase().trim();
+
+    resultado = resultado.filter((p) =>
+      p.nome.toLowerCase().includes(termo)
+    );
+  }
+
+  if (categoria !== "Tudo") {
+    resultado = resultado.filter(
+      (p) => p.categoria === categoria
+    );
+  }
+
+  setListaFiltrada(resultado);
+}
+
+
 
   useEffect(() => {
     carregarProdutos();
@@ -251,9 +272,24 @@ export default function Produtos() {
           numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.listContent}
-          renderItem={({ item }) => (
-            <ProductCard item={item} onPress={abrirModal} />
-          )}
+
+        renderItem={({ item }) => {
+
+          const semEstoque =
+            !item.estoque?.some(
+              (estoqueItem) => Number(estoqueItem.quantidade) > 0
+            );
+
+          return (
+            <ProductCard
+              item={item}
+              onPress={abrirModal}
+              semEstoque={semEstoque}
+              isCliente={isCliente}
+            />
+          );
+        }}
+
           ListEmptyComponent={
             <Text style={{ textAlign: "center", color: "#999", marginTop: 40 }}>
               Nenhum produto encontrado nesta seção.
@@ -293,7 +329,7 @@ export default function Produtos() {
   onClose={() => setModalVisible(false)}
         onUpdated={() => {
     setModalVisible(false);
-    carregarProdutos(true); // Isso limpa o cache antigo e grava o novo vindo do backend
+    carregarProdutos(true); 
   }}
   onAdicionarAoLook={(prod) => {
           setModalVisible(false);

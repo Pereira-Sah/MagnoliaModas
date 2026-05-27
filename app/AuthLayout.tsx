@@ -6,6 +6,7 @@ import {
   Text,
   KeyboardAvoidingView,
   Platform,
+  ScrollView
 } from 'react-native';
 
 import {
@@ -47,14 +48,15 @@ export default function AuthLayout({
         backgroundColor={colors.Warmbeigebackground}
       />
 
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={
-          Platform.OS === 'ios'
-            ? 'padding'
-            : undefined
-        }
-      >
+<KeyboardAvoidingView
+  style={styles.container}
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+>
+  <ScrollView
+    contentContainerStyle={styles.scrollContent}
+    keyboardShouldPersistTaps="handled"
+    showsVerticalScrollIndicator={false}
+  >
 
         <OrganicBackground />
 
@@ -88,8 +90,8 @@ export default function AuthLayout({
           {children}
         </View>
 
-      </KeyboardAvoidingView>
-
+    </ScrollView>
+  </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -99,15 +101,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.Warmbeigebackground,
   },
+  scrollContent: {
+  flexGrow: 1,
+},
 
   topSection: {
-    flex: 0.95,
-
-    justifyContent: 'center',
+  paddingTop: 40,
+  paddingBottom: 30,
+  justifyContent: 'center',
     alignItems: 'center',
-
     paddingHorizontal: 30,
-    paddingTop: 10,
   },
 
   logo: {
@@ -139,14 +142,15 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 40,
   },
 
-  bottomSection: {
-    flex: 1,
+bottomSection: {
+  backgroundColor: 'white',
 
-    backgroundColor: 'white',
+  paddingHorizontal: 28,
+  paddingTop: 8,
 
-    paddingHorizontal: 28,
-    paddingTop: 8,
-  },
+  flexGrow: 1,
+},
+
   safeArea: {
   flex: 1,
   backgroundColor: 'white',

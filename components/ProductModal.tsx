@@ -140,9 +140,7 @@ export default function ProductModal({
                 )}
               </View>
 
-              {/* 🌟 RENDERIZAÇÃO CONDICIONAL DE BOTÕES */}
               {isCliente ? (
-                /* INTERFACE DO CLIENTE: Botão Call-To-Action chamando o Provador */
                 <TouchableOpacity
                   style={{
                     backgroundColor: colors?.Lightolivegreen || "#808000",
@@ -165,7 +163,6 @@ export default function ProductModal({
                   </Text>
                 </TouchableOpacity>
               ) : (
-                /* INTERFACE ADMINISTRATIVA: Lápis e Lixeira originais */
                 <View style={styles.actionButtons}>
                   <TouchableOpacity
                     style={styles.iconBtn}
