@@ -9,13 +9,16 @@
     ActivityIndicator,
     Alert,
     Dimensions,
+    Modal,
+    TextInput,
+    Animated,
   } from "react-native";
   import { Ionicons } from "@expo/vector-icons";
   import { useLocalSearchParams, router } from "expo-router";
   import api from "../src/services/api";
   import AsyncStorage from "@react-native-async-storage/async-storage";
-import TabBar from "../components/TabBar";
-
+  import TabBar from "../components/TabBar";
+  import QRCode from "react-native-qrcode-svg";
   const { width } = Dimensions.get("window");
 
   const colors = {
@@ -49,6 +52,23 @@ import TabBar from "../components/TabBar";
     const [produtosNoPedido, setProdutosNoPedido] = useState<ItemCarrinho[]>([]);
     const [produtoFocoId, setProdutoFocoId] = useState<string | null>(null);
 
+    const [modalCheckoutVisible, setModalCheckoutVisible] = useState(false);
+    const [localRetirada, setLocalRetirada] = useState("");
+    const [formaPagamento, setFormaPagamento] = useState("");
+    const [mostrarPix, setMostrarPix] = useState(false);
+    const [dadosCartao, setDadosCartao] = useState({
+      nome: "",
+      numero: "",
+      validade: "",
+      cvv: "",
+    });
+
+    const [simulandoPagamento, setSimulandoPagamento] = useState(false);
+    const [pagamentoConcluido, setPagamentoConcluido] = useState(false);
+    const scaleAnim = useState(new Animated.Value(0))[0];
+
+
+    
     useEffect(() => {
       async function inicializarDados() {
         try {
@@ -229,75 +249,91 @@ import TabBar from "../components/TabBar";
       );
     };
 
-    const finalizarPedidoLookSugerido = async () => {
-      if (produtosNoPedido.length === 0) {
-        Alert.alert("Sacola Vazia", "Nenhum produto selecionado.");
-        return;
+const simularPagamentoPix = async () => {
+  setSimulandoPagamento(true);
+
+  setTimeout(async () => {
+    setSimulandoPagamento(false);
+    setPagamentoConcluido(true);
+
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      useNativeDriver: true,
+    }).start();
+
+    await finalizarPedidoLookSugerido();
+
+    setTimeout(() => {
+      setModalCheckoutVisible(false);
+
+      router.push("/MeusPedidos");
+    }, 3500);
+
+  }, 15000);
+};
+
+
+  const finalizarPedidoLookSugerido = async () => {
+    if (!localRetirada) {
+      Alert.alert("Selecione um endereço de retirada");
+      return;
+    }
+
+    if (!formaPagamento) {
+      Alert.alert("Selecione uma forma de pagamento");
+      return;
+    }
+
+    try {
+      setCarregando(true);
+
+      const itensFormatados = await Promise.all(
+        produtosNoPedido.map(async (item) => {
+          let idItemEstoqueReal =
+            item.variacaoSelecionada?.id_variacao ||
+            item.id_item_estoque;
+
+          return {
+            id_item_estoque: String(idItemEstoqueReal),
+            quantidade: item.quantidade || 1,
+            preco_unitario_venda: Number(item.preco_base) || 0,
+            categoria: item.categoria || "Geral",
+          };
+        }),
+      );
+
+      const token = await AsyncStorage.getItem("token");
+
+      const payloadVenda = {
+        meio_venda: "Aplicativo",
+        status_venda: "Pendente",
+        nome_comprador: "Cliente App",
+        telefone_comprador: "",
+        dados_pagamento: formaPagamento,
+        local_retirada: localRetirada,
+        itens: itensFormatados,
+      };
+
+      const response = await api.post("/vendas", payloadVenda, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200 || response.status === 201) {
+        setModalCheckoutVisible(false);
+
+        console.log("Pedido criado com sucesso");
       }
-
-      try {
-        setCarregando(true);
-        const itensFormatados = await Promise.all(
-          produtosNoPedido.map(async (item) => {
-            let idItemEstoqueReal =
-              item.variacaoSelecionada?.id_variacao || item.id_item_estoque;
-            const codigoBusca =
-              item.codigo_barras || item.variacaoSelecionada?.codigo_barras;
-
-            if (!idItemEstoqueReal && codigoBusca) {
-              try {
-                const response = await api.get(
-                  `/produtos/buscar-por-codigo/${String(codigoBusca).trim()}`,
-                );
-                if (response.data && response.data.variacao_encontrada) {
-                  idItemEstoqueReal =
-                    response.data.variacao_encontrada.id_variacao;
-                }
-              } catch (err) {
-                console.log("Erro ao buscar variação");
-              }
-            }
-
-            if (!idItemEstoqueReal) {
-              throw new Error(`Sem variação para: ${item.nome}`);
-            }
-
-            return {
-              id_item_estoque: String(idItemEstoqueReal),
-              quantidade: item.quantidade || 1,
-              preco_unitario_venda: Number(item.preco_base) || 0,
-              categoria: item.categoria || "Geral",
-            };
-          }),
-        );
-
-        const token = await AsyncStorage.getItem("token");
-
-        const payloadVenda = {
-          meio_venda: "WhatsApp",
-          status_venda: "Pendente",
-          nome_comprador: "Cliente Provador Look IA",
-          telefone_comprador: "",
-          dados_pagamento: "Pix",
-          itens: itensFormatados,
-        };
-
-        const response = await api.post("/vendas", payloadVenda, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (response.status === 200 || response.status === 201) {
-          Alert.alert("Pedido Confirmado!", "Salvo com sucesso.");
-          setProdutosNoPedido([]);
-          setProdutoFocoId(null);
-          setSugestoesML([]);
-        }
-      } catch (error: any) {
-        Alert.alert("Erro ao Finalizar", error.message || "Erro desconhecido.");
-      } finally {
-        setCarregando(false);
-      }
-    };
+    } catch (error: any) {
+      Alert.alert(
+        "Erro",
+        error.message || "Erro ao finalizar pedido",
+      );
+    } finally {
+      setCarregando(false);
+    }
+  };
 
     const itemFocado = produtosNoPedido.find(
       (item) => String(item.id) === String(produtoFocoId),
@@ -311,6 +347,37 @@ import TabBar from "../components/TabBar";
         </View>
       );
     }
+
+    const enderecosRetirada = [
+    {
+      id: 1,
+      titulo: "Feira de Sexta",
+      endereco:
+        "Av. Nove de Julho - Jardim Praia Grande, Mongaguá - SP, 11730-000",
+      icon: "storefront-outline",
+    },
+    {
+      id: 2,
+      titulo: "Feira de Domingo",
+      endereco:
+        "R. Caraguatatuba, 596 - Balneario Regina Maria, Mongaguá - SP, 11730-000",
+      icon: "calendar-outline",
+    },
+    {
+      id: 3,
+      titulo: "Feira de Quarta",
+      endereco:
+        "R. Etelvina Simões Salomão, 119 - Balneario Umurama, Mongaguá - SP, 11730-000",
+      icon: "location-outline",
+    },
+    {
+      id: 4,
+      titulo: "Feira de Sábado",
+      endereco:
+        "R. Pôrto Alegre, 15 - Centro, Mongaguá - SP, 11730-000",
+      icon: "business-outline",
+    },
+  ];
 
     return (
       <View style={styles.container}>
@@ -404,7 +471,7 @@ import TabBar from "../components/TabBar";
             </ScrollView>
           )}
 
-          {/* SELETOR DE VARIAÇÃO / GRADE (LAYOUT RENOVADO E MODERNO) */}
+          {/* SELETOR DE VARIAÇÃO */}
           {itemFocado && (
             <View style={styles.variacaoContainer}>
               <View style={styles.seletorHeader}>
@@ -525,11 +592,310 @@ import TabBar from "../components/TabBar";
             <Text style={styles.checkoutTotalLabel}>Total do seu Pedido:</Text>
             <Text style={styles.checkoutTotalPreco}>R$ {calcularTotalPedido().toFixed(2)}</Text>
           </View>
-          <TouchableOpacity style={styles.btnFinalizar} onPress={finalizarPedidoLookSugerido}>
-            <Text style={styles.btnFinalizarTexto}>Fechar Venda</Text>
+
+              <TouchableOpacity
+                style={styles.btnFinalizar}
+                onPress={() => {
+                setPagamentoConcluido(false);
+                setSimulandoPagamento(false);
+                scaleAnim.setValue(0);
+
+                setModalCheckoutVisible(true);
+              }}
+                            >
+              <Text style={styles.btnFinalizarTexto}>Fechar Venda</Text>
             <Ionicons name="chevron-forward" size={18} color="white" />
           </TouchableOpacity>
         </View>
+
+
+
+            <Modal
+  visible={modalCheckoutVisible}
+  animationType="slide"
+  transparent
+>
+  <View style={styles.modalOverlay}>
+    <View style={styles.modalContainer}>
+
+      <View style={styles.modalHeader}>
+        <Text style={styles.modalTitulo}>
+          Finalizar Compra
+        </Text>
+
+        <TouchableOpacity
+          onPress={() => setModalCheckoutVisible(false)}
+        >
+          <Ionicons
+            name="close"
+            size={24}
+            color="#555"
+          />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+
+        {/* ENDEREÇOS */}
+
+        <Text style={styles.modalSubtitulo}>
+          Escolha o local de retirada
+        </Text>
+
+        {enderecosRetirada.map((item) => (
+          <TouchableOpacity
+            key={item.id}
+            style={[
+              styles.cardEndereco,
+              localRetirada === item.endereco &&
+                styles.cardEnderecoAtivo,
+            ]}
+            onPress={() =>
+              setLocalRetirada(item.endereco)
+            }
+          >
+            <Ionicons
+              name={item.icon as any}
+              size={24}
+              color={colors.dustypink}
+            />
+
+            <View style={{ flex: 1 }}>
+              <Text style={styles.enderecoTitulo}>
+                {item.titulo}
+              </Text>
+
+              <Text style={styles.enderecoTexto}>
+                {item.endereco}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        ))}
+
+        {/* PAGAMENTO */}
+
+        <Text style={styles.modalSubtitulo}>
+          Forma de pagamento
+        </Text>
+
+        <View style={styles.pagamentoRow}>
+
+          <TouchableOpacity
+            style={[
+              styles.btnPagamento,
+              formaPagamento === "Pix" &&
+                styles.btnPagamentoAtivo,
+            ]}
+            onPress={() => {
+              setFormaPagamento("Pix");
+              setMostrarPix(true);
+            }}
+          >
+            <Ionicons
+              name="qr-code-outline"
+              size={22}
+              color="#333"
+            />
+
+            <Text style={styles.pagamentoTexto}>
+              Pix
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.btnPagamento,
+              formaPagamento === "Crédito" &&
+                styles.btnPagamentoAtivo,
+            ]}
+            onPress={() => {
+              setFormaPagamento("Crédito");
+              setMostrarPix(false);
+            }}
+          >
+            <Ionicons
+              name="card-outline"
+              size={22}
+              color="#333"
+            />
+
+            <Text style={styles.pagamentoTexto}>
+              Crédito
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.btnPagamento,
+              formaPagamento === "Débito" &&
+                styles.btnPagamentoAtivo,
+            ]}
+            onPress={() => {
+              setFormaPagamento("Débito");
+              setMostrarPix(false);
+            }}
+          >
+            <Ionicons
+              name="wallet-outline"
+              size={22}
+              color="#333"
+            />
+
+            <Text style={styles.pagamentoTexto}>
+              Débito
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* PIX */}
+
+        {mostrarPix && (
+          <View style={styles.pixContainer}>
+
+            {!simulandoPagamento && !pagamentoConcluido && (
+              <>
+                <Text style={styles.pixTitulo}>
+                  Escaneie o QR Code
+                </Text>
+
+                <QRCode
+                  value="PIX-MAGNOLIA-MODAS-123"
+                  size={180}
+                />
+
+                <View style={styles.pixInfoBox}>
+                  <Text style={styles.pixLabel}>
+                    Chave Pix:
+                  </Text>
+
+                  <Text style={styles.pixKey}>
+                    magnoliamodas@pix.com
+                  </Text>
+                </View>
+
+                <TouchableOpacity
+                  style={styles.btnConfirmarPagamento}
+                  onPress={simularPagamentoPix}
+                >
+                  <Ionicons
+                    name="scan-circle-outline"
+                    size={20}
+                    color="#FFF"
+                  />
+
+                  <Text style={styles.btnConfirmarTexto}>
+                    Simular Pagamento
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+        {simulandoPagamento && (
+          <View style={styles.loadingPagamentoContainer}>
+
+            <ActivityIndicator
+              size="large"
+              color={colors.dustypink}
+            />
+
+            <Text style={styles.processandoTexto}>
+              Aguardando confirmação do Pix...
+            </Text>
+
+            <Text style={styles.processandoSubtexto}>
+              Isso pode levar alguns segundos
+            </Text>
+          </View>
+        )}
+
+        {pagamentoConcluido && (
+          <Animated.View
+            style={[
+              styles.sucessoContainer,
+              {
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
+            <Ionicons
+              name="checkmark-circle"
+              size={120}
+              color="#6BBF73"
+            />
+
+            <Text style={styles.sucessoTitulo}>
+              Pagamento Confirmado!
+            </Text>
+
+            <Text style={styles.sucessoTexto}>
+              Seu pedido foi enviado com sucesso.
+            </Text>
+          </Animated.View>
+        )}
+      </View>
+    )}
+
+        {/* CARTÃO */}
+
+        {!mostrarPix && formaPagamento !== "" && (
+          <View style={styles.cartaoContainer}>
+
+            <TextInput
+              placeholder="Nome no cartão"
+              style={styles.input}
+              placeholderTextColor="#999"
+              onChangeText={(text) =>
+                setDadosCartao({
+                  ...dadosCartao,
+                  nome: text,
+                })
+              }
+            />
+
+            <TextInput
+              placeholder="Número do cartão"
+              style={styles.input}
+              placeholderTextColor="#999"
+              keyboardType="numeric"
+            />
+
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              <TextInput
+                placeholder="Validade"
+                style={[styles.input, { flex: 1 }]}
+                placeholderTextColor="#999"
+              />
+
+              <TextInput
+                placeholder="CVV"
+                style={[styles.input, { flex: 1 }]}
+                placeholderTextColor="#999"
+                keyboardType="numeric"
+              />
+            </View>
+
+            <TouchableOpacity
+              style={styles.btnConfirmarPagamento}
+              onPress={finalizarPedidoLookSugerido}
+            >
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color="#FFF"
+              />
+
+              <Text style={styles.btnConfirmarTexto}>
+                Confirmar Pagamento
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </ScrollView>
+    </View>
+  </View>
+</Modal>
+
+
 
               <TabBar />
         
@@ -707,4 +1073,195 @@ import TabBar from "../components/TabBar";
       gap: 4,
     },
     btnFinalizarTexto: { color: "#FFF", fontWeight: "bold", fontSize: 14 },
+
+    modalOverlay: {
+  flex: 1,
+  backgroundColor: "rgba(0,0,0,0.5)",
+  justifyContent: "flex-end",
+},
+
+modalContainer: {
+  backgroundColor: "#FFF",
+  borderTopLeftRadius: 30,
+  borderTopRightRadius: 30,
+  padding: 20,
+  maxHeight: "90%",
+},
+
+modalHeader: {
+  flexDirection: "row",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: 20,
+},
+
+modalTitulo: {
+  fontSize: 22,
+  fontWeight: "700",
+  color: "#333",
+},
+
+modalSubtitulo: {
+  fontSize: 15,
+  fontWeight: "700",
+  marginBottom: 12,
+  marginTop: 15,
+  color: "#444",
+},
+
+cardEndereco: {
+  flexDirection: "row",
+  gap: 12,
+  backgroundColor: "#FAFAFA",
+  padding: 14,
+  borderRadius: 14,
+  marginBottom: 12,
+  borderWidth: 1,
+  borderColor: "#EEE",
+},
+
+cardEnderecoAtivo: {
+  borderColor: colors.dustypink,
+  backgroundColor: "#FFF5F7",
+},
+
+enderecoTitulo: {
+  fontWeight: "700",
+  color: "#333",
+  marginBottom: 4,
+},
+
+enderecoTexto: {
+  fontSize: 12,
+  color: "#666",
+},
+
+pagamentoRow: {
+  flexDirection: "row",
+  gap: 10,
+  marginBottom: 20,
+},
+
+btnPagamento: {
+  flex: 1,
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 14,
+  borderRadius: 12,
+  borderWidth: 1,
+  borderColor: "#EEE",
+  backgroundColor: "#FAFAFA",
+},
+
+btnPagamentoAtivo: {
+  borderColor: colors.dustypink,
+  backgroundColor: "#FFF5F7",
+},
+
+pagamentoTexto: {
+  marginTop: 6,
+  fontWeight: "600",
+  color: "#444",
+},
+
+pixContainer: {
+  alignItems: "center",
+  marginTop: 20,
+},
+
+pixTitulo: {
+  fontSize: 15,
+  fontWeight: "700",
+  marginBottom: 20,
+},
+
+btnConfirmarPagamento: {
+  marginTop: 25,
+  backgroundColor: "#4E5B48",
+  paddingVertical: 14,
+  paddingHorizontal: 20,
+  borderRadius: 14,
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 8,
+},
+
+btnConfirmarTexto: {
+  color: "#FFF",
+  fontWeight: "700",
+},
+
+cartaoContainer: {
+  marginTop: 20,
+},
+
+input: {
+  backgroundColor: "#FAFAFA",
+  borderRadius: 12,
+  paddingHorizontal: 14,
+  paddingVertical: 14,
+  marginBottom: 12,
+  borderWidth: 1,
+  borderColor: "#EEE",
+  color: "#333",
+},
+pixInfoBox: {
+  width: "100%",
+  backgroundColor: "#F8F8F8",
+  padding: 14,
+  borderRadius: 14,
+  marginTop: 18,
+  alignItems: "center",
+},
+
+pixLabel: {
+  fontSize: 12,
+  color: "#777",
+  marginBottom: 6,
+},
+
+pixKey: {
+  fontSize: 15,
+  fontWeight: "700",
+  color: "#333",
+},
+
+loadingPagamentoContainer: {
+  alignItems: "center",
+  justifyContent: "center",
+  marginTop: 40,
+},
+
+processandoTexto: {
+  marginTop: 20,
+  fontSize: 18,
+  fontWeight: "700",
+  color: "#333",
+},
+
+processandoSubtexto: {
+  marginTop: 8,
+  color: "#777",
+  fontSize: 13,
+},
+
+sucessoContainer: {
+  alignItems: "center",
+  justifyContent: "center",
+  paddingVertical: 40,
+},
+
+sucessoTitulo: {
+  fontSize: 26,
+  fontWeight: "800",
+  color: "#333",
+  marginTop: 20,
+},
+
+sucessoTexto: {
+  marginTop: 10,
+  color: "#666",
+  fontSize: 14,
+  textAlign: "center",
+},
   });

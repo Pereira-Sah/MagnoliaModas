@@ -275,7 +275,6 @@ export default function ListaVendas() {
         }
       />
 
-      {/* MODAL DESIGN ATUALIZADO */}
       <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <TouchableOpacity 
