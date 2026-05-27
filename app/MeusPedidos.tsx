@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import api from "../src/services/api";
 import { useFocusEffect } from "expo-router"; 
 import TabBar from "../components/TabBar";
+import * as SecureStore from "expo-secure-store";
 
 const colors = {
   dustypink: "#DFA3B2",
@@ -45,7 +46,6 @@ export default function MeusPedidos() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [clienteNome, setClienteNome] = useState<string>("");
-
   useFocusEffect(
     useCallback(() => {
       carregarDados();
@@ -55,11 +55,7 @@ export default function MeusPedidos() {
 async function carregarDados() {
   try {
     if (!refreshing) setLoading(true);
-
-    const perfilResponse = await api.get("/auth/me");
-    const usuario = perfilResponse.data;
-    const nomeUsuario = usuario?.nome;
-    const idUsuario = usuario?.id;
+const nomeUsuario = await SecureStore.getItemAsync("userName");
 
     if (!nomeUsuario) {
       setClienteNome("");
@@ -73,8 +69,6 @@ async function carregarDados() {
     const todasVendas = response.data || [];
 
   const minhasVendas = todasVendas.filter((v: Venda) => {
-    console.log("VENDA:", v.nome_comprador);
-    console.log("USUARIO:", nomeUsuario);
 
     if (!v.nome_comprador) return false;
 

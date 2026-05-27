@@ -18,6 +18,7 @@
   import api from "../src/services/api";
   import AsyncStorage from "@react-native-async-storage/async-storage";
   import TabBar from "../components/TabBar";
+  import * as SecureStore from "expo-secure-store";
   import QRCode from "react-native-qrcode-svg";
   const { width } = Dimensions.get("window");
 
@@ -62,17 +63,18 @@
       validade: "",
       cvv: "",
     });
-
+    const [nomeUsuario, setNomeUsuario] = useState("");
     const [simulandoPagamento, setSimulandoPagamento] = useState(false);
     const [pagamentoConcluido, setPagamentoConcluido] = useState(false);
     const scaleAnim = useState(new Animated.Value(0))[0];
-
-
     
     useEffect(() => {
       async function inicializarDados() {
         try {
           setCarregando(true);
+          const nome = await SecureStore.getItemAsync("userName")||"nome";
+          setNomeUsuario(nome);
+
           const response = await api.get("/produtos");
           const lista = response.data || [];
           setProdutosVitrine(lista);
@@ -267,7 +269,7 @@ const simularPagamentoPix = async () => {
       setModalCheckoutVisible(false);
 
       router.push("/MeusPedidos");
-    }, 3500);
+    }, 2500);
 
   }, 15000);
 };
@@ -307,7 +309,7 @@ const simularPagamentoPix = async () => {
       const payloadVenda = {
         meio_venda: "Aplicativo",
         status_venda: "Pendente",
-        nome_comprador: "Cliente App",
+        nome_comprador: nomeUsuario,
         telefone_comprador: "",
         dados_pagamento: formaPagamento,
         local_retirada: localRetirada,
