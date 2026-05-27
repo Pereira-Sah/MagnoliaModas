@@ -24,8 +24,6 @@ import { router } from "expo-router";
 import ScannerModal from "../components/ScannerModal";
 import CreateSaleModal from "../components/CreateSaleModal";
 
-const CACHE_KEY = "@magnolia:produtos";
-
 export default function Produtos() {
   const [todosProdutos, setTodosProdutos] = useState([]);
   const [listaFiltrada, setListaFiltrada] = useState([]);
@@ -98,91 +96,73 @@ export default function Produtos() {
     }
   }
 
-async function sincronizarComBackend() {
-  try {
+  async function sincronizarComBackend() {
+    try {
+      const response = await api.get("/produtos/");
 
-    const response = await api.get("/produtos/");
+      if (Array.isArray(response.data)) {
+        const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
 
-    if (Array.isArray(response.data)) {
+        let produtosLocais = [];
 
-      const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
+        if (cacheLocal) {
+          produtosLocais = JSON.parse(cacheLocal);
+        }
 
-      let produtosLocais = [];
+        const idsArquivados = produtosLocais
+          .filter((p) => p.arquivado === true)
+          .map((p) => p.id);
 
-      if (cacheLocal) {
-        produtosLocais = JSON.parse(cacheLocal);
+        const produtosAtualizados = response.data.map((produto) => ({
+          ...produto,
+          arquivado: idsArquivados.includes(produto.id),
+        }));
+
+        setTodosProdutos(produtosAtualizados);
+
+        await AsyncStorage.setItem(
+          CACHE_KEY,
+          JSON.stringify(produtosAtualizados),
+        );
+
+        filtrarLocalmente(
+          produtosAtualizados,
+          termoBusca,
+          categoriaSelecionada,
+        );
       }
+    } catch (e) {
+      console.error("Erro ao sincronizar com backend:", e);
+    }
+  }
 
-      const idsArquivados = produtosLocais
-        .filter((p) => p.arquivado === true)
-        .map((p) => p.id);
+  async function filtrarLocalmente(produtos, busca, categoria) {
+    let resultado = [...produtos];
 
-      const produtosAtualizados = response.data.map((produto) => ({
-        ...produto,
-        arquivado: idsArquivados.includes(produto.id),
-      }));
+    resultado = resultado.filter((p) => p.arquivado !== true);
 
-      setTodosProdutos(produtosAtualizados);
+    if (isCliente) {
+      resultado = resultado.filter((produto) => {
+        const temEstoque = produto.estoque?.some(
+          (itemEstoque) => Number(itemEstoque.quantidade) > 0,
+        );
 
-      await AsyncStorage.setItem(
-        CACHE_KEY,
-        JSON.stringify(produtosAtualizados)
-      );
-
-      filtrarLocalmente(
-        produtosAtualizados,
-        termoBusca,
-        categoriaSelecionada
-      );
+        return temEstoque;
+      });
     }
 
-  } catch (e) {
-    console.error(
-      "Erro ao sincronizar com backend:",
-      e
-    );
+    if (busca.trim() !== "") {
+      const termo = busca.toLowerCase().trim();
+
+      resultado = resultado.filter((p) => p.nome.toLowerCase().includes(termo));
+    }
+
+    if (categoria !== "Tudo") {
+      resultado = resultado.filter((p) => p.categoria === categoria);
+    }
+
+    setListaFiltrada(resultado);
   }
-}
-
-
-
-async function filtrarLocalmente(produtos, busca, categoria){
-
-  let resultado = [...produtos];
-
-  resultado = resultado.filter(
-    (p) => p.arquivado !== true
-  );
-
-  if (isCliente) {
-    resultado = resultado.filter((produto) => {
-
-      const temEstoque = produto.estoque?.some(
-        (itemEstoque) => Number(itemEstoque.quantidade) > 0
-      );
-
-      return temEstoque;
-    });
-  }
-
-  if (busca.trim() !== "") {
-    const termo = busca.toLowerCase().trim();
-
-    resultado = resultado.filter((p) =>
-      p.nome.toLowerCase().includes(termo)
-    );
-  }
-
-  if (categoria !== "Tudo") {
-    resultado = resultado.filter(
-      (p) => p.categoria === categoria
-    );
-  }
-
-  setListaFiltrada(resultado);
-}
-
-
 
   useEffect(() => {
     carregarProdutos();
@@ -207,40 +187,30 @@ async function filtrarLocalmente(produtos, busca, categoria){
     setModalVisible(true);
   };
 
-async function handleDelete(id) {
-  try {
+  async function handleDelete(id) {
+    try {
+      const atualizados = todosProdutos.map((produto) => {
+        if (produto.id === id) {
+          return {
+            ...produto,
+            arquivado: true,
+          };
+        }
 
-    const atualizados = todosProdutos.map((produto) => {
+        return produto;
+      });
 
-      if (produto.id === id) {
-        return {
-          ...produto,
-          arquivado: true,
-        };
-      }
+      await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(atualizados));
 
-      return produto;
-    });
+      setTodosProdutos(atualizados);
 
-    await AsyncStorage.setItem(
-      CACHE_KEY,
-      JSON.stringify(atualizados)
-    );
+      await filtrarLocalmente(atualizados, termoBusca, categoriaSelecionada);
 
-    setTodosProdutos(atualizados);
-
-    await filtrarLocalmente(
-      atualizados,
-      termoBusca,
-      categoriaSelecionada
-    );
-
-    setModalVisible(false);
-
-  } catch (error) {
-    console.log(error);
+      setModalVisible(false);
+    } catch (error) {
+      console.log(error);
+    }
   }
-}
 
   return (
     <View style={styles.container}>
@@ -333,24 +303,20 @@ async function handleDelete(id) {
           numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.listContent}
-
-        renderItem={({ item }) => {
-
-          const semEstoque =
-            !item.estoque?.some(
-              (estoqueItem) => Number(estoqueItem.quantidade) > 0
+          renderItem={({ item }) => {
+            const semEstoque = !item.estoque?.some(
+              (estoqueItem) => Number(estoqueItem.quantidade) > 0,
             );
 
-          return (
-            <ProductCard
-              item={item}
-              onPress={abrirModal}
-              semEstoque={semEstoque}
-              isCliente={isCliente}
-            />
-          );
-        }}
-
+            return (
+              <ProductCard
+                item={item}
+                onPress={abrirModal}
+                semEstoque={semEstoque}
+                isCliente={isCliente}
+              />
+            );
+          }}
           ListEmptyComponent={
             <Text style={{ textAlign: "center", color: "#999", marginTop: 40 }}>
               Nenhum produto encontrado nesta seção.
@@ -383,17 +349,17 @@ async function handleDelete(id) {
         </>
       )}
 
-<ProductModal
-  visible={modalVisible}
-  produto={produtoSelecionado}
-  isCliente={isCliente}
-  onDelete={handleDelete}
-  onClose={() => setModalVisible(false)}
+      <ProductModal
+        visible={modalVisible}
+        produto={produtoSelecionado}
+        isCliente={isCliente}
+        onDelete={handleDelete}
+        onClose={() => setModalVisible(false)}
         onUpdated={() => {
-    setModalVisible(false);
-    carregarProdutos(true); 
-  }}
-  onAdicionarAoLook={(prod) => {
+          setModalVisible(false);
+          carregarProdutos(true);
+        }}
+        onAdicionarAoLook={(prod) => {
           setModalVisible(false);
           router.push({
             pathname: "/combinacaoRoupas",
@@ -431,5 +397,4 @@ async function handleDelete(id) {
       />
     </View>
   );
-
 }

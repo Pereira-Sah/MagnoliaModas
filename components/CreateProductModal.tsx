@@ -37,36 +37,52 @@ export default function CreateProductModal({ visible, onClose }: Props) {
   const [salvando, setSalvando] = useState(false);
   const [codigoBarras, setCodigoBarras] = useState("");
   const [scannerVisible, setScannerVisible] = useState(false);
-  const tags = ["floral", "festa", "casual", "alfaiataria", "linho"];
+  const tags = [
+    "casual",
+    "alfaiataria",
+    "linho",
+    "floral",
+    "festa",
+    "basico",
+    "jeans",
+    "seda",
+    "classico",
+    "neutro",
+    "rustico",
+    "verao",
+    "colorido",
+    "estampado",
+  ];
   const [nome, setNome] = useState("");
   const [descricao, setDescricao] = useState("");
   const [preco, setPreco] = useState("");
   const [estacao, setEstacao] = useState("");
   const [categoria, setCategoria] = useState("");
-const [variacoes, setVariacoes] = useState([
-  {
-    tamanho: "U",
-    cor: "N/A",
-    quantidade: "1",
-    codigo_barras: "",
-  },
-]);
-const [scannerVariacaoIndex, setScannerVariacaoIndex] =
-  useState<number | null>(null);
-
-function adicionarVariacao() {
-  setVariacoes((prev) => [
-    ...prev,
+  const [variacoes, setVariacoes] = useState([
     {
-      tamanho: "",
-      cor: "",
+      tamanho: "U",
+      cor: "N/A",
       quantidade: "1",
       codigo_barras: "",
     },
   ]);
-}
+  const [scannerVariacaoIndex, setScannerVariacaoIndex] = useState<
+    number | null
+  >(null);
 
-function removerVariacao(index: number) {
+  function adicionarVariacao() {
+    setVariacoes((prev) => [
+      ...prev,
+      {
+        tamanho: "",
+        cor: "",
+        quantidade: "1",
+        codigo_barras: "",
+      },
+    ]);
+  }
+
+  function removerVariacao(index: number) {
     setVariacoes((prev) => prev.filter((_, i) => i !== index));
   }
 
@@ -579,67 +595,48 @@ function removerVariacao(index: number) {
             onPhotoCaptured={handlePhotoCaptured}
           />
 
-        <Modal
-          visible={confirmVisible}
-          transparent
-          animationType="fade"
-        >
-          <View style={s.alertOverlay}>
-            <View style={s.alertContainer}>
+          <Modal visible={confirmVisible} transparent animationType="fade">
+            <View style={s.alertOverlay}>
+              <View style={s.alertContainer}>
+                <View style={s.alertIconContainer}>
+                  <Text style={s.alertIcon}>?</Text>
+                </View>
 
-              <View style={s.alertIconContainer}>
-                <Text style={s.alertIcon}>?</Text>
+                <Text style={s.alertTitle}>Imprimir etiquetas?</Text>
+
+                <Text style={s.alertMessage}>
+                  Deseja imprimir as etiquetas de código de barras agora?
+                </Text>
+
+                <View style={s.alertButtons}>
+                  <TouchableOpacity
+                    style={s.alertCancelButton}
+                    onPress={() => {
+                      setConfirmVisible(false);
+                      handleClose();
+                    }}
+                  >
+                    <Text style={s.alertCancelText}>Depois</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={s.alertConfirmButton}
+                    onPress={async () => {
+                      setConfirmVisible(false);
+
+                      if (produtoCriadoId) {
+                        await puxarEImprimirEtiqueta(produtoCriadoId);
+                      }
+
+                      handleClose();
+                    }}
+                  >
+                    <Text style={s.alertConfirmText}>Imprimir</Text>
+                  </TouchableOpacity>
+                </View>
               </View>
-
-              <Text style={s.alertTitle}>
-                Imprimir etiquetas?
-              </Text>
-
-              <Text style={s.alertMessage}>
-                Deseja imprimir as etiquetas
-                de código de barras agora?
-              </Text>
-
-              <View style={s.alertButtons}>
-
-                <TouchableOpacity
-                  style={s.alertCancelButton}
-                  onPress={()=>{
-                    setConfirmVisible(false);
-                    handleClose();
-                  }}
-                >
-                  <Text style={s.alertCancelText}>
-                    Depois
-                  </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={s.alertConfirmButton}
-                  onPress={async()=>{
-
-                    setConfirmVisible(false);
-
-                    if(produtoCriadoId){
-                      await puxarEImprimirEtiqueta(
-                        produtoCriadoId
-                      );
-                    }
-
-                    handleClose();
-
-                  }}
-                >
-                  <Text style={s.alertConfirmText}>
-                    Imprimir
-                  </Text>
-                </TouchableOpacity>
-
-              </View>
-
             </View>
-          </View>
-        </Modal>
+          </Modal>
 
           <ScannerModal
             visible={scannerVisible}
