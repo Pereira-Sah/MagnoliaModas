@@ -23,7 +23,6 @@ import TabBar from "../components/TabBar";
 import { router } from "expo-router";
 import ScannerModal from "../components/ScannerModal";
 import CreateSaleModal from "../components/CreateSaleModal";
-// import * as Print from "expo-print";
 
 const CACHE_KEY = "@magnolia:produtos";
 
@@ -78,8 +77,19 @@ export default function Produtos() {
   }, []);
 
   async function carregarProdutos(forcarAtualizacao = false) {
-    try {
-      setCarregando(true);
+  try {
+    setCarregando(true);
+    
+    if (!forcarAtualizacao) {
+      const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
+      if (cacheLocal) {
+        const produtosSalvos = JSON.parse(cacheLocal);
+        setTodosProdutos(produtosSalvos);
+        filtrarLocalmente(produtosSalvos, termoBusca, categoriaSelecionada);
+      }
+    }
+    
+    await sincronizarComBackend();
 
       if (!forcarAtualizacao) {
         const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
