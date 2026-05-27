@@ -55,8 +55,22 @@ export default function EditProductModal({
   onClose,
   onUpdated,
 }: Props) {
-  const tagsDisponiveis = ["floral", "festa", "casual", "alfaiataria", "linho"];
-
+  const tagsDisponiveis = [
+    "casual",
+    "alfaiataria",
+    "linho",
+    "floral",
+    "festa",
+    "basico",
+    "jeans",
+    "seda",
+    "classico",
+    "neutro",
+    "rustico",
+    "verao",
+    "colorido",
+    "estampado",
+  ];
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [imageUrl, setImageUrl] = useState("");
 
@@ -154,7 +168,7 @@ export default function EditProductModal({
               }
             },
           },
-        ]
+        ],
       );
     } else {
       setEstoque((prev) => prev.filter((_, i) => i !== index));
@@ -388,7 +402,7 @@ export default function EditProductModal({
 
             {estoque.map((variacao, index) => {
               const existeNoBanco = !!(variacao.id_variacao || variacao.id);
-              
+
               return (
                 <View
                   key={index}
@@ -410,11 +424,21 @@ export default function EditProductModal({
                     }}
                   >
                     <Text style={{ fontWeight: "600" }}>
-                      {existeNoBanco ? `Variação ${index + 1}` : `Nova Variação ${index + 1}`}
+                      {existeNoBanco
+                        ? `Variação ${index + 1}`
+                        : `Nova Variação ${index + 1}`}
                     </Text>
 
-                    <TouchableOpacity onPress={() => removerVariacao(index, variacao)}>
-                      <Ionicons name={existeNoBanco ? "archive-outline" : "trash-outline"} size={20} color="#E57373" />
+                    <TouchableOpacity
+                      onPress={() => removerVariacao(index, variacao)}
+                    >
+                      <Ionicons
+                        name={
+                          existeNoBanco ? "archive-outline" : "trash-outline"
+                        }
+                        size={20}
+                        color="#E57373"
+                      />
                     </TouchableOpacity>
                   </View>
 
@@ -422,7 +446,9 @@ export default function EditProductModal({
                     style={[s.input, { marginBottom: 8 }]}
                     placeholder="Cor"
                     value={variacao.cor}
-                    onChangeText={(text) => atualizarVariacao(index, "cor", text)}
+                    onChangeText={(text) =>
+                      atualizarVariacao(index, "cor", text)
+                    }
                   />
 
                   <TextInput
