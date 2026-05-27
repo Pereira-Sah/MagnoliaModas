@@ -7,6 +7,7 @@ import {
   Image,
   Platform,
   ActivityIndicator,
+  KeyboardAvoidingView,
 } from "react-native";
 import * as SecureStore from "expo-secure-store";
 import { router } from "expo-router";
@@ -109,32 +110,34 @@ export default function Login() {
 
   return (
     <AuthLayout title="Bem-vinda de volta" subtitle="Sentimos sua Falta!">
-      <View style={authStyles.formContainer}>
-        <Text style={authStyles.description}>
-          Entre com sua conta para acessar
-        </Text>
+      <KeyboardAvoidingView>
+        <View style={authStyles.formContainer}>
+          <Text style={authStyles.description}>
+            Entre com sua conta para acessar
+          </Text>
 
-        <AuthInput
-          icon="mail-outline"
-          placeholder="E-mail"
-          onChangeText={setEmail}
-        />
+          <AuthInput
+            icon="mail-outline"
+            placeholder="E-mail"
+            onChangeText={setEmail}
+          />
 
-        <AuthInput
-          icon="lock-closed-outline"
-          placeholder="Senha"
-          secureTextEntry
-          onChangeText={setSenha}
-        />
+          <AuthInput
+            icon="lock-closed-outline"
+            placeholder="Senha"
+            secureTextEntry
+            onChangeText={setSenha}
+          />
 
-        <TouchableOpacity style={authStyles.button} onPress={handleLogin}>
-          <Text style={authStyles.buttonText}>Entrar</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={authStyles.button} onPress={handleLogin}>
+            <Text style={authStyles.buttonText}>Entrar</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push("/cadastro")}>
-          <Text style={authStyles.link}>Não possui conta? Cadastre-se</Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity onPress={() => router.push("/cadastro")}>
+            <Text style={authStyles.link}>Não possui conta? Cadastre-se</Text>
+          </TouchableOpacity>
+        </View>
+      </KeyboardAvoidingView>
     </AuthLayout>
   );
 }
