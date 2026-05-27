@@ -1,6 +1,7 @@
-import { View, TextInput, StyleSheet } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, fonts } from '../styles/authStyles';
+import { useState } from 'react';
 
 type Props = {
   icon: keyof typeof Ionicons.glyphMap;
@@ -15,6 +16,11 @@ export default function AuthInput({
   secureTextEntry,
   onChangeText,
 }: Props) {
+
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+
+  const ehSenha = secureTextEntry;
+
   return (
     <View style={styles.container}>
       <Ionicons
@@ -26,10 +32,24 @@ export default function AuthInput({
       <TextInput
         placeholder={placeholder}
         placeholderTextColor="#999"
-        secureTextEntry={secureTextEntry}
+        secureTextEntry={ehSenha && !mostrarSenha}        
         style={styles.input}
         onChangeText={onChangeText}
       />
+
+
+        {ehSenha && (
+        <TouchableOpacity
+          onPress={() => setMostrarSenha(!mostrarSenha)}
+        >
+          <Ionicons
+            name={mostrarSenha ? 'eye-off-outline' : 'eye-outline'}
+            size={20}
+            color={colors.Lightolivegreen}
+          />
+        </TouchableOpacity>
+      )}
+
     </View>
   );
 }

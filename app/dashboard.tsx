@@ -18,7 +18,7 @@ import api from "../src/services/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SecureStore from "expo-secure-store";
 import * as Print from "expo-print";
-
+import { router } from "expo-router";
 
 const { width } = Dimensions.get("window");
 const CACHE_KEY = "@magnolia:produtos";
@@ -295,6 +295,7 @@ export default function Dashboard() {
           {/* ACTIONS */}
           <View style={dashboardStyles.heroActionsRow}>
             
+
             {/* ETIQUETAS */}
             <TouchableOpacity
               style={dashboardStyles.heroActionCardPink}
@@ -320,10 +321,34 @@ export default function Dashboard() {
               </Text>
 
               <Text style={dashboardStyles.heroActionSubtitle}>
-                Gerar impressões
+                 Impressões
               </Text>
+
             </TouchableOpacity>
 
+            <TouchableOpacity
+            style={dashboardStyles.heroActionCardArchive}
+            activeOpacity={0.85}
+            onPress={() => router.push("/arquivados")}
+          >
+            <View style={dashboardStyles.heroActionIconArchive}>
+              <Ionicons
+                name="archive-outline"
+                size={20}
+                color="#FFF"
+              />
+            </View>
+
+            <Text style={dashboardStyles.heroActionTitle}>
+              Arquivados
+            </Text>
+            <Text style={dashboardStyles.heroActionSubtitle}>
+              Peças ocultas
+            </Text>
+
+          </TouchableOpacity>
+
+          
             {/* FEIRA */}
             <TouchableOpacity
               style={dashboardStyles.heroActionCardGreen}
@@ -343,10 +368,12 @@ export default function Dashboard() {
               </Text>
 
               <Text style={dashboardStyles.heroActionSubtitle}>
-                Relatório estoque
+                Relatório 
               </Text>
             </TouchableOpacity>
           </View>
+
+          
         </View>
 
       <ScrollView

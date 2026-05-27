@@ -177,8 +177,8 @@ export default function ListaVendas() {
               const palavras = nome.split(" ");
 
               const nomeLimitado =
-                palavras.length > 5
-                  ? palavras.slice(0, 4).join(" ") + "..."
+                palavras.length > 4
+                  ? palavras.slice(0, 3).join(" ") + "..."
                   : nome;
 
               return nomeLimitado;

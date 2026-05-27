@@ -10,18 +10,53 @@ interface ProductCardProps {
     descricao: string;
   };
   onPress: (item: any) => void;
+
+  semEstoque?: boolean;
+  isCliente?: boolean;
 }
 
-export default function ProductCard({ item, onPress }: ProductCardProps) {
+export default function ProductCard({ item, onPress, semEstoque = false, isCliente = false }: ProductCardProps) {
   return (
+
 <TouchableOpacity 
       activeOpacity={0.8} 
-      style={styles.gridCard} 
+      style={[styles.gridCard, 
+              semEstoque &&
+          !isCliente && {
+            backgroundColor: '#ffe5e5',
+            borderWidth: 1,
+            borderColor: '#ff4d4d',
+          },
+      ]}
       onPress={() => onPress(item)}
     >
       <View style={styles.imageContainer}>
         <Image source={{ uri: item.imagem }} style={styles.gridImage} />
-                <Text style={styles.gridPrice}>R$ {item.preco_base}</Text>
+          <Text style={styles.gridPrice}>R$ {item.preco_base}</Text>
+
+        {semEstoque && !isCliente && (
+          <View
+            style={{
+              position: 'absolute',
+              top: 10,
+              right: 10,
+              backgroundColor: '#ff4d4d',
+              paddingHorizontal: 8,
+              paddingVertical: 4,
+              borderRadius: 8,
+            }}
+          >
+            <Text
+              style={{
+                color: 'white',
+                fontSize: 11,
+                fontWeight: 'bold',
+              }}
+            >
+              ESGOTADO
+            </Text>
+          </View>
+        )}
 
       </View>
 

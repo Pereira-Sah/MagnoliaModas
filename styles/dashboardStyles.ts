@@ -87,10 +87,8 @@ heroIconCircle: {
   height: 58,
   borderRadius: 999,
   backgroundColor: colors.dustypink,
-
   justifyContent: "center",
   alignItems: "center",
-
   shadowColor: colors.dustypink,
   shadowOpacity: 0.25,
   shadowRadius: 12,
@@ -100,29 +98,30 @@ heroIconCircle: {
 heroActionsRow: {
   flexDirection: "row",
   marginTop: 26,
-  gap: 14,
+  justifyContent: "space-between",
+  gap: 5,
 },
 
 heroActionCardPink: {
   flex: 1,
-  backgroundColor: "rgba(255,255,255,0.55)",
+  backgroundColor: "rgba(255,255,255,0.75)",
+  borderRadius: 22,
+  paddingVertical: 16,
+  paddingHorizontal: 10,
+  marginHorizontal: 4,
+  alignItems: "center",
 
-  borderRadius: 26,
-  padding: 18,
 
-  borderWidth: 1,
-  borderColor: "rgba(255,255,255,0.6)",
 },
 
 heroActionCardGreen: {
   flex: 1,
-  backgroundColor: "rgba(255,255,255,0.55)",
-
-  borderRadius: 26,
-  padding: 18,
-
-  borderWidth: 1,
-  borderColor: "rgba(255,255,255,0.6)",
+  backgroundColor: "rgba(255,255,255,0.75)",
+  borderRadius: 22,
+  paddingVertical: 16,
+  paddingHorizontal: 10,
+  marginHorizontal: 4,
+  alignItems: "center",
 },
 
 heroActionIconPink: {
@@ -130,10 +129,8 @@ heroActionIconPink: {
   height: 42,
   borderRadius: 999,
   backgroundColor: colors.dustypink,
-
   justifyContent: "center",
   alignItems: "center",
-
   marginBottom: 14,
 },
 
@@ -142,26 +139,44 @@ heroActionIconGreen: {
   height: 42,
   borderRadius: 999,
   backgroundColor: colors.Lightolivegreen,
-
   justifyContent: "center",
   alignItems: "center",
-
   marginBottom: 14,
 },
 
 heroActionTitle: {
-  fontSize: 15,
+  fontSize: 12,
   fontWeight: "700",
   color: "#333",
 },
 
 heroActionSubtitle: {
-  marginTop: 4,
-  fontSize: 12,
+  marginTop: 3,
+  fontSize: 11,
   color: "#777",
-  lineHeight: 18,
+  lineHeight: 14,
 },
 
+heroActionCardArchive: {
+  flex: 1,
+  backgroundColor: "rgba(255,255,255,0.75)",
+  borderRadius: 22,
+  paddingVertical: 16,
+  paddingHorizontal: 10,
+  marginHorizontal: 4,
+  alignItems: "center",
+
+},
+
+heroActionIconArchive: {
+  width: 42,
+  height: 42,
+  borderRadius: 999,
+  backgroundColor: "#9E9E9E",
+  justifyContent: "center",
+  alignItems: "center",
+  marginBottom: 14,
+},
 
   scrollContainer: {
     paddingHorizontal: 16,

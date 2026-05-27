@@ -53,6 +53,7 @@ export default function Produtos() {
   const [nome, setNome] = useState("Usuária");
 
   const [isCliente, setIsCliente] = useState(false);
+  const CACHE_KEY = "@magnolia:produtos";
 
   useEffect(() => {
     const obterDadosUsuario = async () => {
@@ -107,30 +108,93 @@ export default function Produtos() {
       setCarregando(false);
     }
   }
-  async function sincronizarComBackend() {
-    try {
-      const response = await api.get("/produtos/");
-      if (Array.isArray(response.data)) {
-        setTodosProdutos(response.data);
-        await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(response.data));
-        filtrarLocalmente(response.data, termoBusca, categoriaSelecionada);
+}
+
+async function sincronizarComBackend() {
+  try {
+
+    const response = await api.get("/produtos/");
+
+    if (Array.isArray(response.data)) {
+
+      const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
+
+      let produtosLocais = [];
+
+      if (cacheLocal) {
+        produtosLocais = JSON.parse(cacheLocal);
       }
-    } catch (e) {
-      console.error("Erro ao sincronizar com backend, mantendo local.", e);
+
+      const idsArquivados = produtosLocais
+        .filter((p) => p.arquivado === true)
+        .map((p) => p.id);
+
+      const produtosAtualizados = response.data.map((produto) => ({
+        ...produto,
+        arquivado: idsArquivados.includes(produto.id),
+      }));
+
+      setTodosProdutos(produtosAtualizados);
+
+      await AsyncStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify(produtosAtualizados)
+      );
+
+      filtrarLocalmente(
+        produtosAtualizados,
+        termoBusca,
+        categoriaSelecionada
+      );
     }
+
+  } catch (e) {
+    console.error(
+      "Erro ao sincronizar com backend:",
+      e
+    );
+  }
+}
+
+
+
+async function filtrarLocalmente(produtos, busca, categoria){
+
+  let resultado = [...produtos];
+
+  resultado = resultado.filter(
+    (p) => p.arquivado !== true
+  );
+
+  if (isCliente) {
+    resultado = resultado.filter((produto) => {
+
+      const temEstoque = produto.estoque?.some(
+        (itemEstoque) => Number(itemEstoque.quantidade) > 0
+      );
+
+      return temEstoque;
+    });
   }
 
-  function filtrarLocalmente(produtos, busca, categoria) {
-    let resultado = [...produtos];
-    if (busca.trim() !== "") {
-      const termo = busca.toLowerCase().trim();
-      resultado = resultado.filter((p) => p.nome.toLowerCase().includes(termo));
-    }
-    if (categoria !== "Tudo") {
-      resultado = resultado.filter((p) => p.categoria === categoria);
-    }
-    setListaFiltrada(resultado);
+  if (busca.trim() !== "") {
+    const termo = busca.toLowerCase().trim();
+
+    resultado = resultado.filter((p) =>
+      p.nome.toLowerCase().includes(termo)
+    );
   }
+
+  if (categoria !== "Tudo") {
+    resultado = resultado.filter(
+      (p) => p.categoria === categoria
+    );
+  }
+
+  setListaFiltrada(resultado);
+}
+
+
 
   useEffect(() => {
     carregarProdutos();
@@ -154,6 +218,41 @@ export default function Produtos() {
     setProdutoSelecionado(item);
     setModalVisible(true);
   };
+
+async function handleDelete(id) {
+  try {
+
+    const atualizados = todosProdutos.map((produto) => {
+
+      if (produto.id === id) {
+        return {
+          ...produto,
+          arquivado: true,
+        };
+      }
+
+      return produto;
+    });
+
+    await AsyncStorage.setItem(
+      CACHE_KEY,
+      JSON.stringify(atualizados)
+    );
+
+    setTodosProdutos(atualizados);
+
+    await filtrarLocalmente(
+      atualizados,
+      termoBusca,
+      categoriaSelecionada
+    );
+
+    setModalVisible(false);
+
+  } catch (error) {
+    console.log(error);
+  }
+}
 
   return (
     <View style={styles.container}>
@@ -246,9 +345,24 @@ export default function Produtos() {
           numColumns={2}
           columnWrapperStyle={styles.row}
           contentContainerStyle={styles.listContent}
-          renderItem={({ item }) => (
-            <ProductCard item={item} onPress={abrirModal} />
-          )}
+
+        renderItem={({ item }) => {
+
+          const semEstoque =
+            !item.estoque?.some(
+              (estoqueItem) => Number(estoqueItem.quantidade) > 0
+            );
+
+          return (
+            <ProductCard
+              item={item}
+              onPress={abrirModal}
+              semEstoque={semEstoque}
+              isCliente={isCliente}
+            />
+          );
+        }}
+
           ListEmptyComponent={
             <Text style={{ textAlign: "center", color: "#999", marginTop: 40 }}>
               Nenhum produto encontrado nesta seção.
@@ -281,15 +395,17 @@ export default function Produtos() {
         </>
       )}
 
-      <ProductModal
-        visible={modalVisible}
-        produto={produtoSelecionado}
-        isCliente={isCliente}
-        onClose={() => setModalVisible(false)}
-        onEstoqueAtualizado={() => {
-          carregarProdutos(true);
-        }}
-        onAdicionarAoLook={(prod) => {
+<ProductModal
+  visible={modalVisible}
+  produto={produtoSelecionado}
+  isCliente={isCliente}
+  onDelete={handleDelete}
+  onClose={() => setModalVisible(false)}
+        onUpdated={() => {
+    setModalVisible(false);
+    carregarProdutos(true); 
+  }}
+  onAdicionarAoLook={(prod) => {
           setModalVisible(false);
           router.push({
             pathname: "/combinacaoRoupas",
@@ -327,4 +443,4 @@ export default function Produtos() {
       />
     </View>
   );
-}
+

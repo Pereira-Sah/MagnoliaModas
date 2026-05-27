@@ -9,8 +9,10 @@ import {
   Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { styles, colors } from "../styles/produtosStyles"; // 🌟 Importado colors caso use para o novo botão
+import { styles, colors } from "../styles/produtosStyles";
 import EditProductModal from "./EditProductModal";
+import CustomAlert from "./CustomAlert";
+
 
 interface Estoque {
   cor: string;
@@ -36,8 +38,8 @@ interface ProductModalProps {
   onClose: () => void;
   onEdit?: (produto: Produto) => void;
   onDelete: (id: string) => void;
-  isCliente?: boolean; // 🌟 Controla se a visão é a do Cliente
-  onAdicionarAoLook?: (produto: Produto) => void; // 🌟 Ação do botão do cliente
+  isCliente?: boolean; 
+  onAdicionarAoLook?: (produto: Produto) => void;
 }
 
 export default function ProductModal({
@@ -46,10 +48,12 @@ export default function ProductModal({
   onClose,
   onEdit,
   onDelete,
-  isCliente = false, // 🌟 Padrão falso para não quebrar onde já é usado no ADM
+  isCliente = false, 
   onAdicionarAoLook,
 }: ProductModalProps) {
+
   const [editVisible, setEditVisible] = useState(false);
+  const [alertVisible, setAlertVisible] = useState(false);
 
   if (!produto) return null;
 
@@ -140,9 +144,7 @@ export default function ProductModal({
                 )}
               </View>
 
-              {/* 🌟 RENDERIZAÇÃO CONDICIONAL DE BOTÕES */}
               {isCliente ? (
-                /* INTERFACE DO CLIENTE: Botão Call-To-Action chamando o Provador */
                 <TouchableOpacity
                   style={{
                     backgroundColor: colors?.Lightolivegreen || "#808000",
@@ -165,7 +167,6 @@ export default function ProductModal({
                   </Text>
                 </TouchableOpacity>
               ) : (
-                /* INTERFACE ADMINISTRATIVA: Lápis e Lixeira originais */
                 <View style={styles.actionButtons}>
                   <TouchableOpacity
                     style={styles.iconBtn}
@@ -176,7 +177,7 @@ export default function ProductModal({
 
                   <TouchableOpacity
                     style={[styles.iconBtn, { marginLeft: 12 }]}
-                    onPress={() => onDelete(produto.id)}
+                    onPress={() => setAlertVisible(true)}
                   >
                     <Ionicons name="archive" size={20} color="#E57373" />
                   </TouchableOpacity>
@@ -193,6 +194,19 @@ export default function ProductModal({
         onUpdated={handleEditSuccess}
         produto={produto}
       />
+
+      <CustomAlert
+      visible={alertVisible}
+      title="Arquivar Produto"
+      message="Deseja arquivar este produto? Ele deixará de aparecer na listagem principal."
+      confirmText="Arquivar"
+      cancelText="Cancelar"
+      onCancel={() => setAlertVisible(false)}
+      onConfirm={() => {
+        setAlertVisible(false);
+        onDelete(produto.id);
+      }}
+    />
     </>
   );
 }
