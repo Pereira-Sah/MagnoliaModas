@@ -12,6 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import * as ImagePicker from 'expo-image-picker';
 
 interface Props {
   visible: boolean;
@@ -42,6 +43,19 @@ export default function CameraModal({
     setFoto(imagem.uri);
   }
 
+  async function abrirGaleria() {
+    const resultado = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [4, 4],
+      quality: 1,
+    });
+
+    if (!resultado.canceled && resultado.assets[0].uri) {
+      setFoto(resultado.assets[0].uri);
+    }
+  }
+
   async function enviar() {
     try {
       setLoadingIA(true);
@@ -54,195 +68,188 @@ export default function CameraModal({
     }
   }
 
-return (
-  <Modal
-    visible={visible}
-    animationType="slide"
-    statusBarTranslucent
-  >
-    <View style={styles.container}>
+  return (
+    <Modal
+      visible={visible}
+      animationType="slide"
+      statusBarTranslucent
+    >
+      <View style={styles.container}>
 
-      <View style={styles.heroSection}>
-        <View style={styles.heroBlob} />
-        <View style={styles.heroBlob2} />
+        <View style={styles.heroSection}>
+          <View style={styles.heroBlob} />
+          <View style={styles.heroBlob2} />
 
-        <View style={styles.headerRow}>
-          <View>
-            <Text style={styles.title}>
-              Capturar Foto
-            </Text>
+          <View style={styles.headerRow}>
+            <View>
+              <Text style={styles.title}>
+                Capturar Foto
+              </Text>
 
-            <Text style={styles.subtitle}>
-              Adicione uma imagem ao catálogo
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={styles.closeButton}
-            onPress={onClose}
-          >
-            <Ionicons
-              name="close"
-              size={20}
-              color="#555"
-            />
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View style={styles.content}>
-
-        {!permissaoCamera ? (
-
-          <Text style={styles.permissionText}>
-            Verificando permissões...
-          </Text>
-
-        ) : !permissaoCamera.granted ? (
-
-          <View style={styles.permissionContainer}>
-
-            <View style={styles.iconCircle}>
-              <Ionicons
-                name="camera-outline"
-                size={38}
-                color="#FFF"
-              />
+              <Text style={styles.subtitle}>
+                Adicione uma imagem ao catálogo
+              </Text>
             </View>
 
-            <Text style={styles.permissionTitle}>
-              Permissão necessária
-            </Text>
-
-            <Text style={styles.permissionSubtitle}>
-              Precisamos acessar sua câmera para capturar fotos dos produtos.
-            </Text>
-
             <TouchableOpacity
-              style={styles.primaryButton}
-              onPress={solicitarPermissaoCamera}
+              style={styles.closeButton}
+              onPress={onClose}
             >
-              <Text style={styles.primaryButtonText}>
-                Permitir câmera
-              </Text>
+              <Ionicons
+                name="close"
+                size={20}
+                color="#555"
+              />
             </TouchableOpacity>
           </View>
+        </View>
 
-        ) : loadingIA ? (
+        <View style={styles.content}>
 
-          <View style={styles.loadingContainer}>
-
-            <Image
-              source={{ uri: foto }}
-              style={styles.loadingImage}
-            />
-
-            <View style={styles.loadingOverlay} />
-
-            <View style={styles.loadingContent}>
-
-              <View style={styles.loadingIcon}>
+          {!permissaoCamera ? (
+            <Text style={styles.permissionText}>
+              Verificando permissões...
+            </Text>
+          ) : !permissaoCamera.granted ? (
+            <View style={styles.permissionContainer}>
+              <View style={styles.iconCircle}>
                 <Ionicons
-                  name="sparkles"
-                  size={34}
+                  name="camera-outline"
+                  size={38}
                   color="#FFF"
                 />
               </View>
 
-              <Text style={styles.loadingTitle}>
-                Magnolia AI analisando peça
+              <Text style={styles.permissionTitle}>
+                Permissão necessária
               </Text>
 
-              <Text style={styles.loadingSubtitle}>
-                Identificando categoria, estilo,
-                cores e detalhes da roupa...
+              <Text style={styles.permissionSubtitle}>
+                Precisamos acessar sua câmera para capturar fotos dos produtos.
               </Text>
-
-              <ActivityIndicator
-                size="large"
-                color={colors.Lightolivegreen}
-                style={{ marginTop: 28 }}
-              />
-
-
-            </View>
-          </View>
-
-        ) : foto === '' ? (
-
-          <React.Fragment>
-
-            <View style={styles.cameraContainer}>
-              <CameraView
-                ref={cameraRef}
-                style={styles.camera}
-              />
-            </View>
-
-            <TouchableOpacity
-              style={[
-                styles.captureButton,
-                {
-                  marginBottom: insets.bottom + 12,
-                },
-              ]}
-              onPress={tirarFoto}
-            >
-              <View style={styles.captureInner} />
-            </TouchableOpacity>
-
-          </React.Fragment>
-
-        ) : (
-
-          <React.Fragment>
-
-            <Image
-              source={{ uri: foto }}
-              style={styles.imagePreview}
-            />
-
-            <View style={styles.actionsRow}>
-
-              <TouchableOpacity
-                style={styles.secondaryButton}
-                onPress={() => setFoto('')}
-              >
-                <Ionicons
-                  name="refresh-outline"
-                  size={18}
-                  color="#888"
-                />
-
-                <Text style={styles.secondaryButtonText}>
-                  Refazer
-                </Text>
-              </TouchableOpacity>
 
               <TouchableOpacity
                 style={styles.primaryButton}
-                onPress={enviar}
+                onPress={solicitarPermissaoCamera}
               >
-                <Ionicons
-                  name="checkmark-outline"
-                  size={18}
-                  color="#FFF"
-                />
-
                 <Text style={styles.primaryButtonText}>
-                  Usar foto
+                  Permitir câmera
                 </Text>
               </TouchableOpacity>
-
             </View>
+          ) : loadingIA ? (
+            <View style={styles.loadingContainer}>
+              <Image
+                source={{ uri: foto }}
+                style={styles.loadingImage}
+              />
 
-          </React.Fragment>
-        )}
+              <View style={styles.loadingOverlay} />
 
+              <View style={styles.loadingContent}>
+                <View style={styles.loadingIcon}>
+                  <Ionicons
+                    name="sparkles"
+                    size={34}
+                    color="#FFF"
+                  />
+                </View>
+
+                <Text style={styles.loadingTitle}>
+                  Magnolia AI analisando peça
+                </Text>
+
+                <Text style={styles.loadingSubtitle}>
+                  Identificando categoria, estilo,
+                  cores e detalhes da roupa...
+                </Text>
+
+                <ActivityIndicator
+                  size="large"
+                  color={colors.Lightolivegreen}
+                  style={{ marginTop: 28 }}
+                />
+              </View>
+            </View>
+          ) : foto === '' ? (
+            <React.Fragment>
+              <View style={styles.cameraContainer}>
+                <CameraView
+                  ref={cameraRef}
+                  style={styles.camera}
+                />
+              </View>
+
+              <View style={[styles.controlsRow, { marginBottom: insets.bottom + 12 }]}>
+                
+                <TouchableOpacity
+                  style={styles.galleryButton}
+                  onPress={abrirGaleria}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons
+                    name="images-outline"
+                    size={26}
+                    color="#6D625B"
+                  />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.captureButton}
+                  onPress={tirarFoto}
+                >
+                  <View style={styles.captureInner} />
+                </TouchableOpacity>
+
+                <View style={styles.galleryButtonPlaceholder} />
+
+              </View>
+            </React.Fragment>
+          ) : (
+            <React.Fragment>
+              <Image
+                source={{ uri: foto }}
+                style={styles.imagePreview}
+              />
+
+              <View style={styles.actionsRow}>
+                <TouchableOpacity
+                  style={styles.secondaryButton}
+                  onPress={() => setFoto('')}
+                >
+                  <Ionicons
+                    name="refresh-outline"
+                    size={18}
+                    color="#888"
+                  />
+
+                  <Text style={styles.secondaryButtonText}>
+                    Refazer
+                  </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.primaryButton}
+                  onPress={enviar}
+                >
+                  <Ionicons
+                    name="checkmark-outline"
+                    size={18}
+                    color="#FFF"
+                  />
+
+                  <Text style={styles.primaryButtonText}>
+                    Usar foto
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </React.Fragment>
+          )}
+
+        </View>
       </View>
-    </View>
-  </Modal>
-);
+    </Modal>
+  );
 }
 
 const colors = {
@@ -261,14 +268,11 @@ const styles = StyleSheet.create({
 
   heroSection: {
     backgroundColor: colors.Warmbeigebackground,
-
     paddingTop: 70,
     paddingHorizontal: 24,
     paddingBottom: 28,
-
     borderBottomLeftRadius: 36,
     borderBottomRightRadius: 36,
-
     overflow: 'hidden',
   },
 
@@ -315,9 +319,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 16,
-
     backgroundColor: 'rgba(255,255,255,0.65)',
-
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -337,12 +339,9 @@ const styles = StyleSheet.create({
     width: 86,
     height: 86,
     borderRadius: 30,
-
     backgroundColor: colors.Lightolivegreen,
-
     justifyContent: 'center',
     alignItems: 'center',
-
     marginBottom: 24,
   },
 
@@ -359,7 +358,6 @@ const styles = StyleSheet.create({
     color: '#888',
     fontSize: 14,
     fontFamily: 'Poppins_400Regular',
-
     paddingHorizontal: 20,
   },
 
@@ -372,12 +370,9 @@ const styles = StyleSheet.create({
 
   cameraContainer: {
     flex: 1,
-
     borderRadius: 28,
     overflow: 'hidden',
-
     backgroundColor: '#EEE',
-
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -392,20 +387,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  controlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    marginTop: 24,
+  },
+
+  galleryButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#F4F4F4',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+  },
+
+  galleryButtonPlaceholder: {
+    width: 56,
+  },
+
   captureButton: {
     width: 82,
     height: 82,
     borderRadius: 41,
-
     backgroundColor: '#FFF',
-
-    alignSelf: 'center',
-
     justifyContent: 'center',
     alignItems: 'center',
-
-    marginTop: 24,
-
     borderWidth: 5,
     borderColor: 'rgba(223,163,178,0.25)',
   },
@@ -449,14 +460,10 @@ const styles = StyleSheet.create({
   secondaryButton: {
     flex: 1,
     height: 56,
-
     borderRadius: 18,
-
     backgroundColor: '#F4F4F4',
-
     justifyContent: 'center',
     alignItems: 'center',
-
     flexDirection: 'row',
   },
 
@@ -466,68 +473,54 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: 'Poppins_600SemiBold',
   },
+
   loadingContainer: {
-  flex: 1,
-  borderRadius: 28,
-  overflow: 'hidden',
-},
+    flex: 1,
+    borderRadius: 28,
+    overflow: 'hidden',
+  },
 
-loadingImage: {
-  width: '100%',
-  height: '100%',
-  position: 'absolute',
-},
+  loadingImage: {
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+  },
 
-loadingOverlay: {
-  ...StyleSheet.absoluteFillObject,
-  backgroundColor: 'rgba(255,255,255,0.82)',
-},
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.82)',
+  },
 
-loadingContent: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  paddingHorizontal: 32,
-},
+  loadingContent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
 
-loadingIcon: {
-  width: 82,
-  height: 82,
-  borderRadius: 28,
+  loadingIcon: {
+    width: 82,
+    height: 82,
+    borderRadius: 28,
+    backgroundColor: colors.dustypink,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
 
-  backgroundColor: colors.dustypink,
+  loadingTitle: {
+    fontSize: 22,
+    color: '#5C524D',
+    textAlign: 'center',
+    fontFamily: 'Poppins_600SemiBold',
+  },
 
-  justifyContent: 'center',
-  alignItems: 'center',
-
-  marginBottom: 24,
-},
-
-loadingTitle: {
-  fontSize: 22,
-  color: '#5C524D',
-  textAlign: 'center',
-  fontFamily: 'Poppins_600SemiBold',
-},
-
-loadingSubtitle: {
-  marginTop: 10,
-  textAlign: 'center',
-  lineHeight: 24,
-  color: '#8D817A',
-  fontSize: 14,
-  fontFamily: 'Poppins_400Regular',
-},
-
-loadingSteps: {
-  marginTop: 34,
-  width: '100%',
-  gap: 12,
-},
-
-loadingStepText: {
-  fontSize: 14,
-  color: '#6F6F6F',
-  fontFamily: 'Poppins_400Regular',
-},
+  loadingSubtitle: {
+    marginTop: 10,
+    textAlign: 'center',
+    lineHeight: 24,
+    color: '#8D817A',
+    fontSize: 14,
+    fontFamily: 'Poppins_400Regular',
+  },
 });
