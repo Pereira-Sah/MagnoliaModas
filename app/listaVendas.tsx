@@ -40,6 +40,7 @@ interface Venda {
   dados_pagamento?: string;
   cliente_nome?: string;
   itens?: ItemVenda[];
+  status_venda?: "Pendente" | "Finalizada";
 }
 
 export default function ListaVendas() {
@@ -149,10 +150,23 @@ export default function ListaVendas() {
               </View>
             </View>
 
-            <View style={{ marginTop: 10 }}>
+            <View style={{ marginTop: 10, flexDirection: "row",  gap: 12, alignItems: "center", display: "flex" }}>
               <View style={styles.paymentBadge}>
                 <Ionicons name="card-outline" size={13} color={colors.dustypink} />
                 <Text style={styles.paymentText}>{dados_pagamento}</Text>
+              </View>
+
+              <View
+                style={[
+                  styles.statusBadge,
+                  item.status_venda === "Finalizada"
+                    ? styles.statusFinalizada
+                    : styles.statusPendente,
+                ]}
+              >
+                <Text style={styles.statusText}>
+                  {item.status_venda || "Pendente"}
+                </Text>
               </View>
             </View>
           </View>
@@ -269,10 +283,13 @@ export default function ListaVendas() {
           styles.listContent,
           { paddingBottom: 140 + insets.bottom },
         ]}
+        
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.dustypink} />
         }
+
+        
       />
 
       <Modal visible={modalVisible} animationType="slide" transparent onRequestClose={() => setModalVisible(false)}>
@@ -322,6 +339,50 @@ export default function ListaVendas() {
                   </View>
                 </View>
               </View>
+
+              <TouchableOpacity
+                  style={[
+                    styles.statusButton,
+                    selectedVenda?.status_venda === "Finalizada"
+                      ? styles.statusFinalizada
+                      : styles.statusPendente,
+                  ]}
+                  onPress={async () => {
+                    if (!selectedVenda) return;
+
+                    const novoStatus =
+                      selectedVenda.status_venda === "Finalizada"
+                        ? "Pendente"
+                        : "Finalizada";
+
+                    try {
+                      await api.patch(`/vendas/${selectedVenda.id}`, {
+                        status_venda: novoStatus,
+                      });
+
+                      setVendas((prev) =>
+                        prev.map((v) =>
+                          v.id === selectedVenda.id
+                            ? { ...v, status_venda: novoStatus }
+                            : v
+                        )
+                      );
+
+                      setSelectedVenda((prev) =>
+                        prev ? { ...prev, status_venda: novoStatus } : prev
+                      );
+                    } catch (error) {
+                      console.log("Erro ao atualizar status:", error);
+                    }
+                  }}
+                >
+                  <Text style={{ fontWeight: "700" }}>
+                    Mudar para{" "}
+                    {selectedVenda?.status_venda === "Finalizada"
+                      ? "Pendente"
+                      : "Finalizada"}
+                  </Text>
+                </TouchableOpacity>
 
               <Text style={styles.modalSectionTitle}>Itens Comprados</Text>
 
@@ -762,4 +823,34 @@ const styles = StyleSheet.create({
     fontWeight: "800",
     color: colors.Lightolivegreen,
   },
+  statusBadge: {
+  marginTop: 12,
+  alignSelf: "flex-start",
+  paddingHorizontal: 10,
+  paddingVertical: 4,
+  borderRadius: 999,
+},
+
+statusPendente: {
+  backgroundColor: "#FFE4E4",
+  color: "#D9534F !important",
+},
+
+statusFinalizada: {
+  backgroundColor:colors.Lightolivegreen,
+},
+
+statusText: {
+  fontSize: 12,
+  fontWeight: "700",
+  color: "#FFF",
+
+},
+statusButton: {
+  marginTop: 20,
+  marginBottom: 10,
+  padding: 12,
+  borderRadius: 12,
+  alignItems: "center",
+},
 });
