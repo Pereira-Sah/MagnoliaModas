@@ -268,6 +268,7 @@ const simularPagamentoPix = async () => {
     setTimeout(() => {
       setModalCheckoutVisible(false);
 
+      alert("Pagamento simulado com sucesso! O pedido foi finalizado.");
       router.push("/MeusPedidos");
     }, 2500);
 
