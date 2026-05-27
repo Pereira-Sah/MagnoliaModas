@@ -78,19 +78,8 @@ export default function Produtos() {
   }, []);
 
   async function carregarProdutos(forcarAtualizacao = false) {
-  try {
-    setCarregando(true);
-    
-    if (!forcarAtualizacao) {
-      const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
-      if (cacheLocal) {
-        const produtosSalvos = JSON.parse(cacheLocal);
-        setTodosProdutos(produtosSalvos);
-        filtrarLocalmente(produtosSalvos, termoBusca, categoriaSelecionada);
-      }
-    }
-    
-    await sincronizarComBackend();
+    try {
+      setCarregando(true);
 
       if (!forcarAtualizacao) {
         const cacheLocal = await AsyncStorage.getItem(CACHE_KEY);
@@ -108,7 +97,6 @@ export default function Produtos() {
       setCarregando(false);
     }
   }
-}
 
 async function sincronizarComBackend() {
   try {
@@ -444,3 +432,4 @@ async function handleDelete(id) {
     </View>
   );
 
+}

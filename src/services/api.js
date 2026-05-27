@@ -4,7 +4,7 @@ import { Platform } from 'react-native';
 
 const api = axios.create({
   baseURL: process.env.EXPO_PUBLIC_API_URL,
-  timeout: 10000,
+  timeout: 50000,
 });
 
 api.interceptors.request.use(async (config) => {
